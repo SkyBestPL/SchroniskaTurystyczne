@@ -376,9 +376,6 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ExhibitorId")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdExhibitor")
                         .HasColumnType("int");
 
@@ -399,7 +396,7 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExhibitorId");
+                    b.HasIndex("IdExhibitor");
 
                     b.ToTable("Shelters");
                 });
@@ -634,8 +631,8 @@ namespace SchroniskaTurystyczne.Migrations
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Shelter", b =>
                 {
                     b.HasOne("SchroniskaTurystyczne.Models.User", "Exhibitor")
-                        .WithMany()
-                        .HasForeignKey("ExhibitorId")
+                        .WithMany("Shelters")
+                        .HasForeignKey("IdExhibitor")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -735,6 +732,8 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Navigation("Rooms");
 
                     b.Navigation("SentMessages");
+
+                    b.Navigation("Shelters");
                 });
 #pragma warning restore 612, 618
         }

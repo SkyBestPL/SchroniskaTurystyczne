@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SchroniskaTurystyczne.Migrations
 {
     /// <inheritdoc />
-    public partial class mig1 : Migration
+    public partial class mig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -160,15 +160,14 @@ namespace SchroniskaTurystyczne.Migrations
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Rating = table.Column<double>(type: "float", nullable: false),
                     LocationLon = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    LocationLat = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ExhibitorId = table.Column<int>(type: "int", nullable: false)
+                    LocationLat = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Shelters", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Shelters_Users_ExhibitorId",
-                        column: x => x.ExhibitorId,
+                        name: "FK_Shelters_Users_IdExhibitor",
+                        column: x => x.IdExhibitor,
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -472,9 +471,9 @@ namespace SchroniskaTurystyczne.Migrations
                 column: "GuestId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Shelters_ExhibitorId",
+                name: "IX_Shelters_IdExhibitor",
                 table: "Shelters",
-                column: "ExhibitorId");
+                column: "IdExhibitor");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShelterTags_IdTag",

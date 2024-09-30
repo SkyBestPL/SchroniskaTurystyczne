@@ -21,5 +21,6 @@ namespace SchroniskaTurystyczne.Models
         public ICollection<Booking> Bookings { get; set; }
         public ICollection<Message> SentMessages { get; set; }
         public ICollection<Message> ReceivedMessages { get; set; }
+        public ICollection<Shelter> Shelters { get; set; }
     }
 }

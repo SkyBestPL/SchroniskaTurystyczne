@@ -1,0 +1,82 @@
+﻿@model SchroniskaTurystyczne.Models.Shelter
+
+@{
+    ViewData["Title"] = "Dodaj Schronisko";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div id="map" style="height: 400px;"></div>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Nazwa Schroniska</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label">Opis</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Rating" class="control-label">Ocena</label>
+        <input asp-for="Rating" class="form-control" />
+        <span asp-validation-for="Rating" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="LocationLat" id="Latitude" />
+    <input type="hidden" asp-for="LocationLon" id="Longitude" />
+
+    <button type="submit" class="btn btn-primary">Dodaj Schronisko</button>
+</form>
+
+<script>
+
+    const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
+
+    var lat = 53.13257160700577, lon = 23.159856412251838;
+
+    const map = L.map('map').setView([lat, lon], 13);
+
+    L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
+        minZoom: 0,
+        maxZoom: 19,
+        attribution: '<a href="https://api.mapy.cz/copyright" target="_blank">&copy; Seznam.cz a.s. a další</a>',
+    }).addTo(map);
+
+    let marker = L.marker([lat, lon]).addTo(map);
+
+    document.getElementById('Latitude').value = lat;
+    document.getElementById('Longitude').value = lon;
+
+    map.on('click', function (e) {
+        marker.setLatLng(e.latlng);
+
+        document.getElementById('Latitude').value = e.latlng.lat;
+        document.getElementById('Longitude').value = e.latlng.lng;
+    });
+
+    const LogoControl = L.Control.extend({
+        options: {
+            position: 'bottomleft',
+        },
+
+        onAdd: function (map) {
+            const container = L.DomUtil.create('div');
+            const link = L.DomUtil.create('a', '', container);
+
+            link.setAttribute('href', 'http://mapy.cz/');
+            link.setAttribute('target', '_blank');
+            link.innerHTML = '<img src="https://api.mapy.cz/img/api/logo.svg" />';
+            L.DomEvent.disableClickPropagation(link);
+
+            return container;
+        },
+    });
+
+    new LogoControl().addTo(map);
+
+</script>

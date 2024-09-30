@@ -148,6 +148,12 @@ namespace SchroniskaTurystyczne.Data
                 .WithMany(r => r.BookingRooms)
                 .HasForeignKey(br => br.IdRoom)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Shelter>()
+                .HasOne(s => s.Exhibitor) 
+                .WithMany(u => u.Shelters)
+                .HasForeignKey(s => s.IdExhibitor)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }
