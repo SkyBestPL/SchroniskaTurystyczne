@@ -1,0 +1,245 @@
+﻿@model SchroniskaTurystyczne.Models.SavedRoute
+
+@{
+    ViewData["Title"] = "Dodaj Trasę";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div id="map" style="height: 400px;"></div>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Nazwa Trasy</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <!-- Miejsce do przechowywania punktów trasy -->
+    <div id="routePoints"></div>
+
+    <button type="submit" class="btn btn-primary">Dodaj Trasę</button>
+</form>
+
+<h3>Lista Schronisk:</h3>
+<ul>
+    @if (ViewBag.Shelters != null && ViewBag.Shelters.Count > 0)
+    {
+        foreach (var shelter in ViewBag.Shelters)
+        {
+            <li>
+                <strong>Nazwa:</strong> @shelter.Name <br />
+                <strong>Opis:</strong> @shelter.Description <br />
+                <strong>Wystawiający:</strong> @shelter.Exhibitor <br />
+                <strong>Ocena:</strong> @shelter.Rating <br />
+                <strong>Współrzędne:</strong> (Lat: @shelter.LocationLat, Lon: @shelter.LocationLon) <br />
+            </li>
+        }
+    }
+    else
+    {
+        <li>Brak schronisk do wyświetlenia.</li>
+    }
+</ul>
+
+<script>
+    // replace with your own API key
+    const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
+
+    // Inicjalizacja mapy
+    const map = new maplibregl.Map({
+        container: 'map',
+        center: [19.48022053933678, 52.06936257159014],  // Środek mapy na Polskę
+        zoom: 6,
+        style: {
+            version: 8,
+            sources: {
+                'basic-tiles': {
+                    type: 'raster',
+                    url: `https://api.mapy.cz/v1/maptiles/basic/tiles.json?apikey=${API_KEY}`,
+                    tileSize: 256,
+                },
+                'route-geometry': {
+                    type: 'geojson',
+                    data: {
+                        type: "LineString",
+                        coordinates: [],
+                    },
+                },
+            },
+            layers: [{
+                id: 'tiles',
+                type: 'raster',
+                source: 'basic-tiles',
+            }, {
+                id: 'route-geometry',
+                type: 'line',
+                source: 'route-geometry',
+                layout: {
+                    'line-join': 'round',
+                    'line-cap': 'round',
+                },
+                paint: {
+                    'line-color': '#0033ff',
+                    'line-width': 8,
+                    'line-opacity': 0.6,
+                },
+            }],
+        },
+    });
+
+    // Lista schronisk przekazana z kontrolera
+    const shelters = @Html.Raw(Json.Serialize(ViewBag.Shelters));
+    console.log(shelters); // Dodaj to, aby upewnić się, że dane są poprawne
+
+    // Funkcja do dodania markerów dla schronisk
+    function addShelterMarkers(shelters) {
+        if (shelters.length === 0) {
+            console.warn("Brak schronisk do dodania markerów.");
+            return; // Zakończ, jeśli nie ma schronisk
+        }
+
+        shelters.forEach(shelter => {
+            console.log(`Dodawanie markera dla: ${shelter.name}, Lat: ${shelter.locationLat}, Lon: ${shelter.locationLon}`);
+
+            // Użyj niestandardowego elementu div jako markera
+            const markerElement = document.createElement('div');
+            markerElement.className = 'custom-marker'; // Dodaj klasę CSS
+
+            const marker = new maplibregl.Marker(markerElement) // Użyj niestandardowego elementu
+                .setLngLat([parseFloat(shelter.locationLon), parseFloat(shelter.locationLat)])
+                .setPopup(new maplibregl.Popup({ offset: 25 })
+                    .setHTML(`
+                        <h3>${shelter.name}</h3>
+                        <p>${shelter.description}</p>
+                        <p>Wystawiający: ${shelter.exhibitor}</p>
+                        <p>Ocena: ${shelter.rating}</p>
+                    `))
+                .addTo(map);
+        });
+    }
+
+    // Dodanie markerów po załadowaniu mapy
+    map.on('load', function () {
+        console.log("Mapa załadowana, dodawanie markerów");
+        addShelterMarkers(shelters);
+    });
+
+    // Zmienna do przechowywania współrzędnych wybranych punktów
+    let routePoints = [];
+    let markers = []; // Przechowuje markery
+
+    // Obsługa kliknięcia na mapie (dodawanie punktów do trasy)
+    map.on('click', function (e) {
+        const coords = [e.lngLat.lng, e.lngLat.lat];
+
+        // Dodaj punkt do tablicy
+        routePoints.push(coords);
+
+        // Dodaj marker na mapie
+        addMarker(coords, routePoints.length - 1);
+
+        // Aktualizuj routing po dodaniu punktu
+        if (routePoints.length > 1) {
+            calculateRoute(routePoints);
+        }
+
+        // Aktualizacja ukrytych pól formularza
+        updateRoutePointsInput(routePoints);
+    });
+
+    // Funkcja dodająca marker
+    function addMarker(coords, index) {
+        const marker = new maplibregl.Marker({ draggable: true }) // Marker z opcją przeciągania
+            .setLngLat(coords)
+            .addTo(map);
+
+        markers.push(marker);
+
+        // Obsługa przesuwania markera
+        marker.on('dragend', function () {
+            const newCoords = marker.getLngLat();
+            routePoints[index] = [newCoords.lng, newCoords.lat]; // Aktualizuj współrzędne
+
+            // Przelicz trasę po przesunięciu markera
+            if (routePoints.length > 1) {
+                calculateRoute(routePoints);
+            }
+
+            // Aktualizuj ukryte pola formularza
+            updateRoutePointsInput(routePoints);
+        });
+    }
+
+    // Funkcja aktualizująca ukryte pola formularza dla punktów trasy
+    function updateRoutePointsInput(points) {
+        const routePointsDiv = document.getElementById('routePoints');
+        routePointsDiv.innerHTML = ''; // Wyczyść poprzednie punkty
+
+        points.forEach((point, index) => {
+            let latInput = document.createElement('input');
+            latInput.type = 'hidden';
+            latInput.name = `RoutePoints[${index}].LocationLat`;
+            latInput.value = point[1];
+
+            let lonInput = document.createElement('input');
+            lonInput.type = 'hidden';
+            lonInput.name = `RoutePoints[${index}].LocationLon`;
+            lonInput.value = point[0];
+
+            routePointsDiv.appendChild(latInput);
+        });
+    }
+
+    // Funkcja obliczająca trasę między punktami przy użyciu API Mapy.cz
+    async function calculateRoute(points) {
+        try {
+            const url = new URL('https://api.mapy.cz/v1/routing/route');
+
+            url.searchParams.set('apikey', API_KEY);
+            url.searchParams.set('lang', 'pl');
+            url.searchParams.set('routeType', 'foot_fast');
+            url.searchParams.set('avoidToll', 'false');
+
+            // Dodanie punktu początkowego
+            url.searchParams.set('start', points[0].join(','));
+
+            // Dodanie punktu końcowego
+            url.searchParams.set('end', points[points.length - 1].join(','));
+
+            // Dodanie punktów pośrednich (jeśli są)
+            for (let i = 1; i < points.length - 1; i++) {
+                url.searchParams.append('waypoints', points[i].join(','));
+            }
+
+            const response = await fetch(url.toString(), { mode: 'cors' });
+            const json = await response.json();
+
+            // Aktualizacja geometrii trasy
+            const source = map.getSource('route-geometry');
+            if (source && json.geometry) {
+                source.setData(json.geometry);
+            }
+
+            // Ustawienie widoku na całą trasę
+            const bounds = bbox(json.geometry.geometry.coordinates);
+            map.fitBounds(bounds, { padding: 40 });
+        } catch (error) {
+            console.log('Błąd podczas wyznaczania trasy:', error);
+        }
+    }
+
+    // Funkcja obliczająca bounding box dla zestawu współrzędnych
+    function bbox(coords) {
+        let minLat = Infinity, minLng = Infinity, maxLat = -Infinity, maxLng = -Infinity;
+
+        coords.forEach(coord => {
+            minLng = Math.min(coord[0], minLng);
+            maxLng = Math.max(coord[0], maxLng);
+            minLat = Math.min(coord[1], minLat);
+            maxLat = Math.max(coord[1], maxLat);
+        });
+
+        return [[minLng, minLat], [maxLng, maxLat]];
+    }
+</script>

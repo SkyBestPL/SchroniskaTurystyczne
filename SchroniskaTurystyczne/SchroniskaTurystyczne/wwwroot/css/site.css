@@ -24,3 +24,11 @@ body {
 shelter-item {
     margin-bottom: 60px;
 }
+
+.custom-marker {
+    background-color: red;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 2px solid white;
+}

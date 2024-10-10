@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="~/SchroniskaTurystyczne.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb7U4/Q5x5WE5Bt5WE+03O12Rb5oEw5+qbyQK" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-8zc8BG/Dk5r0HZ5tA/4W8HhweOf4h5Vt0MBiPrr6vHJo+5SzfBdOztD5OTf7jtXT" crossorigin="anonymous"></script>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
 </head>
 <body>
     <header>
@@ -29,9 +32,10 @@
                                 Dla gości
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="guestDropdown">
-                                <li><a class="dropdown-item" href="#">Lista schronisk</a></li>
+                                <li><a class="dropdown-item" href="/Shelters/Index">Lista schronisk</a></li>
                                 <li><a class="dropdown-item" href="#">Mapa schronisk</a></li>
                                 <li><a class="dropdown-item" href="#">Rezerwacje</a></li>
+                                <li><a class="dropdown-item" asp-controller="Shelters" asp-action="CreateRoute">Tworzenie trasy</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">

@@ -47,5 +47,31 @@ namespace SchroniskaTurystyczne.Controllers
                 .ToListAsync();
             return View(shelters);
         }
+
+        public IActionResult CreateRoute()
+        {
+            var shelters = _context.Shelters
+                .Select(s => new
+                {
+                    s.Id,
+                    s.Name,
+                    s.Description,
+                    s.LocationLat,
+                    s.LocationLon,
+                    s.Rating,
+                    Exhibitor = s.Exhibitor.FirstName + " " + s.Exhibitor.LastName, // Dane o wystawiającym
+                })
+                .ToList();
+
+            // Przekaż schroniska do widoku
+            ViewBag.Shelters = shelters;
+
+            foreach (var shelter in shelters)
+            {
+                Console.WriteLine($"Shelter: {shelter.Name}, Lat: {shelter.LocationLat}, Lon: {shelter.LocationLon}");
+            }
+
+            return View("~/Views/Routes/Create.cshtml");
+        }
     }
 }
