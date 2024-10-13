@@ -4,12 +4,14 @@ using SchroniskaTurystyczne.Data;
 using SchroniskaTurystyczne.Models;
 using System.Threading.Tasks;
 using System.Linq;
+using Microsoft.AspNetCore.Identity;
 
 namespace SchroniskaTurystyczne.Controllers
 {
     public class SheltersController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly UserManager<AppUser> _userManager;
 
         public SheltersController(ApplicationDbContext context)
         {
@@ -27,9 +29,10 @@ namespace SchroniskaTurystyczne.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Name,Description,Rating,LocationLon,LocationLat")] Shelter shelter)
         {
+            //var user = await _userManager.GetUserAsync(User);
             //if (ModelState.IsValid)
             //{
-                shelter.IdExhibitor = 2; //tymczasowo wlasciciel ma zawsze id = 2
+            shelter.IdExhibitor = "e2d9b874-62a8-455a-9186-40c10b091d02";
 
                 _context.Add(shelter);
                 await _context.SaveChangesAsync();

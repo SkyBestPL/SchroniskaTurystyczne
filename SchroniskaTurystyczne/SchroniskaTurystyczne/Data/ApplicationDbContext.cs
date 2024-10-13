@@ -1,15 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using SchroniskaTurystyczne.Models;
+using System.Data;
+using System.Reflection.Emit;
 
 namespace SchroniskaTurystyczne.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : IdentityDbContext<AppUser>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
-
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingRoom> BookingRooms { get; set; }
         public DbSet<Message> Messages { get; set; }
@@ -17,7 +19,6 @@ namespace SchroniskaTurystyczne.Data
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Point> Points { get; set; }
         public DbSet<Review> Reviews { get; set; }
-        public DbSet<Role> Roles { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
         public DbSet<RoutePoint> RoutePoints { get; set; }
@@ -25,10 +26,11 @@ namespace SchroniskaTurystyczne.Data
         public DbSet<Shelter> Shelters { get; set; }
         public DbSet<ShelterTag> ShelterTags { get; set; }
         public DbSet<Tag> Tags { get; set; }
-        public DbSet<User> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             //klucze zlozone
             modelBuilder.Entity<BookingRoom>()
                 .HasKey(br => new { br.IdBooking, br.IdRoom });
@@ -95,11 +97,11 @@ namespace SchroniskaTurystyczne.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             //inne
-            modelBuilder.Entity<User>()
+           /* modelBuilder.Entity<AppUser>()
                 .HasOne(u => u.Role)
                 .WithMany(r => r.Users)
                 .HasForeignKey(u => u.IdRole)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict);*/
 
             modelBuilder.Entity<Point>()
                 .HasOne(p => p.Shelter)
@@ -110,7 +112,7 @@ namespace SchroniskaTurystyczne.Data
             //pola tekstowe
             modelBuilder.Entity<Room>()
                 .Property(r => r.Status)
-                .HasMaxLength(50);
+            .HasMaxLength(50);
 
             modelBuilder.Entity<Review>()
                 .Property(r => r.Contents)
@@ -150,7 +152,7 @@ namespace SchroniskaTurystyczne.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Shelter>()
-                .HasOne(s => s.Exhibitor) 
+                .HasOne(s => s.Exhibitor)
                 .WithMany(u => u.Shelters)
                 .HasForeignKey(s => s.IdExhibitor)
                 .OnDelete(DeleteBehavior.Cascade);

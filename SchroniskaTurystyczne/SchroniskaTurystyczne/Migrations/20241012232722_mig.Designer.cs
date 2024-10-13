@@ -12,7 +12,7 @@ using SchroniskaTurystyczne.Data;
 namespace SchroniskaTurystyczne.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240924205559_mig")]
+    [Migration("20241012232722_mig")]
     partial class mig
     {
         /// <inheritdoc />
@@ -20,10 +20,218 @@ namespace SchroniskaTurystyczne.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.6")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasDatabaseName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("RoleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetRoleClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserClaims", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ProviderKey")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoginProvider", "ProviderKey");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserLogins", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("RoleId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("UserId", "RoleId");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("AspNetUserRoles", (string)null);
+                });
+
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("LoginProvider")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(128)
+                        .HasColumnType("nvarchar(128)");
+
+                    b.Property<string>("Value")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.ToTable("AspNetUserTokens", (string)null);
+                });
+
+            modelBuilder.Entity("SchroniskaTurystyczne.Models.AppUser", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.ToTable("AspNetUsers", (string)null);
+                });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Booking", b =>
                 {
@@ -39,8 +247,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<DateTime>("CheckOutDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdGuest")
-                        .HasColumnType("int");
+                    b.Property<string>("IdGuest")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("NumberOfPeople")
                         .HasColumnType("int");
@@ -87,11 +296,13 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdReceiver")
-                        .HasColumnType("int");
+                    b.Property<string>("IdReceiver")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("IdSender")
-                        .HasColumnType("int");
+                    b.Property<string>("IdSender")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
@@ -142,6 +353,9 @@ namespace SchroniskaTurystyczne.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<int>("IdShelter")
                         .HasColumnType("int");
 
@@ -153,14 +367,11 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("IdShelter");
+                    b.HasIndex("AppUserId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("IdShelter");
 
                     b.ToTable("Photos");
                 });
@@ -216,8 +427,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<int>("IdShelter")
                         .HasColumnType("int");
 
-                    b.Property<int>("IdUser")
-                        .HasColumnType("int");
+                    b.Property<string>("IdUser")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<int>("Rating")
                         .HasColumnType("int");
@@ -231,23 +443,6 @@ namespace SchroniskaTurystyczne.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.Role", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Roles");
-                });
-
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Room", b =>
                 {
                     b.Property<int>("Id")
@@ -255,6 +450,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AppUserId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -275,10 +473,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<int?>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("AppUserId");
 
                     b.HasIndex("IdShelter");
 
@@ -286,8 +483,6 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.HasIndex("Name")
                         .IsUnique();
-
-                    b.HasIndex("UserId");
 
                     b.ToTable("Rooms");
                 });
@@ -350,11 +545,12 @@ namespace SchroniskaTurystyczne.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("GuestId")
-                        .HasColumnType("int");
+                    b.Property<string>("GuestId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("IdGuest")
-                        .HasColumnType("int");
+                    b.Property<string>("IdGuest")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -379,8 +575,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdExhibitor")
-                        .HasColumnType("int");
+                    b.Property<string>("IdExhibitor")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("LocationLat")
                         .IsRequired()
@@ -436,47 +633,60 @@ namespace SchroniskaTurystyczne.Migrations
                     b.ToTable("Tags");
                 });
 
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.User", b =>
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
+                {
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
+                {
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
+                {
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("IdRole")
-                        .HasColumnType("int");
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
 
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PhoneNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdRole");
-
-                    b.ToTable("Users");
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<string>", b =>
+                {
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Booking", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "Guest")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Guest")
                         .WithMany("Bookings")
                         .HasForeignKey("IdGuest")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -506,13 +716,13 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Message", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "Receiver")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("IdReceiver")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "Sender")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("IdSender")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -536,15 +746,15 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Photo", b =>
                 {
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany("Photos")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
                         .WithMany("Photos")
                         .HasForeignKey("IdShelter")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("SchroniskaTurystyczne.Models.User", null)
-                        .WithMany("Photos")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("Shelter");
                 });
@@ -567,7 +777,7 @@ namespace SchroniskaTurystyczne.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "User")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("IdUser")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -580,6 +790,10 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Room", b =>
                 {
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", null)
+                        .WithMany("Rooms")
+                        .HasForeignKey("AppUserId");
+
                     b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
                         .WithMany("Rooms")
                         .HasForeignKey("IdShelter")
@@ -591,10 +805,6 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasForeignKey("IdType")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("SchroniskaTurystyczne.Models.User", null)
-                        .WithMany("Rooms")
-                        .HasForeignKey("UserId");
 
                     b.Navigation("RoomType");
 
@@ -622,18 +832,16 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.SavedRoute", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "Guest")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Guest")
                         .WithMany()
-                        .HasForeignKey("GuestId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("GuestId");
 
                     b.Navigation("Guest");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Shelter", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.User", "Exhibitor")
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Exhibitor")
                         .WithMany("Shelters")
                         .HasForeignKey("IdExhibitor")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -661,15 +869,21 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Navigation("Tag");
                 });
 
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.User", b =>
+            modelBuilder.Entity("SchroniskaTurystyczne.Models.AppUser", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.Role", "Role")
-                        .WithMany("Users")
-                        .HasForeignKey("IdRole")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                    b.Navigation("Bookings");
 
-                    b.Navigation("Role");
+                    b.Navigation("Photos");
+
+                    b.Navigation("ReceivedMessages");
+
+                    b.Navigation("Reviews");
+
+                    b.Navigation("Rooms");
+
+                    b.Navigation("SentMessages");
+
+                    b.Navigation("Shelters");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Booking", b =>
@@ -682,11 +896,6 @@ namespace SchroniskaTurystyczne.Migrations
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Point", b =>
                 {
                     b.Navigation("RoutePoints");
-                });
-
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.Role", b =>
-                {
-                    b.Navigation("Users");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Room", b =>
@@ -720,23 +929,6 @@ namespace SchroniskaTurystyczne.Migrations
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Tag", b =>
                 {
                     b.Navigation("ShelterTags");
-                });
-
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.User", b =>
-                {
-                    b.Navigation("Bookings");
-
-                    b.Navigation("Photos");
-
-                    b.Navigation("ReceivedMessages");
-
-                    b.Navigation("Reviews");
-
-                    b.Navigation("Rooms");
-
-                    b.Navigation("SentMessages");
-
-                    b.Navigation("Shelters");
                 });
 #pragma warning restore 612, 618
         }

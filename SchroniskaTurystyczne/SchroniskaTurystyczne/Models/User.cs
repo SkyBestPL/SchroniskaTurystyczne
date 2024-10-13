@@ -3,7 +3,7 @@ using System.Data;
 
 namespace SchroniskaTurystyczne.Models
 {
-    public class User
+    /*public class User
     {
         [Key]
         public int Id { get; set; }
@@ -22,5 +22,5 @@ namespace SchroniskaTurystyczne.Models
         public ICollection<Message> SentMessages { get; set; }
         public ICollection<Message> ReceivedMessages { get; set; }
         public ICollection<Shelter> Shelters { get; set; }
-    }
+    }*/
 }

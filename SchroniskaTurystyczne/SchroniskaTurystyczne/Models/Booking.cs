@@ -6,13 +6,13 @@ namespace SchroniskaTurystyczne.Models
     {
         [Key]
         public int Id { get; set; }
-        public int IdGuest { get; set; }
+        public string IdGuest { get; set; }
         public int NumberOfPeople { get; set; }
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
         public string Status { get; set; }
 
-        public virtual User Guest { get; set; }
+        public virtual AppUser Guest { get; set; }
         public virtual ICollection<BookingRoom> BookingRooms { get; set; }
         public virtual ICollection<Payment> Payments { get; set; }
     }
