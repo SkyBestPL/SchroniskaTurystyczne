@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using SchroniskaTurystyczne.Models;
 using System.Data;
 using System.Reflection.Emit;
@@ -21,7 +22,7 @@ namespace SchroniskaTurystyczne.Data
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
-        public DbSet<RoutePoint> RoutePoints { get; set; }
+        //public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<SavedRoute> SavedRoutes { get; set; }
         public DbSet<Shelter> Shelters { get; set; }
         public DbSet<ShelterTag> ShelterTags { get; set; }
@@ -34,9 +35,6 @@ namespace SchroniskaTurystyczne.Data
             //klucze zlozone
             modelBuilder.Entity<BookingRoom>()
                 .HasKey(br => new { br.IdBooking, br.IdRoom });
-
-            modelBuilder.Entity<RoutePoint>()
-                .HasKey(rp => new { rp.IdRoute, rp.IdPoint });
 
             //rel wiele do wielu
             modelBuilder.Entity<ShelterTag>()
@@ -97,17 +95,28 @@ namespace SchroniskaTurystyczne.Data
                 .OnDelete(DeleteBehavior.Cascade);
 
             //inne
-           /* modelBuilder.Entity<AppUser>()
-                .HasOne(u => u.Role)
-                .WithMany(r => r.Users)
-                .HasForeignKey(u => u.IdRole)
-                .OnDelete(DeleteBehavior.Restrict);*/
+            /* modelBuilder.Entity<AppUser>()
+                 .HasOne(u => u.Role)
+                 .WithMany(r => r.Users)
+                 .HasForeignKey(u => u.IdRole)
+                 .OnDelete(DeleteBehavior.Restrict);*/
 
             modelBuilder.Entity<Point>()
                 .HasOne(p => p.Shelter)
                 .WithMany(s => s.Points)
                 .HasForeignKey(p => p.IdShelter)
-                .OnDelete(DeleteBehavior.Restrict); //moze byc null dlatego restricted
+                .IsRequired(false);
+
+            modelBuilder.Entity<SavedRoute>()
+                .HasOne(sr => sr.Guest)
+                .WithMany(u => u.SavedRoutes)
+                .HasForeignKey(sr => sr.IdGuest);
+
+            //jeden-do-wielu
+            modelBuilder.Entity<Point>()
+                .HasOne(p => p.SavedRoute)
+                .WithMany(r => r.Points)
+                .HasForeignKey(p => p.IdSavedRoute);
 
             //pola tekstowe
             modelBuilder.Entity<Room>()

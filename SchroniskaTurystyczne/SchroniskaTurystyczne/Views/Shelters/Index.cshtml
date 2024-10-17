@@ -4,13 +4,13 @@
     ViewData["Title"] = "Dostępne Schroniska";
 }
 
-<h2>@ViewData["Title"]</h2>
+<h2 style="font-size: 30px">@ViewData["Title"]</h2>
 
 <div class="shelter-list">
     @foreach (var shelter in Model)
     {
         <div>
-            <h3>@shelter.Name</h3>
+            <h3 style="color: grey; font-size: 20px; margin-top: 30px">@shelter.Name</h3>
             <p><strong>Opis:</strong> @shelter.Description</p>
             <p><strong>Ocena:</strong> @shelter.Rating</p>
             <p><strong>Lokalizacja:</strong> @shelter.LocationLat, @shelter.LocationLon</p>
@@ -23,6 +23,7 @@
             }
 
             <button onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż mapę</button>
+            <button >Rezerwuj</button>
 
             <div style="width: 100%; height: 400px; display:none;" id="map-@shelter.Id"></div>
         </div>

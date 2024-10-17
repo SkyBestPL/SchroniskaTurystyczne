@@ -244,18 +244,18 @@ namespace SchroniskaTurystyczne.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IdGuest = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    GuestId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    IdGuest = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_SavedRoutes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_SavedRoutes_AspNetUsers_GuestId",
-                        column: x => x.GuestId,
+                        name: "FK_SavedRoutes_AspNetUsers_IdGuest",
+                        column: x => x.IdGuest,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -338,8 +338,9 @@ namespace SchroniskaTurystyczne.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    IdSavedRoute = table.Column<int>(type: "int", nullable: false),
                     IdShelter = table.Column<int>(type: "int", nullable: true),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Number = table.Column<int>(type: "int", nullable: false),
                     LocationLon = table.Column<double>(type: "float", nullable: false),
                     LocationLat = table.Column<double>(type: "float", nullable: false)
@@ -348,11 +349,16 @@ namespace SchroniskaTurystyczne.Migrations
                 {
                     table.PrimaryKey("PK_Points", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_Points_SavedRoutes_IdSavedRoute",
+                        column: x => x.IdSavedRoute,
+                        principalTable: "SavedRoutes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_Points_Shelters_IdShelter",
                         column: x => x.IdShelter,
                         principalTable: "Shelters",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -439,32 +445,6 @@ namespace SchroniskaTurystyczne.Migrations
                         name: "FK_ShelterTags_Tags_IdTag",
                         column: x => x.IdTag,
                         principalTable: "Tags",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RoutePoints",
-                columns: table => new
-                {
-                    IdRoute = table.Column<int>(type: "int", nullable: false),
-                    IdPoint = table.Column<int>(type: "int", nullable: false),
-                    SavedRouteId = table.Column<int>(type: "int", nullable: false),
-                    PointId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoutePoints", x => new { x.IdRoute, x.IdPoint });
-                    table.ForeignKey(
-                        name: "FK_RoutePoints_Points_PointId",
-                        column: x => x.PointId,
-                        principalTable: "Points",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_RoutePoints_SavedRoutes_SavedRouteId",
-                        column: x => x.SavedRouteId,
-                        principalTable: "SavedRoutes",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -568,6 +548,11 @@ namespace SchroniskaTurystyczne.Migrations
                 column: "IdShelter");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Points_IdSavedRoute",
+                table: "Points",
+                column: "IdSavedRoute");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Points_IdShelter",
                 table: "Points",
                 column: "IdShelter");
@@ -604,19 +589,9 @@ namespace SchroniskaTurystyczne.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoutePoints_PointId",
-                table: "RoutePoints",
-                column: "PointId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_RoutePoints_SavedRouteId",
-                table: "RoutePoints",
-                column: "SavedRouteId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_SavedRoutes_GuestId",
+                name: "IX_SavedRoutes_IdGuest",
                 table: "SavedRoutes",
-                column: "GuestId");
+                column: "IdGuest");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shelters_IdExhibitor",
@@ -660,10 +635,10 @@ namespace SchroniskaTurystyczne.Migrations
                 name: "Photos");
 
             migrationBuilder.DropTable(
-                name: "Reviews");
+                name: "Points");
 
             migrationBuilder.DropTable(
-                name: "RoutePoints");
+                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "ShelterTags");
@@ -676,9 +651,6 @@ namespace SchroniskaTurystyczne.Migrations
 
             migrationBuilder.DropTable(
                 name: "Bookings");
-
-            migrationBuilder.DropTable(
-                name: "Points");
 
             migrationBuilder.DropTable(
                 name: "SavedRoutes");

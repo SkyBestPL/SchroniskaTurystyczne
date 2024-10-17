@@ -12,7 +12,7 @@ using SchroniskaTurystyczne.Data;
 namespace SchroniskaTurystyczne.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241012232722_mig")]
+    [Migration("20241014105102_mig")]
     partial class mig
     {
         /// <inheritdoc />
@@ -384,6 +384,9 @@ namespace SchroniskaTurystyczne.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("IdSavedRoute")
+                        .HasColumnType("int");
+
                     b.Property<int?>("IdShelter")
                         .HasColumnType("int");
 
@@ -394,13 +397,14 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasColumnType("float");
 
                     b.Property<string>("Name")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Number")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("IdSavedRoute");
 
                     b.HasIndex("IdShelter");
 
@@ -514,29 +518,6 @@ namespace SchroniskaTurystyczne.Migrations
                     b.ToTable("RoomTypes");
                 });
 
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.RoutePoint", b =>
-                {
-                    b.Property<int>("IdRoute")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdPoint")
-                        .HasColumnType("int");
-
-                    b.Property<int>("PointId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("SavedRouteId")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdRoute", "IdPoint");
-
-                    b.HasIndex("PointId");
-
-                    b.HasIndex("SavedRouteId");
-
-                    b.ToTable("RoutePoints");
-                });
-
             modelBuilder.Entity("SchroniskaTurystyczne.Models.SavedRoute", b =>
                 {
                     b.Property<int>("Id")
@@ -545,12 +526,9 @@ namespace SchroniskaTurystyczne.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("GuestId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<string>("IdGuest")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -558,7 +536,7 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GuestId");
+                    b.HasIndex("IdGuest");
 
                     b.ToTable("SavedRoutes");
                 });
@@ -761,10 +739,17 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Point", b =>
                 {
+                    b.HasOne("SchroniskaTurystyczne.Models.SavedRoute", "SavedRoute")
+                        .WithMany("Points")
+                        .HasForeignKey("IdSavedRoute")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
                         .WithMany("Points")
-                        .HasForeignKey("IdShelter")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("IdShelter");
+
+                    b.Navigation("SavedRoute");
 
                     b.Navigation("Shelter");
                 });
@@ -811,30 +796,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Navigation("Shelter");
                 });
 
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.RoutePoint", b =>
-                {
-                    b.HasOne("SchroniskaTurystyczne.Models.Point", "Point")
-                        .WithMany("RoutePoints")
-                        .HasForeignKey("PointId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SchroniskaTurystyczne.Models.SavedRoute", "SavedRoute")
-                        .WithMany("RoutePoints")
-                        .HasForeignKey("SavedRouteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Point");
-
-                    b.Navigation("SavedRoute");
-                });
-
             modelBuilder.Entity("SchroniskaTurystyczne.Models.SavedRoute", b =>
                 {
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Guest")
-                        .WithMany()
-                        .HasForeignKey("GuestId");
+                        .WithMany("SavedRoutes")
+                        .HasForeignKey("IdGuest")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Guest");
                 });
@@ -881,6 +849,8 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.Navigation("Rooms");
 
+                    b.Navigation("SavedRoutes");
+
                     b.Navigation("SentMessages");
 
                     b.Navigation("Shelters");
@@ -891,11 +861,6 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Navigation("BookingRooms");
 
                     b.Navigation("Payments");
-                });
-
-            modelBuilder.Entity("SchroniskaTurystyczne.Models.Point", b =>
-                {
-                    b.Navigation("RoutePoints");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Room", b =>
@@ -910,7 +875,7 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.SavedRoute", b =>
                 {
-                    b.Navigation("RoutePoints");
+                    b.Navigation("Points");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Shelter", b =>

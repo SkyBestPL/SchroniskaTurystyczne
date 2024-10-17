@@ -20,7 +20,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">SchroniskaTurystyczne</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Shelters" asp-action="Index">Schroniarz.pl</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -33,9 +33,8 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="guestDropdown">
                                 <li><a class="dropdown-item" href="/Shelters/Index">Lista schronisk</a></li>
-                                <li><a class="dropdown-item" href="#">Mapa schronisk</a></li>
-                                <li><a class="dropdown-item" href="#">Rezerwacje</a></li>
                                 <li><a class="dropdown-item" asp-controller="Shelters" asp-action="CreateRoute">Tworzenie trasy</a></li>
+                                <li><a class="dropdown-item" asp-controller="Routes" asp-action="UserRoutes">Twoje trasy</a></li>
                             </ul>
                         </li>
                         <li class="nav-item dropdown">
@@ -44,8 +43,6 @@
                             </a>
                             <ul class="dropdown-menu" aria-labelledby="ownerDropdown">
                                 <li><a class="dropdown-item" href="/Shelters/Create">Dodaj schronisko</a></li>
-                                <li><a class="dropdown-item" href="#">Zarządzaj rezerwacjami</a></li>
-                                <li><a class="dropdown-item" href="#">Edytuj schronisko</a></li>
                             </ul>
                         </li>
                     </ul>
@@ -53,10 +50,10 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index"></a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy"></a>
                         </li>
                     </ul>
                     <partial name="_LoginPartial" />

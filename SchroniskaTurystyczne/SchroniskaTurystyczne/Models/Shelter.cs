@@ -13,11 +13,11 @@ namespace SchroniskaTurystyczne.Models
         public string LocationLon { get; set; }
         public string LocationLat { get; set; }
 
-        public AppUser Exhibitor { get; set; }
-        public ICollection<Room> Rooms { get; set; }
-        public ICollection<Photo> Photos { get; set; }
-        public ICollection<Review> Reviews { get; set; }
-        public ICollection<ShelterTag> ShelterTags { get; set; }
-        public ICollection<Point> Points { get; set; }
+        public virtual AppUser Exhibitor { get; set; }
+        public virtual ICollection<Room> Rooms { get; set; }
+        public virtual ICollection<Photo> Photos { get; set; }
+        public virtual ICollection<Review> Reviews { get; set; }
+        public virtual ICollection<ShelterTag> ShelterTags { get; set; }
+        public virtual ICollection<Point> Points { get; set; }
     }
 }

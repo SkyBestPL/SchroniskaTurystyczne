@@ -13,9 +13,10 @@ namespace SchroniskaTurystyczne.Controllers
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
 
-        public SheltersController(ApplicationDbContext context)
+        public SheltersController(ApplicationDbContext context, UserManager<AppUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Shelters/Create
@@ -27,17 +28,24 @@ namespace SchroniskaTurystyczne.Controllers
         // POST: Shelters/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,Rating,LocationLon,LocationLat")] Shelter shelter)
+        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat")] Shelter shelter)
         {
-            //var user = await _userManager.GetUserAsync(User);
+            var user = await _userManager.GetUserAsync(User);
+
+            if (user == null)
+            {
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
+            }
+
             //if (ModelState.IsValid)
             //{
-            shelter.IdExhibitor = "e2d9b874-62a8-455a-9186-40c10b091d02";
+                shelter.IdExhibitor = user.Id;
 
                 _context.Add(shelter);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             //}
+
             //return View(shelter);
         }
 
@@ -62,11 +70,10 @@ namespace SchroniskaTurystyczne.Controllers
                     s.LocationLat,
                     s.LocationLon,
                     s.Rating,
-                    Exhibitor = s.Exhibitor.FirstName + " " + s.Exhibitor.LastName, // Dane o wystawiającym
+                    Exhibitor = s.Exhibitor.FirstName + " " + s.Exhibitor.LastName,
                 })
                 .ToList();
 
-            // Przekaż schroniska do widoku
             ViewBag.Shelters = shelters;
 
             foreach (var shelter in shelters)

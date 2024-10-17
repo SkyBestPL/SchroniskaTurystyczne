@@ -14,6 +14,6 @@ namespace SchroniskaTurystyczne.Models
 
         public virtual Shelter Shelter { get; set; }
         public virtual RoomType RoomType { get; set; }
-        public ICollection<BookingRoom> BookingRooms { get; set; }
+        public virtual ICollection<BookingRoom> BookingRooms { get; set; }
     }
 }
