@@ -14,7 +14,6 @@ namespace SchroniskaTurystyczne.Models
         public double LocationLat { get; set; }
 
         public virtual Shelter? Shelter { get; set; }
-        //public virtual ICollection<RoutePoint> RoutePoints { get; } = [];
         public virtual SavedRoute SavedRoute { get; set; }
     }
 }

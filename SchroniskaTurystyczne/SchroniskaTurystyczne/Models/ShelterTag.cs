@@ -2,7 +2,7 @@
 
 namespace SchroniskaTurystyczne.Models
 {
-    public class ShelterTag
+    /*public class ShelterTag
     {
         [Key]
         public int IdTag { get; set; }
@@ -10,6 +10,5 @@ namespace SchroniskaTurystyczne.Models
 
         public virtual Tag Tag { get; set; }
         public virtual Shelter Shelter { get; set; }
-    }
-
+    }*/
 }

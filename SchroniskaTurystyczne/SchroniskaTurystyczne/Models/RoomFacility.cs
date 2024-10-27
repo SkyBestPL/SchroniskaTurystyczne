@@ -2,15 +2,12 @@
 
 namespace SchroniskaTurystyczne.Models
 {
-    public class BookingRoom
+    /*public class RoomFacility
     {
         [Key]
-        public int IdBooking { get; set; }
         public int IdRoom { get; set; }
-        [Required]
-        public int NumberOfPeople { get; set; }
-
-        public virtual Booking Booking { get; set; }
+        public int IdFacility { get; set; }
         public virtual Room Room { get; set; }
-    }
+        public virtual Facility Facility { get; set; }
+    }*/
 }

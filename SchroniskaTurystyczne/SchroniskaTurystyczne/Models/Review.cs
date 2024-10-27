@@ -10,7 +10,7 @@ namespace SchroniskaTurystyczne.Models
         public string IdUser { get; set; }
         public string Date { get; set; }
         public int Rating { get; set; }
-        public string Contents { get; set; }
+        public string? Contents { get; set; }
 
         public virtual Shelter Shelter { get; set; }
         public virtual AppUser User { get; set; }

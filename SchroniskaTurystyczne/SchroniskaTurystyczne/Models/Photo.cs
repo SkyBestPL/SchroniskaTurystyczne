@@ -7,7 +7,8 @@ namespace SchroniskaTurystyczne.Models
         [Key]
         public int Id { get; set; }
         public int IdShelter { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
+        [Required]
         public string Path { get; set; }
 
         public virtual Shelter Shelter { get; set; }

@@ -1,13 +1,10 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace SchroniskaTurystyczne.Models
 {
-    /*public class Role
+    public class Role : IdentityRole
     {
-        [Key]
-        public int Id { get; set; }
-        public string Name { get; set; }
-
-        public ICollection<AppUser> Users { get; set; }
-    }*/
+        public virtual ICollection<UserRole> UserRoles { get; set; }
+    }
 }

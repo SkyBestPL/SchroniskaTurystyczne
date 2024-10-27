@@ -10,7 +10,6 @@ namespace SchroniskaTurystyczne.Models
         public string Name { get; set; }
 
         public virtual AppUser Guest { get; set; }
-        //public virtual ICollection<RoutePoint> RoutePoints { get; } = [];
         public virtual ICollection<Point> Points { get; set; }
     }
 }

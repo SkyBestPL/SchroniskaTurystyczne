@@ -37,12 +37,15 @@ namespace SchroniskaTurystyczne.Controllers
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
 
+            shelter.IdExhibitor = user.Id;
+            shelter.Exhibitor = user;
+
             //if (ModelState.IsValid)
             //{
-                shelter.IdExhibitor = user.Id;
-
                 _context.Add(shelter);
                 await _context.SaveChangesAsync();
+
+            // Przekierowanie do formularza dodawania pokoju po utworzeniu schroniska
                 return RedirectToAction(nameof(Index));
             //}
 
@@ -55,6 +58,7 @@ namespace SchroniskaTurystyczne.Controllers
             var shelters = await _context.Shelters
                 .Include(s => s.Rooms)
                 .Include(s => s.Photos)
+                .Include(s => s.Exhibitor)
                 .ToListAsync();
             return View(shelters);
         }

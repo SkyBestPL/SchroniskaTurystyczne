@@ -1,54 +1,78 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using SchroniskaTurystyczne.Models;
+using System.Collections.Generic;
 using System.Data;
 using System.Reflection.Emit;
+using System.Reflection.Metadata;
 
 namespace SchroniskaTurystyczne.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<AppUser>
+    public class ApplicationDbContext : IdentityDbContext<AppUser, Role, string,
+        IdentityUserClaim<string>, UserRole, IdentityUserLogin<string>,
+        IdentityRoleClaim<string>, IdentityUserToken<string>>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {
         }
+        public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingRoom> BookingRooms { get; set; }
+        public DbSet<Facility> Facilities { get; set; }
         public DbSet<Message> Messages { get; set; }
-        public DbSet<Payment> Payments { get; set; }
+        //public DbSet<Payment> Payments { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Point> Points { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Room> Rooms { get; set; }
+        //public DbSet<RoomFacility> RoomFacilities { get; set; }
+        public DbSet<RoomPhoto> RoomPhotos { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
         //public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<SavedRoute> SavedRoutes { get; set; }
         public DbSet<Shelter> Shelters { get; set; }
-        public DbSet<ShelterTag> ShelterTags { get; set; }
+        //public DbSet<ShelterTag> ShelterTags { get; set; }
         public DbSet<Tag> Tags { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            //wiele do wielu
+            modelBuilder.Entity<Shelter>()
+                .HasMany(e => e.Tags)
+                .WithMany(e => e.Shelters)
+                .UsingEntity(
+                    "ShelterTag",
+                    l => l.HasOne(typeof(Tag)).WithMany().HasForeignKey("IdTag").HasPrincipalKey(nameof(Tag.Id)),
+                    r => r.HasOne(typeof(Shelter)).WithMany().HasForeignKey("IdShelter").HasPrincipalKey(nameof(Shelter.Id)),
+                    j => j.HasKey("IdShelter", "IdTag"));
+
+            modelBuilder.Entity<Room>()
+                .HasMany(e => e.Facilities)
+                .WithMany(e => e.Rooms)
+                .UsingEntity(
+                    "RoomFacility",
+                    l => l.HasOne(typeof(Facility)).WithMany().HasForeignKey("IdFacility").HasPrincipalKey(nameof(Facility.Id)),
+                    r => r.HasOne(typeof(Room)).WithMany().HasForeignKey("IdRoom").HasPrincipalKey(nameof(Room.Id)),
+                    j => j.HasKey("IdRoom", "IdFacility"));
+
+            modelBuilder.Entity<Booking>()
+                .HasMany(e => e.BookingRooms)
+                .WithOne(e => e.Booking)
+                .HasForeignKey(e => e.IdBooking);
+
+            modelBuilder.Entity<Room>()
+                .HasMany(e => e.BookingRooms)
+                .WithOne(e => e.Room)
+                .HasForeignKey(e => e.IdRoom);
+
             //klucze zlozone
-            modelBuilder.Entity<BookingRoom>()
-                .HasKey(br => new { br.IdBooking, br.IdRoom });
-
-            //rel wiele do wielu
-            modelBuilder.Entity<ShelterTag>()
-                .HasKey(st => new { st.IdShelter, st.IdTag });
-
-            modelBuilder.Entity<ShelterTag>()
-                .HasOne(st => st.Shelter)
-                .WithMany(s => s.ShelterTags)
-                .HasForeignKey(st => st.IdShelter);
-
-            modelBuilder.Entity<ShelterTag>()
-                .HasOne(st => st.Tag)
-                .WithMany(t => t.ShelterTags)
-                .HasForeignKey(st => st.IdTag);
+            /*modelBuilder.Entity<BookingRoom>()
+                .HasKey(br => new { br.IdBooking, br.IdRoom });*/
 
             //rel jeden do wielu
             modelBuilder.Entity<Booking>()
@@ -57,11 +81,11 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(b => b.IdGuest)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Payment>()
+            /*modelBuilder.Entity<Payment>()
                 .HasOne(p => p.Booking)
                 .WithMany(b => b.Payments)
                 .HasForeignKey(p => p.IdBooking)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Cascade);*/
 
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Shelter)
@@ -94,6 +118,12 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(p => p.IdShelter)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<RoomPhoto>()
+                .HasOne(p => p.Room)
+                .WithMany(s => s.RoomPhotos)
+                .HasForeignKey(p => p.IdRoom)
+                .OnDelete(DeleteBehavior.Cascade);
+
             //inne
             /* modelBuilder.Entity<AppUser>()
                  .HasOne(u => u.Role)
@@ -119,9 +149,9 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(p => p.IdSavedRoute);
 
             //pola tekstowe
-            modelBuilder.Entity<Room>()
+            /*modelBuilder.Entity<Room>()
                 .Property(r => r.Status)
-            .HasMaxLength(50);
+            .HasMaxLength(50);*/
 
             modelBuilder.Entity<Review>()
                 .Property(r => r.Contents)
@@ -165,6 +195,153 @@ namespace SchroniskaTurystyczne.Data
                 .WithMany(u => u.Shelters)
                 .HasForeignKey(s => s.IdExhibitor)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Role>(b =>
+            {
+                b.HasMany(e => e.UserRoles)
+                .WithOne(e => e.Role)
+                .HasForeignKey(ur => ur.RoleId)
+                .IsRequired();
+            });
+
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.Reviews)
+                .WithOne(r => r.User)
+                .HasForeignKey(r => r.IdUser);
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.Bookings)
+                .WithOne(b => b.Guest)
+                .HasForeignKey(b => b.IdGuest);
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.SentMessages)
+                .WithOne(m => m.Sender)
+                .HasForeignKey(m => m.IdSender)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.ReceivedMessages)
+                .WithOne(m => m.Receiver)
+                .HasForeignKey(m => m.IdReceiver)
+                .OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.Shelters)
+                .WithOne(s => s.Exhibitor)
+                .HasForeignKey(s => s.IdExhibitor);
+            modelBuilder.Entity<AppUser>()
+                .HasMany(u => u.SavedRoutes)
+                .WithOne(sr => sr.Guest)
+                .HasForeignKey(sr => sr.IdGuest);
+
+            modelBuilder.Entity<AppUser>(b =>
+            {
+                b.HasMany(e => e.UserRoles)
+                .WithOne(e => e.User)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+            });
+
+            Seed(modelBuilder);
+        }
+
+        private void Seed(ModelBuilder builder)
+        {
+            var adminUser = new AppUser()
+            {
+                Email = "admin@admin.com",
+                NormalizedEmail = "ADMIN@ADMIN.COM",
+                UserName = "admin@admin.com",
+                NormalizedUserName = "ADMIN@ADMIN.COM",
+                PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
+                EmailConfirmed = true
+            };
+
+            var rolAdmin = new Role()
+            {
+                Name = "Admin",
+                NormalizedName = "Admin"
+            };
+
+            var userRole = new Role()
+            {
+                Name = "User",
+                NormalizedName = "User"
+            };
+
+            builder.Entity<Role>().HasData(rolAdmin, userRole);
+            builder.Entity<AppUser>().HasData(adminUser);
+
+            var userRoleAdmin = new UserRole()
+            {
+                RoleId = rolAdmin.Id,
+                UserId = adminUser.Id
+            };
+
+            builder.Entity<UserRole>().HasData(userRoleAdmin);
+
+            var roomPublic = new RoomType()
+            {
+                Id = 1,
+                Name = "Public",
+                Description = "Pokój publiczny"
+            };
+
+            var roomPrivate = new RoomType()
+            {
+                Id = 2,
+                Name = "Private",
+                Description = "Pokój prywatny"
+            };
+
+            var roomPlot = new RoomType()
+            {
+                Id = 3,
+                Name = "Plot",
+                Description = "Miejsca na działce"
+            };
+
+            builder.Entity<RoomType>().HasData(roomPublic);
+            builder.Entity<RoomType>().HasData(roomPrivate);
+            builder.Entity<RoomType>().HasData(roomPlot);
+
+            var facToilet = new Facility()
+            {
+                Id = 1,
+                Name = "Toilet",
+                Description = "Toaleta"
+            };
+
+            var facShower = new Facility()
+            {
+                Id = 2,
+                Name = "Shower",
+                Description = "Prysznic"
+            };
+
+            var facSheets = new Facility()
+            {
+                Id = 3,
+                Name = "Sheets",
+                Description = "Pościel"
+            };
+
+            var facWiFi = new Facility()
+            {
+                Id = 4,
+                Name = "Wi-Fi",
+                Description = "Wi-Fi"
+            };
+
+            var facParking = new Facility()
+            {
+                Id = 5,
+                Name = "Parking",
+                Description = "Parking"
+            };
+
+            builder.Entity<Facility>().HasData(facToilet);
+            builder.Entity<Facility>().HasData(facShower);
+            builder.Entity<Facility>().HasData(facSheets);
+            builder.Entity<Facility>().HasData(facWiFi);
+            builder.Entity<Facility>().HasData(facParking);
         }
     }
 }

@@ -1,0 +1,33 @@
+﻿@model SchroniskaTurystyczne.Models.Room
+
+@{
+    ViewData["Title"] = "Dodaj Pokój";
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<form asp-action="Create" method="post">
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Nazwa Pokoju</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label">Opis Pokoju</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="IdType" class="control-label">Typ Pokoju</label>
+        <select asp-for="IdType" class="form-control">
+            <!-- Tutaj możesz dodać opcje typu pokoju -->
+        </select>
+        <span asp-validation-for="IdType" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="IdShelter" value="@ViewBag.ShelterId" />
+
+    <button type="submit" class="btn btn-primary">Dodaj Pokój</button>
+</form>

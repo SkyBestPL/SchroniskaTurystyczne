@@ -2,7 +2,7 @@
 
 namespace SchroniskaTurystyczne.Models
 {
-    public class Payment
+    /*public class Payment
     {
         [Key]
         public int Id { get; set; }
@@ -13,5 +13,5 @@ namespace SchroniskaTurystyczne.Models
         public string Date { get; set; }
 
         public virtual Booking Booking { get; set; }
-    }
+    }*/
 }
