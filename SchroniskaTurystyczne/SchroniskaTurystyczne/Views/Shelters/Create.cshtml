@@ -9,6 +9,7 @@
 <div id="map" style="height: 400px;"></div>
 
 <form asp-action="Create" method="post">
+
     <div class="form-group">
         <label asp-for="Name" class="control-label">Nazwa Schroniska</label>
         <input asp-for="Name" class="form-control" />
@@ -24,16 +25,49 @@
     <input type="hidden" asp-for="LocationLat" id="Latitude" />
     <input type="hidden" asp-for="LocationLon" id="Longitude" />
 
+    <h4>Wybierz Tagi</h4>
+    <div id="tags-container" class="form-group">
+        <select id="tags-select" class="form-control">
+            <option value="">Wybierz tag</option>
+            @foreach (var tag in ViewBag.Tags)
+            {
+                <option value="@tag.Id">@tag.Name</option>
+            }
+        </select>
+        <button type="button" class="btn btn-secondary" onclick="addTag()">Dodaj Tag</button>
+    </div>
+
+    <ul id="selected-tags-list"></ul>
+
+    <input type="hidden" name="SelectedTags" id="selected-tags" />
+
+    <h4>Dodaj Pokoje</h4>
+    <div id="rooms-container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Typ pokoju</th>
+                    <th>Nazwa pokoju</th>
+                    <th>Cena za noc</th>
+                    <th>Pojemność</th>
+                    <th>Usuń</th>
+                </tr>
+            </thead>
+            <tbody id="rooms-table-body">
+                <!-- kolejne wiersze z pokojami -->
+            </tbody>
+        </table>
+        <button type="button" class="btn btn-secondary" onclick="addRoom()">Dodaj Pokój</button>
+    </div>
+
     <button type="submit" class="btn btn-primary">Dodaj Schronisko</button>
 </form>
 
 <script>
     const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
-
     var lat = 52.06936257159014, lon = 19.48022053933678;
 
     const map = L.map('map').setView([lat, lon], 6);
-
     L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
         minZoom: 0,
         maxZoom: 19,
@@ -41,7 +75,6 @@
     }).addTo(map);
 
     let marker = L.marker([lat, lon]).addTo(map);
-
     document.getElementById('Latitude').value = lat;
     document.getElementById('Longitude').value = lon;
 
@@ -51,21 +84,139 @@
         document.getElementById('Longitude').value = e.latlng.lng;
     });
 
-    const LogoControl = L.Control.extend({
-        options: {
-            position: 'bottomleft',
-        },
+    function addRoom() {
+        const container = document.getElementById('rooms-table-body');
+        const index = container.getElementsByTagName('tr').length;
 
-        onAdd: function (map) {
-            const container = L.DomUtil.create('div');
-            const link = L.DomUtil.create('a', '', container);
-            link.setAttribute('href', 'http://mapy.cz/');
-            link.setAttribute('target', '_blank');
-            link.innerHTML = '<img src="https://api.mapy.cz/img/api/logo.svg" />';
-            L.DomEvent.disableClickPropagation(link);
-            return container;
-        },
-    });
+        const row = document.createElement('tr');
+        row.innerHTML = `
+                <td>
+                    <select name="Rooms[${index}].IdType" class="form-control">
+                        @foreach (var type in ViewBag.RoomTypes as List<SchroniskaTurystyczne.Models.RoomType>)
+                        {
+                                <option value="@type.Id">@type.Name</option>
+                        }
+                    </select>
+                </td>
+                <td>
+                    <input type="text" name="Rooms[${index}].Name" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" />
+                </td>
+                <td>
+                    <input type="number" name="Rooms[${index}].Capacity" class="form-control" />
+                </td>
+                <td>
+                    <button type="button" class="btn btn-secondary" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
+                    <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
+                </td>
+                <td>
+                    <div id="facilities-display-${index}" class="selected-facilities-container"></div>
+                    <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
+                </td>
+            `;
+        container.appendChild(row);
+    }
 
-    new LogoControl().addTo(map);
+    function removeRoom(button) {
+        const row = button.closest('tr');
+        row.remove();
+    }
+
+    function addTag() {
+        const tagSelect = document.getElementById('tags-select');
+        const selectedTagsList = document.getElementById('selected-tags-list');
+        const selectedTagsInput = document.getElementById('selected-tags');
+        const selectedTagId = tagSelect.value;
+        const selectedTagText = tagSelect.options[tagSelect.selectedIndex].text;
+
+        // Dodaj wybrany tag do listy
+        if (selectedTagId && !selectedTagsInput.value.includes(selectedTagId)) {
+            // Tworzenie elementu tagu
+            const tagItem = document.createElement('li');
+            tagItem.textContent = selectedTagText;
+            tagItem.dataset.tagId = selectedTagId;
+
+            // Przycisk usuwania
+            const removeButton = document.createElement('button');
+            removeButton.textContent = "Usuń";
+            removeButton.type = "button";
+            removeButton.classList.add('btn', 'btn-danger', 'ml-2');
+            removeButton.onclick = function () {
+                tagItem.remove();
+                updateSelectedTags();
+            };
+            tagItem.appendChild(removeButton);
+            selectedTagsList.appendChild(tagItem);
+            updateSelectedTags();
+        }
+    }
+
+    function updateSelectedTags() {
+        const selectedTagsList = document.getElementById('selected-tags-list');
+        const selectedTags = Array.from(selectedTagsList.children).map(tagItem => tagItem.dataset.tagId);
+        document.getElementById('selected-tags').value = selectedTags.join(',');
+    }
+
+    let currentRoomIndex = null;
+
+    function openFacilitiesModal(roomIndex) {
+        currentRoomIndex = roomIndex;
+        document.getElementById('facilities-modal').style.display = 'block';
+        document.getElementById('modal-overlay').style.display = 'block';
+    }
+
+    function closeFacilitiesModal() {
+        document.getElementById('facilities-modal').style.display = 'none';
+        document.getElementById('modal-overlay').style.display = 'none';
+        currentRoomIndex = null;
+    }
+
+    function toggleFacility(checkbox, facilityName) {
+        const selectedFacilitiesInput = document.getElementById(`selected-facilities-${currentRoomIndex}`);
+        let selectedFacilities = selectedFacilitiesInput ? selectedFacilitiesInput.value.split(',') : [];
+
+        if (checkbox.checked) {
+            selectedFacilities.push(checkbox.value);
+        } else {
+            selectedFacilities = selectedFacilities.filter(id => id !== checkbox.value);
+        }
+
+        selectedFacilitiesInput.value = selectedFacilities.join(',');
+        updateFacilitiesListDisplay(currentRoomIndex, facilityName, checkbox.checked);
+    }
+
+    function updateFacilitiesListDisplay(roomIndex, facilityName, add) {
+        const displayElement = document.getElementById(`facilities-display-${roomIndex}`);
+        const facilityItem = document.createElement('span');
+        facilityItem.className = 'badge badge-info m-1';
+        facilityItem.innerText = facilityName;
+
+        if (add) {
+            displayElement.appendChild(facilityItem);
+        } else {
+            [...displayElement.children].forEach(child => {
+                if (child.innerText === facilityName) child.remove();
+            });
+        }
+    }
 </script>
+
+<!-- Modal do wyboru udogodnień -->
+<div id="facilities-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
+    <h4>Wybierz Udogodnienia</h4>
+    <ul id="facilities-list">
+        @foreach (var facility in ViewBag.Facilities as List<SchroniskaTurystyczne.Models.Facility>)
+        {
+            <li>
+                <label>
+                    <input type="checkbox" value="@facility.Id" onclick="toggleFacility(this, '@facility.Name')" />
+                    @facility.Name
+                </label>
+            </li>
+        }
+    </ul>
+    <button type="button" class="btn btn-primary" onclick="closeFacilitiesModal()">Zamknij</button>
+</div>
+<div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>

@@ -60,7 +60,7 @@ namespace SchroniskaTurystyczne.Data
                     r => r.HasOne(typeof(Room)).WithMany().HasForeignKey("IdRoom").HasPrincipalKey(nameof(Room.Id)),
                     j => j.HasKey("IdRoom", "IdFacility"));
 
-            modelBuilder.Entity<Booking>()
+            /*modelBuilder.Entity<Booking>()
                 .HasMany(e => e.BookingRooms)
                 .WithOne(e => e.Booking)
                 .HasForeignKey(e => e.IdBooking);
@@ -68,7 +68,22 @@ namespace SchroniskaTurystyczne.Data
             modelBuilder.Entity<Room>()
                 .HasMany(e => e.BookingRooms)
                 .WithOne(e => e.Room)
-                .HasForeignKey(e => e.IdRoom);
+                .HasForeignKey(e => e.IdRoom);*/
+
+            // Konfiguracja klucza złożonego dla BookingRoom
+            modelBuilder.Entity<BookingRoom>()
+                .HasKey(br => new { br.IdBooking, br.IdRoom });
+
+            // Opcjonalnie: konfiguracja relacji, jeśli potrzebne
+            modelBuilder.Entity<BookingRoom>()
+                .HasOne(br => br.Booking)
+                .WithMany(b => b.BookingRooms)
+                .HasForeignKey(br => br.IdBooking);
+
+            modelBuilder.Entity<BookingRoom>()
+                .HasOne(br => br.Room)
+                .WithMany(r => r.BookingRooms)
+                .HasForeignKey(br => br.IdRoom);
 
             //klucze zlozone
             /*modelBuilder.Entity<BookingRoom>()
@@ -280,22 +295,19 @@ namespace SchroniskaTurystyczne.Data
             var roomPublic = new RoomType()
             {
                 Id = 1,
-                Name = "Public",
-                Description = "Pokój publiczny"
+                Name = "Pokój publiczny"
             };
 
             var roomPrivate = new RoomType()
             {
                 Id = 2,
-                Name = "Private",
-                Description = "Pokój prywatny"
+                Name = "Pokój prywatny"
             };
 
             var roomPlot = new RoomType()
             {
                 Id = 3,
-                Name = "Plot",
-                Description = "Miejsca na działce"
+                Name = "Miejsce na działce"
             };
 
             builder.Entity<RoomType>().HasData(roomPublic);
@@ -305,43 +317,60 @@ namespace SchroniskaTurystyczne.Data
             var facToilet = new Facility()
             {
                 Id = 1,
-                Name = "Toilet",
-                Description = "Toaleta"
+                Name = "Toaleta"
             };
 
             var facShower = new Facility()
             {
                 Id = 2,
-                Name = "Shower",
-                Description = "Prysznic"
+                Name = "Prysznic"
             };
 
             var facSheets = new Facility()
             {
                 Id = 3,
-                Name = "Sheets",
-                Description = "Pościel"
-            };
-
-            var facWiFi = new Facility()
-            {
-                Id = 4,
-                Name = "Wi-Fi",
-                Description = "Wi-Fi"
-            };
-
-            var facParking = new Facility()
-            {
-                Id = 5,
-                Name = "Parking",
-                Description = "Parking"
+                Name = "Pościel"
             };
 
             builder.Entity<Facility>().HasData(facToilet);
             builder.Entity<Facility>().HasData(facShower);
             builder.Entity<Facility>().HasData(facSheets);
-            builder.Entity<Facility>().HasData(facWiFi);
-            builder.Entity<Facility>().HasData(facParking);
+
+            var wifiTag = new Tag()
+            {
+                Id = 1,
+                Name = "Wi-Fi"
+            };
+
+            var plotTag = new Tag()
+            {
+                Id = 2,
+                Name = "Pola namiotowe"
+            };
+
+            var roomTag = new Tag()
+            {
+                Id = 3,
+                Name = "Pokoje"
+            };
+
+            var barTag = new Tag()
+            {
+                Id = 4,
+                Name = "Bufet"
+            };
+
+            var parkingTag = new Tag()
+            {
+                Id = 5,
+                Name = "Parking"
+            };
+
+            builder.Entity<Tag>().HasData(wifiTag);
+            builder.Entity<Tag>().HasData(plotTag);
+            builder.Entity<Tag>().HasData(roomTag);
+            builder.Entity<Tag>().HasData(barTag);
+            builder.Entity<Tag>().HasData(parkingTag);
         }
     }
 }

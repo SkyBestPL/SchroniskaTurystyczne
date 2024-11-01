@@ -417,7 +417,7 @@ namespace SchroniskaTurystyczne.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BookingRooms", x => x.IdBooking);
+                    table.PrimaryKey("PK_BookingRooms", x => new { x.IdBooking, x.IdRoom });
                     table.ForeignKey(
                         name: "FK_BookingRooms_Bookings_IdBooking",
                         column: x => x.IdBooking,
@@ -517,25 +517,23 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "1837c4ee-a9fc-4722-be8d-23a167605b3a", null, "User", "User" },
-                    { "ba925120-9ecd-409d-80af-2834d054ee05", null, "Admin", "Admin" }
+                    { "1b614704-8b63-4bd5-91ab-e1c4e72014f1", null, "User", "User" },
+                    { "6fde9a76-f43c-47ab-9232-9a19bdb7d272", null, "Admin", "Admin" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "18b3e893-3b24-47cf-8ac2-3318d36a90c6", 0, "b250291e-9553-40fc-8c59-5afb56b1bd89", "admin@admin.com", true, null, null, false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "692ba88b-62e5-4816-9a64-6c6dc39363d4", false, "admin@admin.com" });
+                values: new object[] { "478ec20b-f5a5-4498-a405-70a81c25f5eb", 0, "a6922d88-9b4f-40f6-a381-9aa6094d7ae5", "admin@admin.com", true, null, null, false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "6e1f75be-3f72-4e89-8804-2d0333271542", false, "admin@admin.com" });
 
             migrationBuilder.InsertData(
                 table: "Facilities",
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Toaleta", "Toilet" },
-                    { 2, "Prysznic", "Shower" },
-                    { 3, "Pościel", "Sheets" },
-                    { 4, "Wi-Fi", "Wi-Fi" },
-                    { 5, "Parking", "Parking" }
+                    { 1, null, "Toaleta" },
+                    { 2, null, "Prysznic" },
+                    { 3, null, "Pościel" }
                 });
 
             migrationBuilder.InsertData(
@@ -543,15 +541,27 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, "Pokój publiczny", "Public" },
-                    { 2, "Pokój prywatny", "Private" },
-                    { 3, "Miejsca na działce", "Plot" }
+                    { 1, null, "Pokój publiczny" },
+                    { 2, null, "Pokój prywatny" },
+                    { 3, null, "Miejsce na działce" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Tags",
+                columns: new[] { "Id", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Wi-Fi" },
+                    { 2, "Pola namiotowe" },
+                    { 3, "Pokoje" },
+                    { 4, "Bufet" },
+                    { 5, "Parking" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "ba925120-9ecd-409d-80af-2834d054ee05", "18b3e893-3b24-47cf-8ac2-3318d36a90c6" });
+                values: new object[] { "6fde9a76-f43c-47ab-9232-9a19bdb7d272", "478ec20b-f5a5-4498-a405-70a81c25f5eb" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

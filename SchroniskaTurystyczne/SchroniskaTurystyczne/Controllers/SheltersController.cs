@@ -22,16 +22,17 @@ namespace SchroniskaTurystyczne.Controllers
         // GET: Shelters/Create
         public IActionResult Create()
         {
+            ViewBag.RoomTypes = _context.RoomTypes.ToList();
+            ViewBag.Tags = _context.Tags.ToList();
+            ViewBag.Facilities = _context.Facilities.ToList();
             return View();
         }
 
-        // POST: Shelters/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat")] Shelter shelter)
+        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags)
         {
             var user = await _userManager.GetUserAsync(User);
-
             if (user == null)
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -40,16 +41,40 @@ namespace SchroniskaTurystyczne.Controllers
             shelter.IdExhibitor = user.Id;
             shelter.Exhibitor = user;
 
-            //if (ModelState.IsValid)
-            //{
-                _context.Add(shelter);
-                await _context.SaveChangesAsync();
+            // Przypisz pokoje i ich udogodnienia do schroniska
+            if (shelter.Rooms != null)
+            {
+                foreach (var room in shelter.Rooms)
+                {
+                    room.Shelter = shelter;
 
-            // Przekierowanie do formularza dodawania pokoju po utworzeniu schroniska
-                return RedirectToAction(nameof(Index));
-            //}
+                    // Pobierz wybrane udogodnienia dla pokoju
+                    if (!string.IsNullOrEmpty(room.SelectedFacilities))
+                    {
+                        var facilityIds = room.SelectedFacilities
+                            .Split(',')
+                            .Where(id => !string.IsNullOrWhiteSpace(id)) // Filtruj puste wartości
+                            .Select(int.Parse)
+                            .ToList();
 
-            //return View(shelter);
+                        room.Facilities = await _context.Facilities
+                            .Where(facility => facilityIds.Contains(facility.Id))
+                            .ToListAsync();
+                    }
+                }
+            }
+
+            // Przypisz wybrane tagi do schroniska
+            if (!string.IsNullOrEmpty(SelectedTags))
+            {
+                var tagIds = SelectedTags.Split(',').Select(int.Parse).ToList();
+                shelter.Tags = await _context.Tags.Where(tag => tagIds.Contains(tag.Id)).ToListAsync();
+            }
+
+            _context.Add(shelter);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: Shelters
@@ -57,8 +82,10 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var shelters = await _context.Shelters
                 .Include(s => s.Rooms)
+                    .ThenInclude(r => r.Facilities)
                 .Include(s => s.Photos)
                 .Include(s => s.Exhibitor)
+                .Include(s => s.Tags)
                 .ToListAsync();
             return View(shelters);
         }
@@ -86,6 +113,36 @@ namespace SchroniskaTurystyczne.Controllers
             }
 
             return View("~/Views/Routes/Create.cshtml");
+        }
+
+        public async Task<IActionResult> Booking(int id)
+        {
+            var shelter = await _context.Shelters
+                .Include(s => s.Rooms)
+                    .ThenInclude(r => r.BookingRooms)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (shelter == null)
+            {
+                return NotFound();
+            }
+
+            return RedirectToAction("Index", "Booking", new { id = id });
+        }
+
+        public async Task<IActionResult> GetRoomBookings(int roomId)
+        {
+            var bookings = await _context.BookingRooms
+                .Where(br => br.IdRoom == roomId)
+                .Select(br => new {
+                    start = br.Booking.CheckInDate,
+                    end = br.Booking.CheckOutDate,
+                    title = "Zarezerwowane",
+                    backgroundColor = "red"
+                })
+                .ToListAsync();
+
+            return Json(bookings);
         }
     }
 }

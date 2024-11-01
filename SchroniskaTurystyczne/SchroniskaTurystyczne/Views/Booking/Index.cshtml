@@ -1,0 +1,207 @@
+﻿@model SchroniskaTurystyczne.Models.Shelter
+
+@{
+    ViewData["Title"] = "Rezerwacja";
+}
+
+<h2>Rezerwacja schroniska: @Model.Name</h2>
+
+<!-- Formularz dat rezerwacji -->
+<label>Data zameldowania:</label>
+<input type="date" id="checkInDate" required />
+<label>Data wymeldowania:</label>
+<input type="date" id="checkOutDate" required />
+
+<!-- Sekcja dla pokoi prywatnych -->
+<h3>Pokoje Prywatne</h3>
+@foreach (var room in Model.Rooms.Where(r => r.IdType == 2)) // Typ pokoju prywatnego
+{
+    <div>
+        <h4>@room.Name</h4>
+        <p>Cena za osobę: @room.PricePerNight zł</p>
+        <p>Pojemność osób: @room.Capacity</p>
+
+        <!-- Checkbox do zaznaczenia rezerwacji pokoju prywatnego z data-capacity -->
+        <label>
+            <input type="checkbox" class="privateRoomCheckbox" data-room-id="@room.Id" data-capacity="@room.Capacity" />
+            Rezerwuj cały pokój
+        </label>
+
+        <!-- Przycisk pokazujący dostępność -->
+        <button type="button" class="button-calendar" id="button-@room.Id" onclick="toggleCalendar(@room.Id)">Pokaż dostępność</button>
+    </div>
+
+    <!-- Kalendarz pokoju -->
+    <div id="calendar-@room.Id" class="calendar" style="display: none;"></div>
+}
+
+<!-- Sekcja dla pokoi publicznych -->
+<h3>Pokoje Publiczne</h3>
+@foreach (var room in Model.Rooms.Where(r => r.IdType == 1)) // Typ pokoju publicznego
+{
+    <div>
+        <h4>@room.Name</h4>
+        <p>Cena za osobę: @room.PricePerNight zł</p>
+        <p>Pojemność osób: @room.Capacity</p>
+
+        <!-- Liczba osób dla pokoju publicznego -->
+        <label>Liczba osób:</label>
+        <input type="number" class="numberOfPeople" data-room-id="@room.Id" min="1" max="@room.Capacity" />
+
+        <!-- Przycisk pokazujący dostępność -->
+        <button type="button" class="button-calendar" id="button-@room.Id"  onclick="toggleCalendar(@room.Id)">Pokaż dostępność</button>
+    </div>
+
+    <!-- Kalendarz pokoju -->
+    <div id="calendar-@room.Id" class="calendar" style="display: none;"></div>
+}
+
+<!-- Sekcja dla działek -->
+<h3>Działki</h3>
+@foreach (var room in Model.Rooms.Where(r => r.IdType == 3)) // Typ działki
+{
+    <div>
+        <h4>@room.Name</h4>
+        <p>Cena za osobę: @room.PricePerNight zł</p>
+        <p>Pojemność osób: @room.Capacity</p>
+
+        <!-- Liczba osób dla działki -->
+        <label>Liczba osób:</label>
+        <input type="number" class="numberOfPeople" data-room-id="@room.Id" min="1" max="@room.Capacity" />
+
+        <!-- Przycisk pokazujący dostępność -->
+        <button type="button" class="button-calendar" id="button-@room.Id" onclick="toggleCalendar(@room.Id)">Pokaż dostępność</button>
+    </div>
+
+    <!-- Kalendarz pokoju -->
+    <div id="calendar-@room.Id" class="calendar" style="display: none;"></div>
+}
+
+<button onclick="confirmBooking()">Zarezerwuj</button>
+
+ <script>
+    async function confirmBooking() {
+        const checkInDate = document.getElementById('checkInDate').value;
+        const checkOutDate = document.getElementById('checkOutDate').value;
+
+        if (!checkInDate || !checkOutDate) {
+            alert("Wprowadź daty zameldowania i wymeldowania.");
+            return;
+        }
+
+        const roomsData = [];
+        document.querySelectorAll('.numberOfPeople').forEach(input => {
+            const roomId = input.getAttribute('data-room-id');
+            const numberOfPeople = parseInt(input.value) || 0;
+            if (numberOfPeople > 0) {
+                roomsData.push({ roomId, numberOfPeople });
+            }
+        });
+
+        document.querySelectorAll('.privateRoomCheckbox:checked').forEach(input => {
+            const roomId = input.getAttribute('data-room-id');
+            const capacity = parseInt(input.getAttribute('data-capacity'), 10);
+            roomsData.push({ roomId, numberOfPeople: capacity });
+        });
+
+        if (roomsData.length === 0) {
+            alert("Wprowadź liczbę osób dla przynajmniej jednego pokoju lub wybierz pokój prywatny.");
+            return;
+        }
+
+        try {
+            const response = await fetch('/Booking/ConfirmBooking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    checkInDate,
+                    checkOutDate,
+                    roomsData
+                })
+            });
+
+            if (response.ok) {
+                alert("Rezerwacja zakończona sukcesem!");
+                window.location.href = '/';
+            } else {
+                alert("Błąd podczas rezerwacji.");
+            }
+        } catch (error) {
+            console.error("Błąd podczas wysyłania danych rezerwacji:", error);
+            alert("Błąd podczas rezerwacji.");
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const roomElements = document.querySelectorAll('.calendar');
+        roomElements.forEach(async (calendarEl) => {
+            const roomId = calendarEl.getAttribute('id').split('-')[1];
+
+            try {
+                const response = await fetch(`/Booking/GetRoomBookings?roomId=${roomId}`);
+                const bookings = await response.json();
+
+                setRoomCalendar(roomId, bookings);
+            } catch (error) {
+                console.error(`Błąd podczas pobierania danych rezerwacji dla pokoju ID: ${roomId}`, error);
+            }
+        });
+    });
+
+    function setRoomCalendar(roomId, bookings) {
+        const calendarEl = document.getElementById('calendar-' + roomId);
+
+        const events = bookings.map(booking => ({
+            start: booking.checkInDate,
+            end: booking.checkOutDate,
+            display: 'background',
+            color: 'red'
+        }));
+
+        const calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            events: events,
+            selectable: true,  // Umożliwia wybór zakresu dat
+            select: function (info) {
+                // Przechwyć daty początkową i końcową
+                const startDate = info.startStr;
+                const endDate = info.endStr;
+
+                // Ustaw wybrane daty w formularzu rezerwacji
+                document.getElementById('checkInDate').value = startDate;
+                document.getElementById('checkOutDate').value = endDate;
+
+                // Opcjonalnie: wyświetl alert z wybranym zakresem dat
+                alert(`Wybrano daty od ${startDate} do ${endDate}`);
+            },
+            unselectAuto: false  // Pozwala na ponowny wybór dat bez automatycznego usuwania poprzedniego wyboru
+        });
+
+        calendar.render();
+        calendarEl.fullCalendarInstance = calendar;
+    }
+
+    // Definicja toggleCalendar jako async
+    async function toggleCalendar(roomId) {
+        const calendarEl = document.getElementById('calendar-' + roomId);
+        const buttonEl = document.getElementById('button-' + roomId);
+
+        if (calendarEl.style.display === "none") {
+            calendarEl.style.display = "block";
+            buttonEl.textContent = "Schowaj dostępność";
+
+            if (calendarEl.fullCalendarInstance) {
+                calendarEl.fullCalendarInstance.destroy();
+            }
+
+            const response = await fetch(`/Booking/GetRoomBookings?roomId=${roomId}`);
+            const bookings = await response.json();
+            setRoomCalendar(roomId, bookings);
+
+        } else {
+            calendarEl.style.display = "none";
+            buttonEl.textContent = "Pokaż dostępność";
+        }
+    }
+
+</script>

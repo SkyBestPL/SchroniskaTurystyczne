@@ -9,22 +9,42 @@
 <div class="shelter-list">
     @foreach (var shelter in Model)
     {
-        <div>
-            <h3 style="color: grey; font-size: 20px; margin-top: 30px">@shelter.Name</h3>
+        <div class="shelter-container">
+            <h3>@shelter.Name</h3>
             <p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>
             <p><strong>Opis:</strong> @shelter.Description</p>
             <p><strong>Ocena:</strong> @shelter.Rating</p>
-            <p><strong>Lokalizacja:</strong> @shelter.LocationLat, @shelter.LocationLon</p>
+            <!--<p><strong>Lokalizacja:</strong> @shelter.LocationLat, @shelter.LocationLon</p>-->
 
-            @if (shelter.Photos.Any())
+            @if (shelter.Photos != null && shelter.Photos.Any())
             {
                 <div>
-                    <img src=@Url.Content("~/Images/" + shelter.Photos.First().Name + ".png") alt="@shelter.Photos.First().Name" style="width:200px;" />
+                    <img src=@Url.Content("~/Images/" + shelter.Photos.First().Name + ".png") alt="@shelter.Photos.First().Name" />
                 </div>
             }
 
-            <button onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż mapę</button>
-            <button >Rezerwuj</button>
+            @if (shelter.Rooms != null && shelter.Rooms.Any())
+            {
+                <h4>Pokoje:</h4>
+                <ul>
+                    @foreach (var room in shelter.Rooms)
+                    {
+                        <li><strong>Nazwa:</strong> @room.Name, <strong>Pojemność:</strong> @room.Capacity</li>
+                        @if (room.Facilities != null && room.Facilities.Any())
+                        {
+                            <p><strong>Udogodnienia:</strong>@string.Join(", ", room.Facilities.Select(fac => fac.Name))</p>
+                        }
+                    }
+                </ul>
+            }
+
+            @if (shelter.Tags != null && shelter.Tags.Any())
+            {
+                <p><strong>Tagi:</strong>@string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
+            }
+
+            <button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>
+            <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Rezerwuj</a>
 
             <div style="width: 100%; height: 400px; display:none;" id="map-@shelter.Id"></div>
         </div>

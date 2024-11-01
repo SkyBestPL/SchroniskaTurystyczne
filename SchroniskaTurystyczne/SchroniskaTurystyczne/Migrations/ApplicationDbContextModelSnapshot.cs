@@ -205,9 +205,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "18b3e893-3b24-47cf-8ac2-3318d36a90c6",
+                            Id = "478ec20b-f5a5-4498-a405-70a81c25f5eb",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b250291e-9553-40fc-8c59-5afb56b1bd89",
+                            ConcurrencyStamp = "a6922d88-9b4f-40f6-a381-9aa6094d7ae5",
                             Email = "admin@admin.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -215,7 +215,7 @@ namespace SchroniskaTurystyczne.Migrations
                             NormalizedUserName = "ADMIN@ADMIN.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "692ba88b-62e5-4816-9a64-6c6dc39363d4",
+                            SecurityStamp = "6e1f75be-3f72-4e89-8804-2d0333271542",
                             TwoFactorEnabled = false,
                             UserName = "admin@admin.com"
                         });
@@ -272,7 +272,7 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<int>("NumberOfPeople")
                         .HasColumnType("int");
 
-                    b.HasKey("IdBooking");
+                    b.HasKey("IdBooking", "IdRoom");
 
                     b.HasIndex("IdRoom");
 
@@ -302,32 +302,17 @@ namespace SchroniskaTurystyczne.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "Toaleta",
-                            Name = "Toilet"
+                            Name = "Toaleta"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Prysznic",
-                            Name = "Shower"
+                            Name = "Prysznic"
                         },
                         new
                         {
                             Id = 3,
-                            Description = "Pościel",
-                            Name = "Sheets"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            Description = "Wi-Fi",
-                            Name = "Wi-Fi"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            Description = "Parking",
-                            Name = "Parking"
+                            Name = "Pościel"
                         });
                 });
 
@@ -493,13 +478,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ba925120-9ecd-409d-80af-2834d054ee05",
+                            Id = "6fde9a76-f43c-47ab-9232-9a19bdb7d272",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "1837c4ee-a9fc-4722-be8d-23a167605b3a",
+                            Id = "1b614704-8b63-4bd5-91ab-e1c4e72014f1",
                             Name = "User",
                             NormalizedName = "User"
                         });
@@ -592,20 +577,17 @@ namespace SchroniskaTurystyczne.Migrations
                         new
                         {
                             Id = 1,
-                            Description = "Pokój publiczny",
-                            Name = "Public"
+                            Name = "Pokój publiczny"
                         },
                         new
                         {
                             Id = 2,
-                            Description = "Pokój prywatny",
-                            Name = "Private"
+                            Name = "Pokój prywatny"
                         },
                         new
                         {
                             Id = 3,
-                            Description = "Miejsca na działce",
-                            Name = "Plot"
+                            Name = "Miejsce na działce"
                         });
                 });
 
@@ -696,6 +678,33 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Tags");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Wi-Fi"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Pola namiotowe"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Pokoje"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Bufet"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Name = "Parking"
+                        });
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.UserRole", b =>
@@ -715,8 +724,8 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "18b3e893-3b24-47cf-8ac2-3318d36a90c6",
-                            RoleId = "ba925120-9ecd-409d-80af-2834d054ee05"
+                            UserId = "478ec20b-f5a5-4498-a405-70a81c25f5eb",
+                            RoleId = "6fde9a76-f43c-47ab-9232-9a19bdb7d272"
                         });
                 });
 

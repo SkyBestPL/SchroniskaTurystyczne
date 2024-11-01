@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SchroniskaTurystyczne.Models
 {
@@ -19,5 +20,8 @@ namespace SchroniskaTurystyczne.Models
         public virtual ICollection<Facility>? Facilities { get; set; }
         public virtual ICollection<RoomPhoto>? RoomPhotos { get; set; }
         public virtual ICollection<Point>? Points { get; set; }
+
+        [NotMapped]
+        public string SelectedFacilities { get; set; }
     }
 }
