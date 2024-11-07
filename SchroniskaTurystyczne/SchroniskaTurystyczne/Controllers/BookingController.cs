@@ -30,20 +30,6 @@ namespace SchroniskaTurystyczne.Controllers
             return View(shelter);
         }
 
-        /* [HttpGet]
-         public async Task<IActionResult> GetRoomBookings(int roomId)
-         {
-             var bookings = await _context.BookingRooms
-                 .Where(br => br.IdRoom == roomId)
-                 .Select(br => new {
-                     CheckInDate = br.Booking.CheckInDate.ToString("yyyy-MM-dd"),
-                     CheckOutDate = br.Booking.CheckOutDate.ToString("yyyy-MM-dd")
-                 })
-                 .ToListAsync();
-
-             return Json(bookings);
-         }*/
-
         public IActionResult GetRoomBookings(int roomId)
         {
             // Pobierz wszystkie rezerwacje dla danego pokoju
@@ -86,9 +72,9 @@ namespace SchroniskaTurystyczne.Controllers
             var events = dailyOccupancy.Select(d => new
             {
                 start = d.Key.ToString("yyyy-MM-dd"),
-                end = d.Key.AddDays(1).ToString("yyyy-MM-dd"), // FullCalendar wymaga, aby end był następnego dnia
+                end = d.Key.AddDays(1).ToString("yyyy-MM-dd"),
                 color = (d.Value >= roomCapacity) ? "#ff6969" : "#fdff69",
-                title = $"{d.Value}/{roomCapacity}", // Informacja o liczbie osób i pojemności pokoju
+                title = $"{d.Value}/{roomCapacity}",
                 textColor = "#000000"
             }).ToList();
 
@@ -157,121 +143,5 @@ namespace SchroniskaTurystyczne.Controllers
 
             return Json(new { success = true });
         }
-
-        /*[HttpPost]
-        public IActionResult GetBookings([FromBody] DateTimeRangeModel dateRange)
-        {
-            var bookings = _context.Bookings
-                .Include(b => b.BookingRooms)
-                .ThenInclude(br => br.Room)
-                .Where(b => b.CheckInDate < dateRange.End && b.CheckOutDate > dateRange.Start)
-                .ToList();
-
-            var events = bookings.SelectMany(b => b.BookingRooms.GroupBy(br => br.Room.Id).Select(brGroup =>
-            {
-                var room = brGroup.First().Room;
-                var totalPeople = brGroup.Sum(br => br.NumberOfPeople);
-
-                var color = room.IdType == 2
-                    ? "red" // prywatne pokoje
-                    : (totalPeople <= room.Capacity ? "yellow" : null); // żółte jeśli nie przekracza pojemności
-
-                return new
-                {
-                    roomId = room.Id,
-                    roomName = room.Name,
-                    idType = room.IdType,
-                    checkInDate = b.CheckInDate.ToString("yyyy-MM-dd"),
-                    checkOutDate = b.CheckOutDate.ToString("yyyy-MM-dd"),
-                    numberOfPeople = totalPeople,
-                    color
-                };
-            }));
-
-            return Json(events.Where(e => e.color != null));
-        }*/
-
-        /*[HttpPost]
-        public async Task<IActionResult> ConfirmBooking([FromBody] ConfirmBookingRequest request)
-        {
-            if (ModelState.IsValid)
-            {
-                foreach (var roomData in request.RoomsData)
-                {
-                    var overlappingBookings = await _context.BookingRooms
-                        .Include(br => br.Booking)
-                        .Where(br => br.IdRoom == roomData.RoomId)
-                        .Where(br =>
-                            (request.CheckInDate < br.Booking.CheckOutDate && request.CheckOutDate > br.Booking.CheckInDate))
-                        .ToListAsync();
-
-                    if (overlappingBookings.Any())
-                    {
-                        return BadRequest("Wybrane daty są zajęte dla jednego z pokoi.");
-                    }
-                }
-
-                var booking = new Booking
-                {
-                    IdGuest = User.FindFirstValue(ClaimTypes.NameIdentifier),
-                    NumberOfPeople = request.RoomsData.Sum(rd => rd.NumberOfPeople),
-                    CheckInDate = request.CheckInDate,
-                    CheckOutDate = request.CheckOutDate,
-                    Bill = CalculateTotalBill(request.RoomsData, request.CheckInDate, request.CheckOutDate),
-                    Paid = false,
-                    Verified = false,
-                    BookingRooms = request.RoomsData.Select(rd => new BookingRoom
-                    {
-                        IdRoom = rd.RoomId,
-                        NumberOfPeople = rd.NumberOfPeople
-                    }).ToList()
-                };
-
-                _context.Bookings.Add(booking);
-                await _context.SaveChangesAsync();
-
-                return Ok();
-            }
-
-            return BadRequest("Nieprawidłowe dane rezerwacji.");
-        }*/
-
-        /*private double CalculateTotalBill(List<RoomBookingInfo> roomsData, DateTime checkInDate, DateTime checkOutDate)
-        {
-            double totalBill = 0;
-
-            foreach (var roomData in roomsData)
-            {
-                var room = _context.Rooms.Find(roomData.RoomId);
-                if (room != null)
-                {
-                    var nights = (checkOutDate - checkInDate).Days;
-                    totalBill += nights * room.PricePerNight * roomData.NumberOfPeople;
-                }
-            }
-
-            return totalBill;
-        }*/
     }
-
-    // Definicje klas pomocniczych do danych przyjmowanych przez ConfirmBooking
-   /* public class ConfirmBookingRequest
-    {
-        public DateTime CheckInDate { get; set; }
-        public DateTime CheckOutDate { get; set; }
-        public List<RoomBookingInfo> RoomsData { get; set; }
-    }
-
-    public class RoomBookingInfo
-    {
-        public int RoomId { get; set; }
-        public int NumberOfPeople { get; set; }
-    }
-
-    public class DateTimeRangeModel
-    {
-        public DateTime Start { get; set; }
-        public DateTime End { get; set; }
-    }*/
-
 }

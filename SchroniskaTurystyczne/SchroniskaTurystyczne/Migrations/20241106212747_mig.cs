@@ -311,7 +311,7 @@ namespace SchroniskaTurystyczne.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdShelter = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    PhotoData = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -517,14 +517,14 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "1b614704-8b63-4bd5-91ab-e1c4e72014f1", null, "User", "User" },
-                    { "6fde9a76-f43c-47ab-9232-9a19bdb7d272", null, "Admin", "Admin" }
+                    { "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1", null, "Admin", "Admin" },
+                    { "f2e1617d-82a0-47a7-adcb-2a498983669c", null, "User", "User" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "478ec20b-f5a5-4498-a405-70a81c25f5eb", 0, "a6922d88-9b4f-40f6-a381-9aa6094d7ae5", "admin@admin.com", true, null, null, false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "6e1f75be-3f72-4e89-8804-2d0333271542", false, "admin@admin.com" });
+                values: new object[] { "06b90138-0c25-4e0a-8f12-472688a16f84", 0, "7186c787-1afd-4d1f-b6b0-2ac2ef3d69ab", "admin@admin.com", true, null, null, false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "16bd1f12-8561-462f-9ead-f2d1c95f61e8", false, "admin@admin.com" });
 
             migrationBuilder.InsertData(
                 table: "Facilities",
@@ -561,7 +561,7 @@ namespace SchroniskaTurystyczne.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "6fde9a76-f43c-47ab-9232-9a19bdb7d272", "478ec20b-f5a5-4498-a405-70a81c25f5eb" });
+                values: new object[] { "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1", "06b90138-0c25-4e0a-8f12-472688a16f84" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

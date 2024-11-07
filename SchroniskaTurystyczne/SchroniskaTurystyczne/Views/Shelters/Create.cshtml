@@ -8,7 +8,7 @@
 
 <div id="map" style="height: 400px;"></div>
 
-<form asp-action="Create" method="post">
+<form asp-action="Create" method="post" enctype="multipart/form-data">
 
     <div class="form-group">
         <label asp-for="Name" class="control-label">Nazwa Schroniska</label>
@@ -24,6 +24,11 @@
 
     <input type="hidden" asp-for="LocationLat" id="Latitude" />
     <input type="hidden" asp-for="LocationLon" id="Longitude" />
+
+    <div class="form-group">
+        <label for="Photo">Zdjęcie Schroniska</label>
+        <input type="file" name="Photo" class="form-control" />
+    </div>
 
     <h4>Wybierz Tagi</h4>
     <div id="tags-container" class="form-group">

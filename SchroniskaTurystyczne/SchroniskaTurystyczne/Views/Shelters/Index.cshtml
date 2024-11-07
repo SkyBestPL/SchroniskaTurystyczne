@@ -10,44 +10,51 @@
     @foreach (var shelter in Model)
     {
         <div class="shelter-container">
-            <h3>@shelter.Name</h3>
-            <p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>
-            <p><strong>Opis:</strong> @shelter.Description</p>
-            <p><strong>Ocena:</strong> @shelter.Rating</p>
-            <!--<p><strong>Lokalizacja:</strong> @shelter.LocationLat, @shelter.LocationLon</p>-->
+            <!-- Kolumna informacyjna -->
+            <div class="shelter-info">
+                <h3>@shelter.Name</h3>
+                <p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>
 
-            @if (shelter.Photos != null && shelter.Photos.Any())
-            {
-                <div>
-                    <img src=@Url.Content("~/Images/" + shelter.Photos.First().Name + ".png") alt="@shelter.Photos.First().Name" />
-                </div>
-            }
+                <p class="shelter-description">
+                    <strong>Opis:</strong> @shelter.Description
+                </p>
 
-            @if (shelter.Rooms != null && shelter.Rooms.Any())
-            {
-                <h4>Pokoje:</h4>
-                <ul>
-                    @foreach (var room in shelter.Rooms)
-                    {
-                        <li><strong>Nazwa:</strong> @room.Name, <strong>Pojemność:</strong> @room.Capacity</li>
-                        @if (room.Facilities != null && room.Facilities.Any())
+                <!--@if (shelter.Rooms != null && shelter.Rooms.Any())
+                {
+                        <h4>Pokoje:</h4>
+                        <ul>
+                        @foreach (var room in shelter.Rooms)
                         {
-                            <p><strong>Udogodnienia:</strong>@string.Join(", ", room.Facilities.Select(fac => fac.Name))</p>
+                        <li><strong>Nazwa:</strong> @room.Name, <strong>Pojemność:</strong> @room.Capacity</li>
+                            @if (room.Facilities != null && room.Facilities.Any())
+                            {
+                                 <p><strong>Udogodnienia:</strong>@string.Join(", ", room.Facilities.Select(fac => fac.Name))</p>
+                            }
                         }
-                    }
-                </ul>
-            }
+                        </ul>
+                }-->
 
-            @if (shelter.Tags != null && shelter.Tags.Any())
-            {
-                <p><strong>Tagi:</strong>@string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
-            }
+                @if (shelter.Tags != null && shelter.Tags.Any())
+                {
+                    <p><strong>Tagi:</strong>@string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
+                }
+            </div>
 
-            <button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>
-            <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Rezerwuj</a>
+            <!-- Kolumna ze zdjęciem -->
+            <div class="shelter-photo">
+                @if (shelter.Photos != null && shelter.Photos.Any())
+                {
+                    <img src="data:image;base64,@Convert.ToBase64String(shelter.Photos.First().PhotoData)" alt="@shelter.Photos.First().Name" />
+                }
+            </div>
 
-            <div style="width: 100%; height: 400px; display:none;" id="map-@shelter.Id"></div>
+            <div class="shelter-actions">
+                <button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>
+                <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Rezerwuj</a>
+            </div>
         </div>
+        <!-- Mapa schroniska -->
+        <div style="column-span: all; width: 100%; height: 400px; display:none;" id="map-@shelter.Id"></div>
     }
 </div>
 
@@ -57,15 +64,26 @@
 
     let activeMap = null;
     let activeMapDiv = null;
+    let activeMapShelterId = null;
 
     function openMap(lat, lon, shelterId) {
 
-        if (activeMapDiv) {
+        if (activeMapDiv && activeMapShelterId === shelterId) {
+            activeMapDiv.style.display = 'none';
+            activeMap.remove();
+            activeMap = null;
+            activeMapDiv = null;
+            return;
+        }
+        else if (activeMapDiv)
+        {
             activeMapDiv.style.display = 'none';
             activeMap.remove();
             activeMap = null;
             activeMapDiv = null;
         }
+
+        activeMapShelterId = shelterId;
 
         const mapDiv = document.getElementById('map-' + shelterId);
 

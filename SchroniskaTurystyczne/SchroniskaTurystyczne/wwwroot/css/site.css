@@ -21,6 +21,11 @@ body {
   margin-bottom: 60px;
 }
 
+.title-name {
+    font-weight: bold;
+    color: darkcyan;
+}
+
 .custom-marker {
     width: 20px;
     height: 20px;
@@ -28,6 +33,8 @@ body {
     border-radius: 50%;
     cursor: pointer;
 }
+
+/* ----------------------------------------------------------Shelters/Index---------------------------------------------------------- */
 
 .shelter-list {
     display: flex;
@@ -37,12 +44,41 @@ body {
 }
 
 .shelter-container {
+    display: grid;
+    grid-template-columns: 3fr 2fr; /* Info zajmuje 3/4 szerokoœci, zdjêcie 1/4 */
     background-color: #f9f9f9;
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: auto;
+    gap: 20px;
+    align-items: start;
+}
+
+.shelter-info {
+    flex: 1;
+}
+
+.shelter-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Liczba widocznych linii */
+    -webkit-box-orient: vertical;
+    max-height: 4.5em; /* Dostosuj wysokoœæ zgodnie z iloœci¹ linii */
+}
+
+.shelter-photo img {
+    border-radius: 5px;
+    width: 100%; /* Obrazek zajmuje ca³¹ szerokoœæ kolumny */
+    height: 250px; /* Okreœlona wysokoœæ */
+    object-fit: cover; /* Automatyczne przycinanie, aby obraz pasowa³ */
+}
+
+.shelter-actions {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #ddd;
 }
 
 .shelter-container h3 {
@@ -56,30 +92,30 @@ body {
     color: #666;
 }
 
-.shelter-container img {
-    border-radius: 5px;
-    margin-top: 10px;
-    width: 100%;
-    max-width: 300px;
-}
-
-.shelter-container button {
-    background-color: #007bff;
-    border: none;
-    color: white;
+.shelter-container button,
+.shelter-container a {
     padding: 8px 16px;
     font-size: 16px;
     border-radius: 5px;
     cursor: pointer;
     margin-right: 5px;
+    text-decoration: none;
+    color: white;
+}
+
+.shelter-container button {
+    background-color: #007bff;
+    border: none;
 }
 
 .shelter-container button:hover {
     background-color: #0056b3;
 }
 
+/* ------------------------------------------------------Booking/Index------------------------------------------------------ */
+
 .calendar {
-    max-width: 500px;
+    max-width: 400px;
     margin-top: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -99,4 +135,120 @@ body {
 
 .button-calendar:hover {
     background-color: #0056b3;
+}
+
+/* Styl dla nak³adki */
+#modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Pó³przezroczysta nak³adka */
+    display: none; /* Ukrycie nak³adki domyœlnie */
+    z-index: 999; /* Zapewnia, ¿e modal jest nad ca³¹ treœci¹ */
+}
+
+/* Styl dla okienka modal */
+#summaryModal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px; /* Ustalona szerokoœæ */
+    z-index: 1000; /* Modal nad nak³adk¹ */
+    display: none; /* Ukrycie modal domyœlnie */
+}
+
+/* Styl przycisków w modalu */
+#summaryModal button {
+    margin-top: 10px;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#summaryModal button:first-of-type {
+    background-color: #4CAF50; /* Zielony przycisk "Zap³aæ" */
+    color: white;
+}
+
+#summaryModal button:last-of-type {
+    background-color: #f44336; /* Czerwony przycisk "Anuluj" */
+    color: white;
+    margin-left: 10px;
+}
+
+.h2-rooms {
+    text-align: center;
+    color: black;
+}
+
+.shelter-name {
+    font-weight: bold;
+    color: aquamarine;
+}
+
+.date-selection {
+    text-align: center;
+    margin-bottom: 1.5em;
+    color: white;
+}
+
+.room-sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.room-section h3 {
+    background-color: #f0f0f0;
+    padding: 10px;
+    margin: 0;
+    text-align: center;
+    border-radius: 5px;
+}
+
+.room-container {
+    padding: 1em;
+}
+
+.room-card {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 1em;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.toggle-calendar-btn {
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.confirm-booking-btn {
+    display: block;
+    margin: 1em auto;
+    padding: 10px 20px;
+    background-color: darkcyan;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.date-reservation {
+    margin-top: -10px;
+    margin-left: -56.3%;
+    position: fixed;
+    background-color: darkcyan;
+    width: 200%;
+    z-index: 1101;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

@@ -30,7 +30,7 @@ namespace SchroniskaTurystyczne.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags)
+        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags, IFormFile Photo)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -69,6 +69,33 @@ namespace SchroniskaTurystyczne.Controllers
             {
                 var tagIds = SelectedTags.Split(',').Select(int.Parse).ToList();
                 shelter.Tags = await _context.Tags.Where(tag => tagIds.Contains(tag.Id)).ToListAsync();
+            }
+
+            if (Photo != null && Photo.Length > 0)
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    await Photo.CopyToAsync(memoryStream);
+
+                    //limit zdjęcia - 2 MB
+                    if (memoryStream.Length < 2097152)
+                    {
+                        var shelterPhoto = new Photo
+                        {
+                            IdShelter = shelter.Id,
+                            Name = Photo.FileName,
+                            PhotoData = memoryStream.ToArray(),
+                            Shelter = shelter
+                        };
+
+                        shelter.Photos = new List<Photo> { shelterPhoto };
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Photo", "Zdjęcie jest za duże. Maksymalny rozmiar to 2 MB.");
+                        return View(shelter);
+                    }
+                }
             }
 
             _context.Add(shelter);

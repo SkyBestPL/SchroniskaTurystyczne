@@ -12,7 +12,7 @@ using SchroniskaTurystyczne.Data;
 namespace SchroniskaTurystyczne.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241031180726_mig")]
+    [Migration("20241106212747_mig")]
     partial class mig
     {
         /// <inheritdoc />
@@ -208,9 +208,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "478ec20b-f5a5-4498-a405-70a81c25f5eb",
+                            Id = "06b90138-0c25-4e0a-8f12-472688a16f84",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "a6922d88-9b4f-40f6-a381-9aa6094d7ae5",
+                            ConcurrencyStamp = "7186c787-1afd-4d1f-b6b0-2ac2ef3d69ab",
                             Email = "admin@admin.com",
                             EmailConfirmed = true,
                             LockoutEnabled = false,
@@ -218,7 +218,7 @@ namespace SchroniskaTurystyczne.Migrations
                             NormalizedUserName = "ADMIN@ADMIN.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "6e1f75be-3f72-4e89-8804-2d0333271542",
+                            SecurityStamp = "16bd1f12-8561-462f-9ead-f2d1c95f61e8",
                             TwoFactorEnabled = false,
                             UserName = "admin@admin.com"
                         });
@@ -366,9 +366,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Path")
+                    b.Property<byte[]>("PhotoData")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 
@@ -481,13 +481,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "6fde9a76-f43c-47ab-9232-9a19bdb7d272",
+                            Id = "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "1b614704-8b63-4bd5-91ab-e1c4e72014f1",
+                            Id = "f2e1617d-82a0-47a7-adcb-2a498983669c",
                             Name = "User",
                             NormalizedName = "User"
                         });
@@ -727,8 +727,8 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "478ec20b-f5a5-4498-a405-70a81c25f5eb",
-                            RoleId = "6fde9a76-f43c-47ab-9232-9a19bdb7d272"
+                            UserId = "06b90138-0c25-4e0a-8f12-472688a16f84",
+                            RoleId = "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1"
                         });
                 });
 

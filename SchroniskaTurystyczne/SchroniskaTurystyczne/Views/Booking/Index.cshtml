@@ -4,74 +4,87 @@
     ViewData["Title"] = "Rezerwacja";
 }
 
-<h2>Rezerwacja schroniska: @Model.Name</h2>
+<div class="date-reservation">
+    <h2 class="h2-rooms">Rezerwacja noclegu w schronisku <span class="shelter-name">@Model.Name</span></h2>
 
-<!-- Formularz dat rezerwacji -->
-<label>Data zameldowania:</label>
-<input type="date" id="checkInDate" required />
-<label>Data wymeldowania:</label>
-<input type="date" id="checkOutDate" required />
+    <div class="date-selection">
+        <label>Data zameldowania:</label>
+        <input type="date" id="checkInDate" required />
+        <label>Data wymeldowania:</label>
+        <input type="date" id="checkOutDate" required />
+    </div>
+</div>
 
-<!-- Sekcja dla pokoi prywatnych -->
-<h3>Pokoje Prywatne</h3>
-@foreach (var room in Model.Rooms.Where(r => r.IdType == 2)) // Typ pokoju prywatnego
-{
-    <div data-room-id="@room.Id" data-room-capacity="@room.Capacity">
-        <h4>@room.Name</h4>
-        <p>Cena za osobę: @room.PricePerNight zł</p>
-        <p>Pojemność osób: @room.Capacity</p>
+<div style="height: 120px"></div>
 
-        <!-- Checkbox do zaznaczenia rezerwacji pokoju prywatnego -->
-        <label>
-            <input type="checkbox" class="privateRoomCheckbox" data-room-id="@room.Id" data-capacity="@room.Capacity" />
-            Rezerwuj cały pokój
-        </label>
-
+<div class="room-sections">
+    <!-- Sekcja dla pokoi prywatnych -->
+    <div class="room-section private-rooms">
+        <h3>Pokoje Prywatne</h3>
+        <div id="privateRooms" class="room-container">
+            @foreach (var room in Model.Rooms.Where(r => r.IdType == 2))
+            {
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>
+                        <input type="checkbox" class="privateRoomCheckbox" data-room-name="@room.Name" data-room-id="@room.Id" data-capacity="@room.Capacity" />
+                        Rezerwuj cały pokój
+                    </label>
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
     </div>
 
-    <!-- Kalendarz pokoju -->
-    <div id="calendar-@room.Id" data-room-id="@room.Id" class="calendar" style="display: block;"></div>
-}
-
-<!-- Sekcja dla pokoi publicznych -->
-<h3>Pokoje Publiczne</h3>
-@foreach (var room in Model.Rooms.Where(r => r.IdType == 1)) // Typ pokoju publicznego
-{
-    <div data-room-id="@room.Id" data-room-capacity="@room.Capacity">
-        <h4>@room.Name</h4>
-        <p>Cena za osobę: @room.PricePerNight zł</p>
-        <p>Pojemność osób: @room.Capacity</p>
-
-        <!-- Liczba osób dla pokoju publicznego -->
-        <label>Liczba osób:</label>
-        <input type="number" class="numberOfPeople" data-room-id="@room.Id" min="1" max="@room.Capacity" />
-
+    <!-- Sekcja dla pokoi publicznych -->
+    <div class="room-section public-rooms">
+        <h3>Pokoje Publiczne</h3>
+        <div id="publicRooms" class="room-container">
+            @foreach (var room in Model.Rooms.Where(r => r.IdType == 1))
+            {
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>Liczba osób:</label>
+                    <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="0" max="@room.Capacity" />
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
     </div>
 
-    <!-- Kalendarz pokoju -->
-    <div id="calendar-@room.Id" data-room-id="@room.Id" class="calendar" style="display: block;"></div>
-}
-
-<!-- Sekcja dla pokoi publicznych -->
-<h3>Działki</h3>
-@foreach (var room in Model.Rooms.Where(r => r.IdType == 3)) // Typ działki
-{
-    <div data-room-id="@room.Id" data-room-capacity="@room.Capacity">
-        <h4>@room.Name</h4>
-        <p>Cena za osobę: @room.PricePerNight zł</p>
-        <p>Pojemność osób: @room.Capacity</p>
-
-        <!-- Liczba osób dla pokoju publicznego -->
-        <label>Liczba osób:</label>
-        <input type="number" class="numberOfPeople" data-room-id="@room.Id" min="1" max="@room.Capacity" />
-
+    <!-- Sekcja dla działek -->
+    <div class="room-section plot-rooms">
+        <h3>Działki</h3>
+        <div id="plotRooms" class="room-container">
+            @foreach (var room in Model.Rooms.Where(r => r.IdType == 3))
+            {
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>Liczba osób:</label>
+                    <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="1" max="@room.Capacity" />
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
     </div>
+</div>
 
-    <!-- Kalendarz pokoju -->
-    <div id="calendar-@room.Id" data-room-id="@room.Id" class="calendar" style="display: block;"></div>
-}
+<button class="confirm-booking-btn" onclick="confirmBooking()">Zarezerwuj</button>
 
-<button onclick="confirmBooking()">Zarezerwuj</button>
+<div style="z-index: 1150" id="modalOverlay"></div>
+<div style="z-index: 1151" id="summaryModal">
+    <h3 style="font-weight: bold">Podsumowanie rezerwacji:</h3>
+    <div id="reservationSummary"></div>
+    <p style="font-weight: bold">Łączna suma: <span id="totalPrice"></span> zł</p>
+    <button style="background-color:mediumaquamarine" onclick="finalizeBooking()">Rezerwuj</button>
+    <button style="background-color:darkslategrey" onclick="closeSummaryModal()">Anuluj</button>
+</div>
 
  <script>
 
@@ -148,6 +161,68 @@
         const privateRooms = document.querySelectorAll('.privateRoomCheckbox:checked');
         const publicRooms = document.querySelectorAll('.numberOfPeople');
 
+        let totalPrice = 0;
+
+        // Zbierz dane pokoi prywatnych
+        privateRooms.forEach(roomCheckbox => {
+            const roomId = roomCheckbox.getAttribute('data-room-id');
+            const roomName = roomCheckbox.getAttribute('data-room-name');
+            const capacity = roomCheckbox.getAttribute('data-capacity');
+            const pricePerNight = parseFloat(roomCheckbox.closest('div').querySelector('p').textContent.split(': ')[1]);
+            const nights = (checkOutDate - checkInDate) / (1000 * 3600 * 24);
+            totalPrice += capacity * pricePerNight * nights;
+
+            selectedRooms.push({ roomId, numberOfPeople: capacity, roomName });
+        });
+
+        // Zbierz dane pokoi publicznych i działek
+        publicRooms.forEach(input => {
+            const roomId = input.getAttribute('data-room-id');
+            const roomName = input.getAttribute('data-room-name');
+            const numberOfPeople = parseInt(input.value);
+            const pricePerNight = parseFloat(input.closest('div').querySelector('p').textContent.split(': ')[1]);
+            const nights = (checkOutDate - checkInDate) / (1000 * 3600 * 24);
+
+            if (numberOfPeople > 0) {
+                totalPrice += numberOfPeople * pricePerNight * nights;
+                selectedRooms.push({ roomId, numberOfPeople, roomName });
+            }
+        });
+
+        if (selectedRooms.length === 0) {
+            alert("Nie wybrano żadnego pokoju.");
+            return;
+        }
+
+        // Sprawdź dostępność każdego pokoju
+        for (const room of selectedRooms) {
+            const available = await isBookingAvailable(checkInDate, checkOutDate, room.roomId, room.numberOfPeople);
+            if (!available) {
+                alert(`Pokój o nazwie '${room.roomName}' jest niedostępny w wybranym zakresie dat.`);
+                return;
+            }
+        }
+
+        // Wyświetl podsumowanie rezerwacji
+        document.getElementById("reservationSummary").innerHTML = selectedRooms
+            .map(room => `Pokój ID: ${room.roomId}, Liczba osób: ${room.numberOfPeople}`)
+            .join("<br>");
+        document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
+        openSummaryModal();
+    }
+
+    function closeSummaryModal() {
+        document.getElementById("summaryModal").style.display = 'none';
+    }
+
+    async function finalizeBooking() {
+        const checkInDate = new Date(document.getElementById("checkInDate").value);
+        const checkOutDate = new Date(document.getElementById("checkOutDate").value);
+
+        const selectedRooms = [];
+        const privateRooms = document.querySelectorAll('.privateRoomCheckbox:checked');
+        const publicRooms = document.querySelectorAll('.numberOfPeople');
+
         // Zbierz dane pokoi prywatnych
         privateRooms.forEach(roomCheckbox => {
             const roomId = roomCheckbox.getAttribute('data-room-id');
@@ -164,16 +239,7 @@
             }
         });
 
-        // Sprawdź dostępność każdego pokoju
-        for (const room of selectedRooms) {
-            const available = await isBookingAvailable(checkInDate, checkOutDate, room.roomId, room.numberOfPeople);
-            if (!available) {
-                alert(`Pokój o ID ${room.roomId} jest niedostępny w wybranym zakresie dat.`);
-                return;
-            }
-        }
-
-        // Jeśli wszystko jest dostępne, wyślij dane do kontrolera
+        // Wyślij dane do kontrolera
         fetch('/Booking/ConfirmBooking', {
             method: 'POST',
             headers: {
@@ -189,7 +255,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Rezerwacja zakończona sukcesem!");
-                    window.location.href = '/Booking/Success';
+                    window.location.href = '/Shelters/Index';
                 } else {
                     alert("Rezerwacja nie powiodła się: " + data.message);
                 }
@@ -197,145 +263,14 @@
             .catch(error => console.error("Błąd podczas rezerwacji:", error));
     }
 
-    /*async function confirmBooking() {
-        const checkInDate = document.getElementById('checkInDate').value;
-        const checkOutDate = document.getElementById('checkOutDate').value;
-
-        if (!checkInDate || !checkOutDate) {
-            alert("Wprowadź daty zameldowania i wymeldowania.");
-            return;
-        }
-
-        const roomsData = [];
-        document.querySelectorAll('.numberOfPeople').forEach(input => {
-            const roomId = input.getAttribute('data-room-id');
-            const numberOfPeople = parseInt(input.value) || 0;
-            if (numberOfPeople > 0) {
-                roomsData.push({ roomId, numberOfPeople });
-            }
-        });
-
-        document.querySelectorAll('.privateRoomCheckbox:checked').forEach(input => {
-            const roomId = input.getAttribute('data-room-id');
-            const capacity = parseInt(input.getAttribute('data-capacity'), 10);
-            roomsData.push({ roomId, numberOfPeople: capacity });
-        });
-
-        if (roomsData.length === 0) {
-            alert("Wprowadź liczbę osób dla przynajmniej jednego pokoju lub wybierz pokój prywatny.");
-            return;
-        }
-
-        try {
-            const response = await fetch('/Booking/ConfirmBooking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    checkInDate,
-                    checkOutDate,
-                    roomsData
-                })
-            });
-
-            if (response.ok) {
-                alert("Rezerwacja zakończona sukcesem!");
-                window.location.href = '/';
-            } else {
-                alert("Błąd podczas rezerwacji.");
-            }
-        } catch (error) {
-            console.error("Błąd podczas wysyłania danych rezerwacji:", error);
-            alert("Błąd podczas rezerwacji.");
-        }
+    function openSummaryModal() {
+        document.getElementById("modalOverlay").style.display = 'block';
+        document.getElementById("summaryModal").style.display = 'block';
     }
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const roomElements = document.querySelectorAll('.calendar');
-        roomElements.forEach(async (calendarEl) => {
-            const roomId = calendarEl.getAttribute('id').split('-')[1];
-
-            try {
-                const response = await fetch(`/Booking/GetRoomBookings?roomId=${roomId}`);
-                const bookings = await response.json();
-
-                setRoomCalendar(roomId, bookings);
-            } catch (error) {
-                console.error(`Błąd podczas pobierania danych rezerwacji dla pokoju ID: ${roomId}`, error);
-            }
-        });
-    });
-
-    function setRoomCalendar(roomId, bookings) {
-        const calendarEl = document.getElementById('calendar-' + roomId);
-
-        const events = bookings.map(booking => ({
-            start: booking.checkInDate,
-            end: booking.checkOutDate,
-            display: 'background',
-            color: 'red'
-        }));
-
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-            initialView: 'dayGridMonth',
-            events: events,
-            selectable: true,
-            selectAllow: function (selectInfo) {
-                const startDate = selectInfo.start;
-                const endDate = selectInfo.end;
-
-                // Sprawdź, czy wybrany zakres nie koliduje z istniejącymi rezerwacjami
-                for (const booking of bookings) {
-                    const bookedStart = new Date(booking.checkInDate);
-                    const bookedEnd = new Date(booking.checkOutDate);
-
-                    if (
-                        (startDate >= bookedStart && startDate < bookedEnd) ||
-                        (endDate > bookedStart && endDate <= bookedEnd && startDate != bookedEnd) ||
-                        (startDate <= bookedStart && endDate >= bookedEnd)
-                    ) {
-                        return false; // Blokuj wybór
-                    }
-                }
-
-                return true; // Dozwolone, jeśli nie ma kolizji
-            },
-            select: function (info) {
-                const startDate = info.startStr;
-                const endDate = info.endStr;
-
-                document.getElementById('checkInDate').value = startDate;
-                document.getElementById('checkOutDate').value = endDate;
-
-                alert(`Wybrano daty od ${startDate} do ${endDate}`);
-            },
-            unselectAuto: false
-        });
-
-        calendar.render();
-        calendarEl.fullCalendarInstance = calendar;
+    function closeSummaryModal() {
+        document.getElementById("modalOverlay").style.display = 'none';
+        document.getElementById("summaryModal").style.display = 'none';
     }
-
-    // Definicja toggleCalendar jako async
-    async function toggleCalendar(roomId) {
-        const calendarEl = document.getElementById('calendar-' + roomId);
-        const buttonEl = document.getElementById('button-' + roomId);
-
-        if (calendarEl.style.display === "none") {
-            calendarEl.style.display = "block";
-            buttonEl.textContent = "Schowaj dostępność";
-
-            if (calendarEl.fullCalendarInstance) {
-                calendarEl.fullCalendarInstance.destroy();
-            }
-
-            const response = await fetch(`/Booking/GetRoomBookings?roomId=${roomId}`);
-            const bookings = await response.json();
-            setRoomCalendar(roomId, bookings);
-
-        } else {
-            calendarEl.style.display = "none";
-            buttonEl.textContent = "Pokaż dostępność";
-        }
-    }*/
 
 </script>
