@@ -28,9 +28,12 @@ namespace SchroniskaTurystyczne.Controllers
             return View();
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Name,Description,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags, IFormFile Photo)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(
+    [Bind("Name,Description,Country,City,Street,StreetNumber,LocationLon,LocationLat,Rooms")] Shelter shelter,
+    string SelectedTags,
+    IFormFile Photo)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -48,12 +51,11 @@ namespace SchroniskaTurystyczne.Controllers
                 {
                     room.Shelter = shelter;
 
-                    // Pobierz wybrane udogodnienia dla pokoju
                     if (!string.IsNullOrEmpty(room.SelectedFacilities))
                     {
                         var facilityIds = room.SelectedFacilities
                             .Split(',')
-                            .Where(id => !string.IsNullOrWhiteSpace(id)) // Filtruj puste wartości
+                            .Where(id => !string.IsNullOrWhiteSpace(id))
                             .Select(int.Parse)
                             .ToList();
 
@@ -170,6 +172,11 @@ namespace SchroniskaTurystyczne.Controllers
                 .ToListAsync();
 
             return Json(bookings);
+        }
+
+        public IActionResult MapView(int id)
+        {
+            return RedirectToAction("MapView", "Map", new { id });
         }
     }
 }

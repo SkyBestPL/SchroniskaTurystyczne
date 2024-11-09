@@ -20,6 +20,7 @@ namespace SchroniskaTurystyczne.Models
         public string LocationLon { get; set; }
         [Required]
         public string LocationLat { get; set; }
+        public bool Confirmed { get; set; }
 
         public virtual AppUser Exhibitor { get; set; }
         public virtual ICollection<Room>? Rooms { get; set; }

@@ -4,7 +4,13 @@
     ViewData["Title"] = "Dostępne Schroniska";
 }
 
-<h2 style="font-size: 30px">@ViewData["Title"]</h2>
+<div class="search-bar">
+    <form asp-action="Index" asp-controller="Shelters" method="get">
+        <label for="search-term">Szukaj schroniska:</label>
+        <input type="text" id="search-term" name="searchTerm" placeholder="Wpisz nazwę lub miasto...">
+        <button type="submit">Szukaj</button>
+    </form>
+</div>
 
 <div class="shelter-list">
     @foreach (var shelter in Model)
@@ -17,6 +23,9 @@
 
                 <p class="shelter-description">
                     <strong>Opis:</strong> @shelter.Description
+                </p>
+                <p class="shelter-description">
+                    <strong>Lokalizacja:</strong> @shelter.Country, @shelter.City
                 </p>
 
                 <!--@if (shelter.Rooms != null && shelter.Rooms.Any())
@@ -36,7 +45,7 @@
 
                 @if (shelter.Tags != null && shelter.Tags.Any())
                 {
-                    <p><strong>Tagi:</strong>@string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
+                    <p><strong>Tagi:</strong> @string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
                 }
             </div>
 
@@ -49,7 +58,8 @@
             </div>
 
             <div class="shelter-actions">
-                <button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>
+                <!--<button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>-->
+                <a style="background-color:darkcyan" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
                 <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Rezerwuj</a>
             </div>
         </div>

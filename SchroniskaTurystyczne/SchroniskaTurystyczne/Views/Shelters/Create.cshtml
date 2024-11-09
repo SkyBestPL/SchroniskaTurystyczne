@@ -1,4 +1,5 @@
-﻿@model SchroniskaTurystyczne.Models.Shelter
+﻿<!-- Formularz schroniska -->
+@model SchroniskaTurystyczne.Models.Shelter
 
 @{
     ViewData["Title"] = "Dodaj Schronisko";
@@ -6,9 +7,9 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<div id="map" style="height: 400px;"></div>
+<div id="map" style="height: 400px; margin-bottom: 20px;"></div>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data">
+<form asp-action="Create" method="post" enctype="multipart/form-data" class="mb-5">
 
     <div class="form-group">
         <label asp-for="Name" class="control-label">Nazwa Schroniska</label>
@@ -22,6 +23,31 @@
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
+    <h4>Adres Schroniska</h4>
+    <div class="form-group">
+        <label asp-for="Country" class="control-label">Kraj</label>
+        <input asp-for="Country" class="form-control" />
+        <span asp-validation-for="Country" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="City" class="control-label">Miasto</label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Street" class="control-label">Ulica</label>
+        <input asp-for="Street" class="form-control" />
+        <span asp-validation-for="Street" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StreetNumber" class="control-label">Numer ulicy</label>
+        <input asp-for="StreetNumber" class="form-control" />
+        <span asp-validation-for="StreetNumber" class="text-danger"></span>
+    </div>
+
     <input type="hidden" asp-for="LocationLat" id="Latitude" />
     <input type="hidden" asp-for="LocationLon" id="Longitude" />
 
@@ -31,41 +57,38 @@
     </div>
 
     <h4>Wybierz Tagi</h4>
-    <div id="tags-container" class="form-group">
-        <select id="tags-select" class="form-control">
+    <div class="form-group" id="tags-container">
+        <select id="tags-select" class="form-control mb-2">
             <option value="">Wybierz tag</option>
             @foreach (var tag in ViewBag.Tags)
             {
                 <option value="@tag.Id">@tag.Name</option>
             }
         </select>
-        <button type="button" class="btn btn-secondary" onclick="addTag()">Dodaj Tag</button>
+        <button type="button" class="btn btn-secondary mb-3" onclick="addTag()">Dodaj Tag</button>
+        <ul id="selected-tags-list" class="list-inline"></ul>
+        <input type="hidden" name="SelectedTags" id="selected-tags" />
     </div>
-
-    <ul id="selected-tags-list"></ul>
-
-    <input type="hidden" name="SelectedTags" id="selected-tags" />
 
     <h4>Dodaj Pokoje</h4>
     <div id="rooms-container">
-        <table class="table">
-            <thead>
+        <table class="table table-bordered">
+            <thead class="thead-light">
                 <tr>
                     <th>Typ pokoju</th>
                     <th>Nazwa pokoju</th>
                     <th>Cena za noc</th>
                     <th>Pojemność</th>
+                    <th>Udogodnienia</th>
                     <th>Usuń</th>
                 </tr>
             </thead>
-            <tbody id="rooms-table-body">
-                <!-- kolejne wiersze z pokojami -->
-            </tbody>
+            <tbody id="rooms-table-body"></tbody>
         </table>
         <button type="button" class="btn btn-secondary" onclick="addRoom()">Dodaj Pokój</button>
     </div>
 
-    <button type="submit" class="btn btn-primary">Dodaj Schronisko</button>
+    <button type="submit" class="btn btn-primary mt-4">Dodaj Schronisko</button>
 </form>
 
 <script>
@@ -97,10 +120,10 @@
         row.innerHTML = `
                 <td>
                     <select name="Rooms[${index}].IdType" class="form-control">
-                        @foreach (var type in ViewBag.RoomTypes as List<SchroniskaTurystyczne.Models.RoomType>)
-                        {
+    @foreach (var type in ViewBag.RoomTypes as List<SchroniskaTurystyczne.Models.RoomType>)
+    {
                                 <option value="@type.Id">@type.Name</option>
-                        }
+    }
                     </select>
                 </td>
                 <td>
@@ -113,12 +136,12 @@
                     <input type="number" name="Rooms[${index}].Capacity" class="form-control" />
                 </td>
                 <td>
-                    <button type="button" class="btn btn-secondary" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
-                    <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
+                    <button type="button" class="btn btn-secondary mb-2" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
+                    <div id="facilities-display-${index}" class="selected-facilities-container mt-2"></div>
+                    <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
                 </td>
                 <td>
-                    <div id="facilities-display-${index}" class="selected-facilities-container"></div>
-                    <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
+                    <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
                 </td>
             `;
         container.appendChild(row);
@@ -136,18 +159,16 @@
         const selectedTagId = tagSelect.value;
         const selectedTagText = tagSelect.options[tagSelect.selectedIndex].text;
 
-        // Dodaj wybrany tag do listy
         if (selectedTagId && !selectedTagsInput.value.includes(selectedTagId)) {
-            // Tworzenie elementu tagu
             const tagItem = document.createElement('li');
+            tagItem.className = "badge badge-info m-1";
             tagItem.textContent = selectedTagText;
             tagItem.dataset.tagId = selectedTagId;
 
-            // Przycisk usuwania
             const removeButton = document.createElement('button');
-            removeButton.textContent = "Usuń";
+            removeButton.textContent = "×";
             removeButton.type = "button";
-            removeButton.classList.add('btn', 'btn-danger', 'ml-2');
+            removeButton.classList.add('btn', 'btn-link', 'p-0', 'ml-2', 'text-white');
             removeButton.onclick = function () {
                 tagItem.remove();
                 updateSelectedTags();
@@ -168,6 +189,9 @@
 
     function openFacilitiesModal(roomIndex) {
         currentRoomIndex = roomIndex;
+        document.querySelectorAll('#facilities-list input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = document.getElementById(`selected-facilities-${roomIndex}`).value.includes(checkbox.value);
+        });
         document.getElementById('facilities-modal').style.display = 'block';
         document.getElementById('modal-overlay').style.display = 'block';
     }
@@ -208,7 +232,7 @@
     }
 </script>
 
-<!-- Modal do wyboru udogodnień -->
+<!-- Modal Udogodnień -->
 <div id="facilities-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
     <h4>Wybierz Udogodnienia</h4>
     <ul id="facilities-list">
@@ -222,6 +246,6 @@
             </li>
         }
     </ul>
-    <button type="button" class="btn btn-primary" onclick="closeFacilitiesModal()">Zamknij</button>
+    <button type="button" class="btn btn-primary mt-3" onclick="closeFacilitiesModal()">Zamknij</button>
 </div>
 <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>

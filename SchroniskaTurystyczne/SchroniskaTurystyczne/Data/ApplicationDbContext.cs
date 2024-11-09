@@ -259,7 +259,7 @@ namespace SchroniskaTurystyczne.Data
 
         private void Seed(ModelBuilder builder)
         {
-            var adminUser = new AppUser()
+            var userAdmin = new AppUser() //konto głównego admina
             {
                 Email = "admin@admin.com",
                 NormalizedEmail = "ADMIN@ADMIN.COM",
@@ -269,25 +269,31 @@ namespace SchroniskaTurystyczne.Data
                 EmailConfirmed = true
             };
 
-            var rolAdmin = new Role()
+            var adminRole = new Role()
             {
                 Name = "Admin",
                 NormalizedName = "Admin"
             };
 
-            var userRole = new Role()
+            var guestRole = new Role()
             {
-                Name = "User",
-                NormalizedName = "User"
+                Name = "Guest",
+                NormalizedName = "Guest"
             };
 
-            builder.Entity<Role>().HasData(rolAdmin, userRole);
-            builder.Entity<AppUser>().HasData(adminUser);
+            var exhibitorRole = new Role()
+            {
+                Name = "Exhibitor",
+                NormalizedName = "Exhibitor"
+            };
+
+            builder.Entity<Role>().HasData(adminRole, guestRole, exhibitorRole);
+            builder.Entity<AppUser>().HasData(userAdmin);
 
             var userRoleAdmin = new UserRole()
             {
-                RoleId = rolAdmin.Id,
-                UserId = adminUser.Id
+                RoleId = adminRole.Id,
+                UserId = userAdmin.Id
             };
 
             builder.Entity<UserRole>().HasData(userRoleAdmin);
@@ -295,24 +301,24 @@ namespace SchroniskaTurystyczne.Data
             var roomPublic = new RoomType()
             {
                 Id = 1,
-                Name = "Pokój publiczny"
+                Name = "Public"
             };
 
             var roomPrivate = new RoomType()
             {
                 Id = 2,
-                Name = "Pokój prywatny"
+                Name = "Private"
             };
 
-            var roomPlot = new RoomType()
+            var roomCamping = new RoomType()
             {
                 Id = 3,
-                Name = "Miejsce na działce"
+                Name = "Camping"
             };
 
             builder.Entity<RoomType>().HasData(roomPublic);
             builder.Entity<RoomType>().HasData(roomPrivate);
-            builder.Entity<RoomType>().HasData(roomPlot);
+            builder.Entity<RoomType>().HasData(roomCamping);
 
             var facToilet = new Facility()
             {
