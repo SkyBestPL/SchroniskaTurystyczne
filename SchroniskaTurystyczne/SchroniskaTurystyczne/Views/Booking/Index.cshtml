@@ -4,15 +4,30 @@
     ViewData["Title"] = "Rezerwacja";
 }
 
+<div class="booking-shelter-info">
+    <h1>@Model.Name</h1>
+    <div class="booking-shelter-photos">
+        @foreach (var photo in Model.Photos)
+        {
+            <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.PhotoData)" alt="Zdjęcie schroniska" class="booking-shelter-photo" />
+        }
+    </div>
+</div>
+
 <div class="date-reservation">
     <h2 class="h2-rooms">Rezerwacja noclegu w schronisku <span class="shelter-name">@Model.Name</span></h2>
 
     <div class="date-selection">
-        <label>Data zameldowania:</label>
-        <input type="date" id="checkInDate" required />
-        <label>Data wymeldowania:</label>
-        <input type="date" id="checkOutDate" required />
+        <div class="date-pair">
+            <label>Data zameldowania:</label>
+            <input type="date" id="checkInDate" required />
+        </div>
+        <div class="date-pair">
+            <label>Data wymeldowania:</label>
+            <input type="date" id="checkOutDate" required />
+        </div>
     </div>
+    <button class="confirm-booking-btn" onclick="confirmBooking()">Zarezerwuj</button>
 </div>
 
 <div style="height: 120px"></div>
@@ -73,17 +88,6 @@
             }
         </div>
     </div>
-</div>
-
-<button class="confirm-booking-btn" onclick="confirmBooking()">Zarezerwuj</button>
-
-<div style="z-index: 1150" id="modalOverlay"></div>
-<div style="z-index: 1151" id="summaryModal">
-    <h3 style="font-weight: bold">Podsumowanie rezerwacji:</h3>
-    <div id="reservationSummary"></div>
-    <p style="font-weight: bold">Łączna suma: <span id="totalPrice"></span> zł</p>
-    <button style="background-color:mediumaquamarine" onclick="finalizeBooking()">Rezerwuj</button>
-    <button style="background-color:darkslategrey" onclick="closeSummaryModal()">Anuluj</button>
 </div>
 
  <script>
@@ -194,21 +198,15 @@
             return;
         }
 
-        // Sprawdź dostępność każdego pokoju
-        for (const room of selectedRooms) {
-            const available = await isBookingAvailable(checkInDate, checkOutDate, room.roomId, room.numberOfPeople);
-            if (!available) {
-                alert(`Pokój o nazwie '${room.roomName}' jest niedostępny w wybranym zakresie dat.`);
-                return;
-            }
-        }
-
         // Wyświetl podsumowanie rezerwacji
         document.getElementById("reservationSummary").innerHTML = selectedRooms
-            .map(room => `Pokój ID: ${room.roomId}, Liczba osób: ${room.numberOfPeople}`)
+            .map(room => `Pokój: ${room.roomName}, Liczba osób: ${room.numberOfPeople}`)
             .join("<br>");
         document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
-        openSummaryModal();
+
+        // Otwórz modal Bootstrap
+        var summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
+        summaryModal.show();
     }
 
     function closeSummaryModal() {
@@ -274,3 +272,23 @@
     }
 
 </script>
+
+<!-- Modal Podsumowania Rezerwacji -->
+<div style="z-index: 2000" class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #f0f8ff; color: #333;">
+            <div class="modal-header" style="background-color: #0066cc; color: #fff;">
+                <h5 class="modal-title" id="summaryModalLabel">Podsumowanie rezerwacji</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="reservationSummary"></div>
+                <p style="font-weight: bold; margin-top: 15px;">Łączna suma: <span id="totalPrice"></span> zł</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-success" onclick="finalizeBooking()">Rezerwuj</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+            </div>
+        </div>
+    </div>
+</div>

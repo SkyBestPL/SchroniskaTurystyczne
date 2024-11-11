@@ -21,9 +21,46 @@ body {
   margin-bottom: 60px;
 }
 
+.navbar {
+        background-color: darkcyan;
+    }
+
+    /* Kolory dla linków i tekstu w nawigacji */
+    .navbar-dark .navbar-brand,
+    .navbar-dark .nav-link,
+    .navbar-dark .nav-link.dropdown-toggle {
+        color: #ffffff;
+        font-weight: bold;
+    }
+
+    .navbar-dark .nav-link:hover,
+    .navbar-dark .nav-link.dropdown-toggle:hover {
+        color: #f0f8ff;
+    }
+
+    .navbar-dark .dropdown-menu {
+        background-color: #004d4d; /* Kolor t³a dla menu rozwijanego */
+        border: none;
+    }
+
+    .navbar-dark .dropdown-item {
+        color: #ffffff;
+    }
+
+    .navbar-dark .dropdown-item:hover {
+        background-color: #007b7b; /* Kolor na hover */
+        color: #f0f8ff;
+    }
+
+    /* Przycisk nawigacji mobilnej */
+    .navbar-toggler {
+        border-color: #ffffff;
+    }
+
 .title-name {
     font-weight: bold;
     color: darkcyan;
+    font-size: 25px;
 }
 
 .custom-marker {
@@ -34,8 +71,48 @@ body {
     cursor: pointer;
 }
 
-/* ----------------------------------------------------------Shelters/Index---------------------------------------------------------- */
+.darkcyan-button {
+    padding: 5px 10px;
+    background-color: darkcyan;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
 
+    .darkcyan-button:hover {
+        background-color: #499e9d;
+    }
+
+.aquamarine-button {
+    padding: 5px 10px;
+    background-color: aquamarine;
+    color: black;
+    border: thick;
+    border-color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .aquamarine-button:hover {
+        background-color: #b0ffe2;
+    }
+
+.dark-darkcyan-button {
+    padding: 5px 10px;
+    background-color: #004d4d;
+    color: white;
+    border: thick;
+    border-color: black;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .dark-darkcyan-button:hover {
+        background-color: #016363;
+    }
+
+/* ----------------------------------------------------------Shelters/Index---------------------------------------------------------- */
 .shelter-list {
     display: flex;
     flex-direction: column;
@@ -114,6 +191,32 @@ body {
 
 /* ------------------------------------------------------Booking/Index------------------------------------------------------ */
 
+.booking-shelter-info {
+    text-align: left;
+    margin-bottom: 20px;
+}
+
+.booking-shelter-info h1 {
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.booking-shelter-photos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.booking-shelter-photo {
+    width: 150px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+}
+
 .calendar {
     max-width: 400px;
     margin-top: 10px;
@@ -186,17 +289,32 @@ body {
 
 .h2-rooms {
     text-align: center;
+    font-size: 20px;
     color: black;
 }
 
 .shelter-name {
     font-weight: bold;
+    font-size: 25px;
     color: aquamarine;
 }
 
 .date-selection {
-    text-align: center;
-    margin-bottom: 1.5em;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.date-pair {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.date-pair label {
+    margin-bottom: 5px;
+    font-size: 15px;
     color: white;
 }
 
@@ -233,31 +351,43 @@ body {
 }
 
 .confirm-booking-btn {
-    display: block;
-    margin: 1em auto;
-    padding: 10px 20px;
+    margin-top: 10px;
+    padding: 8px 15px;
     background-color: darkcyan;
-    color: #fff;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
 
-.date-reservation {
-    margin-top: -10px;
-    margin-left: -56.3%;
-    position: fixed;
-    background-color: darkcyan;
-    width: 200%;
-    z-index: 1101;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.confirm-booking-btn:hover {
+    background-color: #66CCAA;
 }
 
+.date-reservation {
+    align-content: center;
+    align-items: center;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: darkcyan;
+    color: white;
+    width: 350px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+}
 /* ---------------------------------------------Map/MapView--------------------------------------------*/
 
 .map-container {
     display: flex;
     height: 100vh;
+    width: 100vw;
+    margin-left: -23%;
+    margin-top: -16px;
 }
 
 .map-area {
@@ -279,4 +409,61 @@ body {
     padding: 10px;
     font-size: 16px;
     cursor: pointer;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 5px;
+    cursor: pointer;
+    background-color: #ddd;
+    border: none;
+    font-size: 14px;
+    border-radius: 5px;
+}
+
+.tab-button.active {
+    background-color: darkcyan;
+    color: white;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/*----------------------------------------------------------------Areas/Identity.../Manage/UserReservations------------------------------------------------------*/
+
+.reservations-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.reservations-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+/*----------------------------------------------------------------Areas/Identity.../Manage/UserShelters------------------------------------------------------*/
+
+.shelters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.shelters-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
 }

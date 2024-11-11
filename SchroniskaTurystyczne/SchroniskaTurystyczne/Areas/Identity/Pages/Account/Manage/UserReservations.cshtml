@@ -1,0 +1,49 @@
+﻿@page
+@model SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage.UserReservationsModel
+@using Microsoft.AspNetCore.Identity
+
+<h2>Moje rezerwacje</h2>
+
+<div class="reservations-container">
+    @foreach (var booking in Model.Bookings)
+    {
+        <div class="reservations-card mb-4">
+            <div class="card-header">
+                <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+            </div>
+
+            <div class="card-body">
+                <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd-MM-yyyy")</p>
+                <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd-MM-yyyy")</p>
+                <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
+
+                <h6>Pokoje:</h6>
+                <ul>
+                    @foreach (var bookingRoom in booking.BookingRooms)
+                    {
+                        <li>@bookingRoom.Room?.Name</li>
+                    }
+                </ul>
+
+                <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
+                <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
+                <p><strong>Status rezerwacji:</strong> @(booking.Verified ? "Potwierdzone" : "Niepotwierdzone")</p>
+            </div>
+
+            <div class="card-footer text-end">
+                <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Booking/Details", new { id = booking.Id })'">Szczegóły</button>
+
+                @if (!booking.Verified)
+                {
+                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Edit", new { id = booking.Id })'">Edytuj rezerwację</button>
+                    <button type="button" class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
+                }
+
+                @if (!booking.Paid)
+                {
+                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
+                }
+            </div>
+        </div>
+    }
+</div>

@@ -12,7 +12,16 @@
     <div class="sidebar">
         <h2>@ViewData["Title"]</h2>
 
-        <div>
+        <!-- Zakładki nawigacyjne -->
+        <div class="tabs">
+            <button onclick="showSection('searchSection')" class="tab-button active">Szukanie noclegu</button>
+            <button onclick="showSection('planSection')" class="tab-button">Planowanie trasy</button>
+            <button onclick="showSection('savedRoutesSection')" class="tab-button">Moje trasy</button>
+        </div>
+
+        <!-- Sekcja Szukanie noclegu -->
+        <div id="searchSection" class="tab-content active">
+            <!-- Domyślnie widoczna -->
             <input type="text" id="searchInput" placeholder="Wpisz miejscowość" class="form-control" />
             <select id="searchType" class="form-control">
                 <option value="regional">Ogólne</option>
@@ -22,22 +31,30 @@
                 <option value="regional.address" selected>Adres</option>
             </select>
             <button onclick="searchLocation()">Szukaj</button>
-        </div>
-
-        <div>
             <button onclick="fitToAllMarkers()">Wyświetl wszystkie schroniska</button>
-            <button onclick="clearRoute()">Wyczyść trasę</button>
-            <button onclick="toggleRouteCreation()">Twórz Trasę</button> <!-- Dodany przycisk do tworzenia trasy -->
         </div>
 
-        <form id="routeForm" asp-controller="Routes" asp-action="Create" method="post">
-            <div class="form-group">
-                <label for="routeName">Nazwa Trasy</label>
-                <input id="routeName" name="Name" class="form-control" />
+        <!-- Sekcja Planowanie trasy -->
+        <div id="planSection" class="tab-content">
+            <button onclick="toggleRouteCreation()">Twórz Trasę</button>
+            <button onclick="clearRoute()">Wyczyść trasę</button>
+            <form id="routeForm" asp-controller="Routes" asp-action="Create" method="post">
+                <div class="form-group">
+                    <label for="routeName">Nazwa Trasy</label>
+                    <input id="routeName" name="Name" class="form-control" />
+                </div>
+                <div id="routePoints"></div>
+                <button type="submit" class="btn btn-primary">Dodaj Trasę</button>
+            </form>
+        </div>
+
+        <!-- Sekcja Moje trasy -->
+        <div id="savedRoutesSection" class="tab-content">
+            <h3>Twoje zapisane trasy</h3>
+            <div id="userRoutesList">
+                <!-- W tym miejscu pojawią się zapisane trasy użytkownika -->
             </div>
-            <div id="routePoints"></div>
-            <button type="submit" class="btn btn-primary">Dodaj Trasę</button>
-        </form>
+        </div>
     </div>
 </div>
 
@@ -262,6 +279,22 @@
             console.error("Błąd podczas wyszukiwania miejscowości:", error);
             alert("Wystąpił problem z wyszukiwaniem. Spróbuj ponownie.");
         }
+    }
+
+    function showSection(sectionId) {
+        // Ukryj wszystkie sekcje
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabContents.forEach(tab => tab.classList.remove('active'));
+
+        // Usuń klasę aktywną ze wszystkich przycisków zakładek
+        const tabButtons = document.querySelectorAll('.tab-button');
+        tabButtons.forEach(button => button.classList.remove('active'));
+
+        // Pokaż wybraną sekcję i ustaw aktywny przycisk
+        document.getElementById(sectionId).classList.add('active');
+
+        // Dodaj klasę active do klikniętego przycisku
+        event.target.classList.add('active');
     }
 
     map.on('load', function () {

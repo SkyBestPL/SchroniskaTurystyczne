@@ -20,6 +20,7 @@ namespace SchroniskaTurystyczne.Controllers
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
                     .ThenInclude(r => r.BookingRooms)
+                .Include(s => s.Photos)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (shelter == null)

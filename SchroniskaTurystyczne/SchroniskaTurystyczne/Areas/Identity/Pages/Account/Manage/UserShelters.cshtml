@@ -1,0 +1,38 @@
+﻿@page
+@model SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage.UserSheltersModel
+
+<h2>Moje Schroniska</h2>
+
+<div class="shelters-container">
+    @foreach (var shelter in Model.Shelters)
+    {
+        <div class="shelters-card mb-4">
+            <div class="card-header">
+                <h5>@shelter.Name</h5>
+                <p>@shelter.City, @shelter.Street @shelter.StreetNumber</p>
+            </div>
+
+            <div class="card-body">
+                <p><strong>Ocena:</strong> @(shelter.Rating.HasValue ? shelter.Rating.Value.ToString("0.0") : "Brak oceny")</p>
+
+                <p><strong>Adres:</strong> @shelter.Street, @shelter.City, @shelter.Country</p>
+
+                <p>
+                    <strong>Liczba zatwierdzonych rezerwacji:</strong>
+                    @Model.ApprovedBookingsCount[shelter.Id]
+                </p>
+
+                <p>
+                    <strong>Liczba niezatwierdzonych rezerwacji:</strong>
+                    @Model.PendingBookingsCount[shelter.Id]
+                </p>
+            </div>
+
+            <div class="card-footer text-end">
+                <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Shelters/Details", new { id = shelter.Id })'">Szczegóły</button>
+                <button type="button" class="btn btn-info" onclick="location.href='@Url.Page("/Shelters/Reviews", new { id = shelter.Id })'">Zobacz recenzje</button>
+                <button type="button" class="btn btn-success" onclick="location.href='@Url.Page("/Shelters/ManageBookings", new { id = shelter.Id })'">Zarządzaj rezerwacjami</button>
+            </div>
+        </div>
+    }
+</div>

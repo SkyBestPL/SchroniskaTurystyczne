@@ -16,6 +16,16 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
         .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
 
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireAdminRole", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("RequireGuestRole", policy => policy.RequireRole("Guest"));
+    options.AddPolicy("RequireExhibitorRole", policy => policy.RequireRole("Exhibitor"));
+    options.AddPolicy("RequireAdminOrGuestRole", policy => policy.RequireRole("Admin", "Guest"));
+    options.AddPolicy("RequireAdminOrExhibitorRole", policy => policy.RequireRole("Admin", "Exhibitor"));
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

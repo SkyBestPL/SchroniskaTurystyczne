@@ -54,35 +54,40 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account
 
         public class InputModel
         {
-            [Required]
-            [Display(Name = "First Name")]
+            [Required(ErrorMessage = "Imię jest wymagane.")]
+            [Display(Name = "Imię")]
             public string FirstName { get; set; }
 
-            [Required]
-            [Display(Name = "Last Name")]
+            [Required(ErrorMessage = "Nazwisko jest wymagane.")]
+            [Display(Name = "Nazwisko")]
 
             public string LastName { get; set; }
-            [Required]
-            [EmailAddress]
+            [Required(ErrorMessage = "Email jest wymagany.")]
+            [EmailAddress(ErrorMessage = "Niepoprawna struktura adresu email.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
-            [Required]
-            [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+            [Required(ErrorMessage = "Hasło jest wymagane.")]
+            [StringLength(100, ErrorMessage = "Hasło musi mieć przynajmniej {2} i maksymalnie {1} znaków.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Hasło")]
             public string Password { get; set; }
 
+            [Required(ErrorMessage = "Powtórz hasło.")]
             [DataType(DataType.Password)]
             [Display(Name = "Potwierdź hasło")]
             [Compare("Password", ErrorMessage = "Hasła są różne.")]
             public string ConfirmPassword { get; set; }
 
-            [Required]
+            [Required(ErrorMessage = "Numer telefonu jest wymagany.")]
             [Phone]
             [Display(Name = "Numer telefonu")]
             [DataType(DataType.PhoneNumber)]
             public string PhoneNumber { get; set; }
+
+            [Required(ErrorMessage = "Wybierz swoją rolę.")]
+            [Display(Name = "Rola")]
+            public string Role { get; set; }
         }
 
 
@@ -112,6 +117,16 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    if (Input.Role == "Guest" || Input.Role == "Exhibitor")
+                    {
+                        await _userManager.AddToRoleAsync(user, Input.Role);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError(string.Empty, "Nieprawidłowa rola.");
+                        return Page();
+                    }
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);

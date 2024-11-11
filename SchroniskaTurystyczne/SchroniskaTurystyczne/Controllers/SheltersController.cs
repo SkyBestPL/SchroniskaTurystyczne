@@ -5,6 +5,7 @@ using SchroniskaTurystyczne.Models;
 using System.Threading.Tasks;
 using System.Linq;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SchroniskaTurystyczne.Controllers
 {
@@ -20,6 +21,7 @@ namespace SchroniskaTurystyczne.Controllers
         }
 
         // GET: Shelters/Create
+        [Authorize(Policy = "RequireExhibitorRole")]
         public IActionResult Create()
         {
             ViewBag.RoomTypes = _context.RoomTypes.ToList();
@@ -31,9 +33,7 @@ namespace SchroniskaTurystyczne.Controllers
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(
-    [Bind("Name,Description,Country,City,Street,StreetNumber,LocationLon,LocationLat,Rooms")] Shelter shelter,
-    string SelectedTags,
-    IFormFile Photo)
+    [Bind("Name,Description,Country,City,Street,StreetNumber,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags, IFormFileCollection Photos)
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
@@ -73,29 +73,32 @@ namespace SchroniskaTurystyczne.Controllers
                 shelter.Tags = await _context.Tags.Where(tag => tagIds.Contains(tag.Id)).ToListAsync();
             }
 
-            if (Photo != null && Photo.Length > 0)
+            shelter.Photos = new List<Photo>();
+            foreach (var photoFile in Photos)
             {
-                using (var memoryStream = new MemoryStream())
+                if (photoFile != null && photoFile.Length > 0)
                 {
-                    await Photo.CopyToAsync(memoryStream);
-
-                    //limit zdjęcia - 2 MB
-                    if (memoryStream.Length < 2097152)
+                    using (var memoryStream = new MemoryStream())
                     {
-                        var shelterPhoto = new Photo
+                        await photoFile.CopyToAsync(memoryStream);
+
+                        if (memoryStream.Length < 10097152) // Limit 10 MB na zdjęcie
                         {
-                            IdShelter = shelter.Id,
-                            Name = Photo.FileName,
-                            PhotoData = memoryStream.ToArray(),
-                            Shelter = shelter
-                        };
+                            var shelterPhoto = new Photo
+                            {
+                                IdShelter = shelter.Id,
+                                Name = photoFile.FileName,
+                                PhotoData = memoryStream.ToArray(),
+                                Shelter = shelter
+                            };
 
-                        shelter.Photos = new List<Photo> { shelterPhoto };
-                    }
-                    else
-                    {
-                        ModelState.AddModelError("Photo", "Zdjęcie jest za duże. Maksymalny rozmiar to 2 MB.");
-                        return View(shelter);
+                            shelter.Photos.Add(shelterPhoto);
+                        }
+                        else
+                        {
+                            ModelState.AddModelError("Photos", "Jedno ze zdjęć jest za duże. Maksymalny rozmiar to 10 MB.");
+                            return View(shelter);
+                        }
                     }
                 }
             }

@@ -1,11 +1,14 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
 
 namespace SchroniskaTurystyczne.Models
 {
     public class AppUser : IdentityUser
     {
-        public string? FirstName { get; set; }
-        public string? LastName { get; set; }
+        [Required(ErrorMessage = "Imię jest wymagane.")]
+        public string FirstName { get; set; }
+        [Required(ErrorMessage = "Nazwisko jest wymagane.")]
+        public string LastName { get; set; }
 
         public virtual ICollection<Review>? Reviews { get; set; }
         public virtual ICollection<Booking>? Bookings { get; set; }

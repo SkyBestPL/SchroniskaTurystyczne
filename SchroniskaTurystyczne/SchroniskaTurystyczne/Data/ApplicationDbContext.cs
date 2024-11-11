@@ -261,6 +261,8 @@ namespace SchroniskaTurystyczne.Data
         {
             var userAdmin = new AppUser() //konto głównego admina
             {
+                FirstName = "Admin",
+                LastName =  "Admin",
                 Email = "admin@admin.com",
                 NormalizedEmail = "ADMIN@ADMIN.COM",
                 UserName = "admin@admin.com",

@@ -119,5 +119,8 @@ namespace  SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
                 ?? System.IO.Path.GetFileNameWithoutExtension(viewContext.ActionDescriptor.DisplayName);
             return string.Equals(activePage, page, StringComparison.OrdinalIgnoreCase) ? "active" : null;
         }
+
+        public static string UserReservationsNavClass(ViewContext viewContext) => PageNavClass(viewContext, "UserReservations");
+        public static string UserSheltersNavClass(ViewContext viewContext) => PageNavClass(viewContext, "UserShelters");
     }
 }
