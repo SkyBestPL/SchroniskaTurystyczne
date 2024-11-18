@@ -2,7 +2,7 @@
 @model SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage.UserReservationsModel
 @using Microsoft.AspNetCore.Identity
 
-<h2>Moje rezerwacje</h2>
+<h3>Moje rezerwacje</h3>
 
 <div class="reservations-container">
     @foreach (var booking in Model.Bookings)
@@ -35,7 +35,7 @@
 
                 @if (!booking.Verified)
                 {
-                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Edit", new { id = booking.Id })'">Edytuj rezerwację</button>
+                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
                     <button type="button" class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
                 }
 

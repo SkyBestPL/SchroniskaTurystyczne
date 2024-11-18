@@ -9,7 +9,7 @@
     }
 }
 
-<h1>Profil użytkownika</h1>
+<h2>Profil użytkownika <strong>@User.Identity.Name</strong></h2>
 
 <div>
     <hr />
@@ -26,3 +26,22 @@
 @section Scripts {
     @RenderSection("Scripts", required: false)
 }
+
+<style>
+    .btn-primary {
+        background-color: darkcyan !important;
+        border-color: darkcyan !important;
+    }
+
+    a {
+        color: black;
+    }
+
+    .nav-link.active, .nav-link:hover, .nav-link:focus {
+        color: white !important;
+    }
+
+    h1, h2, h3, .navbar, .bg-primary, .text-primary {
+        color: black !important;
+    }
+</style>

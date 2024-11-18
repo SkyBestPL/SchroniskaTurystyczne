@@ -15,12 +15,12 @@ namespace SchroniskaTurystyczne.Models
         public string? Country { get; set; }
         public string? City { get; set; }
         public string? Street { get; set; }
-        public string? StreetNumber{ get; set; }
+        public string? StreetNumber { get; set; }
+        public string? ZipCode { get; set; }
         [Required]
         public string LocationLon { get; set; }
         [Required]
         public string LocationLat { get; set; }
-        public bool Confirmed { get; set; }
 
         public virtual AppUser Exhibitor { get; set; }
         public virtual ICollection<Room>? Rooms { get; set; }

@@ -21,7 +21,7 @@
         <span asp-validation-for="Description" class="text-danger"></span>
     </div>
 
-    <h4>Adres Schroniska</h4>
+    <h4 style="margin-top: 20px">Adres Schroniska</h4>
     <div class="form-group">
         <label asp-for="Country" class="control-label">Kraj</label>
         <input asp-for="Country" class="form-control" />
@@ -46,32 +46,32 @@
         <span asp-validation-for="StreetNumber" class="text-danger"></span>
     </div>
 
+    <div class="form-group">
+        <label asp-for="ZipCode" class="control-label">Kod pocztowy</label>
+        <input asp-for="ZipCode" class="form-control" />
+        <span asp-validation-for="ZipCode" class="text-danger"></span>
+    </div>
+
     <input type="hidden" asp-for="LocationLat" id="Latitude" />
     <input type="hidden" asp-for="LocationLon" id="Longitude" />
 
     <label>Zaznacz na mapie dokładną lokalizację swojego schroniska, aby klienci mogli je łatwiej odnaleźć:</label>
     <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
 
+    <h4 style="margin-top: 20px">Zdjęcia schroniska</h4>
+
     <div class="form-group">
-        <label for="Photos">Zdjęcia Schroniska</label>
-        <input type="file" name="Photos" class="form-control" multiple />
+        <input type="file" name="Photos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
     </div>
 
-    <h4>Wybierz Tagi</h4>
-    <div class="form-group" id="tags-container">
-        <select id="tags-select" class="form-control mb-2">
-            <option value="">Wybierz tag</option>
-            @foreach (var tag in ViewBag.Tags)
-            {
-                <option value="@tag.Id">@tag.Name</option>
-            }
-        </select>
-        <button type="button" class="btn btn-secondary mb-3" onclick="addTag()">Dodaj Tag</button>
-        <ul id="selected-tags-list" class="list-inline"></ul>
+    <h4 style="margin-top: 20px">Wybierz Tagi</h4>
+    <div class="form-group">
+        <div id="tags-display" class="selected-tags-container mt-2"></div>
         <input type="hidden" name="SelectedTags" id="selected-tags" />
+        <button style="margin-top: 5px;" type="button" class="btn btn-secondary mb-3" onclick="openTagsModal()">Wybierz Tagi</button>
     </div>
 
-    <h4>Dodaj Pokoje</h4>
+    <h4 style="margin-top: 20px">Dodaj Pokoje</h4>
     <div id="rooms-container">
         <table class="table table-bordered">
             <thead class="thead-light">
@@ -81,6 +81,7 @@
                     <th>Cena za noc (zł)</th>
                     <th>Pojemność (w osobach)</th>
                     <th>Udogodnienia</th>
+                    <th>Aktywny</th>
                     <th>Usuń</th>
                 </tr>
             </thead>
@@ -89,7 +90,7 @@
         <button type="button" class="btn btn-secondary" onclick="addRoom()">Dodaj Pokój</button>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-4">Dodaj Schronisko</button>
+    <button style="margin-left: 570px; margin-top: 10px; font-size: 20px" type="submit" class="darkcyan-button">Stwórz Schronisko</button>
 </form>
 
 <script>
@@ -121,10 +122,10 @@
         row.innerHTML = `
                 <td>
                     <select name="Rooms[${index}].IdType" class="form-control">
-    @foreach (var type in ViewBag.RoomTypes as List<SchroniskaTurystyczne.Models.RoomType>)
-    {
-                                <option value="@type.Id">@type.Name</option>
-    }
+                    @foreach (var type in ViewBag.RoomTypes as List<SchroniskaTurystyczne.Models.RoomType>)
+                    {
+                        <option value="@type.Id">@type.Name</option>
+                    }
                     </select>
                 </td>
                 <td>
@@ -142,10 +143,20 @@
                     <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
                 </td>
                 <td>
+                    <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
+                    <input type="hidden" name="Rooms[${index}].IsActive" id="is-active-${index}" value="true" />
+                </td>
+                <td>
                     <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
                 </td>
             `;
         container.appendChild(row);
+    }
+
+    function updateIsActive(index) {
+        const checkbox = document.querySelector(`.is-active-checkbox[data-index="${index}"]`);
+        const hiddenField = document.getElementById(`is-active-${index}`);
+        hiddenField.value = checkbox.checked;
     }
 
     function removeRoom(button) {
@@ -153,37 +164,51 @@
         row.remove();
     }
 
-    function addTag() {
-        const tagSelect = document.getElementById('tags-select');
-        const selectedTagsList = document.getElementById('selected-tags-list');
-        const selectedTagsInput = document.getElementById('selected-tags');
-        const selectedTagId = tagSelect.value;
-        const selectedTagText = tagSelect.options[tagSelect.selectedIndex].text;
+    let selectedTags = [];
 
-        if (selectedTagId && !selectedTagsInput.value.includes(selectedTagId)) {
-            const tagItem = document.createElement('li');
-            tagItem.className = "badge badge-info m-1";
-            tagItem.textContent = selectedTagText;
-            tagItem.dataset.tagId = selectedTagId;
-
-            const removeButton = document.createElement('button');
-            removeButton.textContent = "×";
-            removeButton.type = "button";
-            removeButton.classList.add('btn', 'btn-link', 'p-0', 'ml-2', 'text-white');
-            removeButton.onclick = function () {
-                tagItem.remove();
-                updateSelectedTags();
-            };
-            tagItem.appendChild(removeButton);
-            selectedTagsList.appendChild(tagItem);
-            updateSelectedTags();
-        }
+    function openTagsModal() {
+        // Zaznacz istniejące tagi w modalu
+        document.querySelectorAll('#tags-list input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = selectedTags.includes(checkbox.value);
+        });
+        document.getElementById('tags-modal').style.display = 'block';
+        document.getElementById('tags-modal-overlay').style.display = 'block';
     }
 
-    function updateSelectedTags() {
-        const selectedTagsList = document.getElementById('selected-tags-list');
-        const selectedTags = Array.from(selectedTagsList.children).map(tagItem => tagItem.dataset.tagId);
+    function closeTagsModal() {
+        document.getElementById('tags-modal').style.display = 'none';
+        document.getElementById('tags-modal-overlay').style.display = 'none';
+    }
+
+    function toggleTag(checkbox, tagName) {
+        if (checkbox.checked) {
+            if (!selectedTags.includes(checkbox.value)) {
+                selectedTags.push(checkbox.value);
+                updateTagsDisplay(tagName, true);
+            }
+        } else {
+            selectedTags = selectedTags.filter(id => id !== checkbox.value);
+            updateTagsDisplay(tagName, false);
+        }
         document.getElementById('selected-tags').value = selectedTags.join(',');
+    }
+
+    function updateTagsDisplay(tagName, add) {
+        const displayElement = document.getElementById('tags-display');
+        if (add) {
+            const tagItem = document.createElement('p');
+            tagItem.className = 'tag-item';
+            tagItem.innerText = tagName;
+            tagItem.dataset.tagName = tagName;
+            tagItem.dataset.tagId = selectedTags[selectedTags.length - 1];
+            displayElement.appendChild(tagItem);
+        } else {
+            Array.from(displayElement.children).forEach(child => {
+                if (child.dataset.tagName === tagName) {
+                    child.remove();
+                }
+            });
+        }
     }
 
     let currentRoomIndex = null;
@@ -250,3 +275,21 @@
     <button type="button" class="btn btn-primary mt-3" onclick="closeFacilitiesModal()">Zamknij</button>
 </div>
 <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<!-- Modal Tagów -->
+<div id="tags-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
+    <h4>Wybierz Tagi</h4>
+    <ul id="tags-list">
+        @foreach (var tag in ViewBag.Tags as List<SchroniskaTurystyczne.Models.Tag>)
+        {
+            <li>
+                <label>
+                    <input type="checkbox" value="@tag.Id" onclick="toggleTag(this, '@tag.Name')" />
+                    @tag.Name
+                </label>
+            </li>
+        }
+    </ul>
+    <button type="button" class="btn btn-primary mt-3" onclick="closeTagsModal()">Zamknij</button>
+</div>
+<div id="tags-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>

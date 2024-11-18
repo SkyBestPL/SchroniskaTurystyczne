@@ -1,0 +1,141 @@
+﻿@model SchroniskaTurystyczne.Models.ManageBookingsViewModel
+
+<div class="container mt-4">
+    <h2>Zarządzanie rezerwacjami - @Model.ShelterName</h2>
+
+    <!-- Niepotwierdzone rezerwacje -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning">
+            <h4>Rezerwacje oczekujące na potwierdzenie (@Model.PendingBookings.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (!Model.PendingBookings.Any())
+            {
+                <p>Brak rezerwacji oczekujących na potwierdzenie.</p>
+            }
+            else
+            {
+                @foreach (var booking in Model.PendingBookings)
+                {
+                    <div class="border p-3 mb-3 rounded">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                                <p>
+                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                </p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <div class="mt-2">
+                                    <strong>Zarezerwowane pokoje:</strong>
+                                    <ul>
+                                        @foreach (var room in booking.Rooms)
+                                        {
+                                            <li>@room.RoomName - @room.NumberOfPeople osób (@room.PricePerNight.ToString("C") za noc)</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <form asp-action="ConfirmBooking" method="post" class="d-inline">
+                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                    <button type="submit" class="btn btn-success">Potwierdź</button>
+                                </form>
+                                <form asp-action="RejectBooking" method="post" class="d-inline">
+                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz odrzucić tę rezerwację?')">Odrzuć</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Potwierdzone rezerwacje -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h4>Potwierdzone rezerwacje (@Model.ConfirmedBookings.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (!Model.ConfirmedBookings.Any())
+            {
+                <p>Brak potwierdzonych rezerwacji.</p>
+            }
+            else
+            {
+                @foreach (var booking in Model.ConfirmedBookings)
+                {
+                    <div class="border p-3 mb-3 rounded">
+                        <div class="row">
+                            <div class="col">
+                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                                <p>
+                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                </p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <div class="mt-2">
+                                    <strong>Zarezerwowane pokoje:</strong>
+                                    <ul>
+                                        @foreach (var room in booking.Rooms)
+                                        {
+                                            <li>@room.RoomName - @room.NumberOfPeople osób (@room.PricePerNight.ToString("C") za noc)</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
+    <!-- Zakończone rezerwacje -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h4>Zakończone rezerwacje (@Model.CompletedBookings.Count)</h4>
+        </div>
+        <div class="card-body">
+            @if (!Model.CompletedBookings.Any())
+            {
+                <p>Brak zakończonych rezerwacji.</p>
+            }
+            else
+            {
+                @foreach (var booking in Model.CompletedBookings)
+                {
+                    <div class="border p-3 mb-3 rounded">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                                <p>
+                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                </p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <div class="mt-2">
+                                    <strong>Zarezerwowane pokoje:</strong>
+                                    <ul>
+                                        @foreach (var room in booking.Rooms)
+                                        {
+                                            <li>@room.RoomName - @room.NumberOfPeople osób (@room.PricePerNight.ToString("C") za noc)</li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <form asp-action="CompleteBooking" method="post">
+                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Czy na pewno chcesz usunąć tę rezerwację?')">Zakończ</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</div>

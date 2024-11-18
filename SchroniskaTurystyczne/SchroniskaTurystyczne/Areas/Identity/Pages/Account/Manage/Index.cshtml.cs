@@ -57,8 +57,14 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             ///     directly from your code. This API may change or be removed in future releases.
             /// </summary>
             [Phone]
-            [Display(Name = "Phone number")]
+            [Display(Name = "Numer telefonu")]
             public string PhoneNumber { get; set; }
+
+            [Required(ErrorMessage = "Imię jest wymagane.")]
+            public string FirstName { get; set; }
+
+            [Required(ErrorMessage = "Nazwisko jest wymagane.")]
+            public string LastName { get; set; }
         }
 
         private async Task LoadAsync(AppUser user)
@@ -70,7 +76,9 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
 
             Input = new InputModel
             {
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                FirstName = user.FirstName,
+                LastName = user.LastName
             };
         }
 
@@ -101,18 +109,21 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             }
 
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
-            if (Input.PhoneNumber != phoneNumber)
+            user.FirstName = Input.FirstName;
+            user.LastName = Input.LastName;
+
+            var updateResult = await _userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, Input.PhoneNumber);
-                if (!setPhoneResult.Succeeded)
+                foreach (var error in updateResult.Errors)
                 {
-                    StatusMessage = "Unexpected error when trying to set phone number.";
-                    return RedirectToPage();
+                    ModelState.AddModelError(string.Empty, error.Description);
                 }
+                return Page();
             }
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            StatusMessage = "Profil został zaaktualizowany.";
             return RedirectToPage();
         }
     }

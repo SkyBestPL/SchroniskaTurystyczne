@@ -60,16 +60,6 @@ namespace SchroniskaTurystyczne.Data
                     r => r.HasOne(typeof(Room)).WithMany().HasForeignKey("IdRoom").HasPrincipalKey(nameof(Room.Id)),
                     j => j.HasKey("IdRoom", "IdFacility"));
 
-            /*modelBuilder.Entity<Booking>()
-                .HasMany(e => e.BookingRooms)
-                .WithOne(e => e.Booking)
-                .HasForeignKey(e => e.IdBooking);
-
-            modelBuilder.Entity<Room>()
-                .HasMany(e => e.BookingRooms)
-                .WithOne(e => e.Room)
-                .HasForeignKey(e => e.IdRoom);*/
-
             // Konfiguracja klucza złożonego dla BookingRoom
             modelBuilder.Entity<BookingRoom>()
                 .HasKey(br => new { br.IdBooking, br.IdRoom });
@@ -85,22 +75,12 @@ namespace SchroniskaTurystyczne.Data
                 .WithMany(r => r.BookingRooms)
                 .HasForeignKey(br => br.IdRoom);
 
-            //klucze zlozone
-            /*modelBuilder.Entity<BookingRoom>()
-                .HasKey(br => new { br.IdBooking, br.IdRoom });*/
-
             //rel jeden do wielu
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Guest)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.IdGuest)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            /*modelBuilder.Entity<Payment>()
-                .HasOne(p => p.Booking)
-                .WithMany(b => b.Payments)
-                .HasForeignKey(p => p.IdBooking)
-                .OnDelete(DeleteBehavior.Cascade);*/
 
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Shelter)
@@ -139,13 +119,6 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(p => p.IdRoom)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //inne
-            /* modelBuilder.Entity<AppUser>()
-                 .HasOne(u => u.Role)
-                 .WithMany(r => r.Users)
-                 .HasForeignKey(u => u.IdRole)
-                 .OnDelete(DeleteBehavior.Restrict);*/
-
             modelBuilder.Entity<Point>()
                 .HasOne(p => p.Shelter)
                 .WithMany(s => s.Points)
@@ -162,11 +135,6 @@ namespace SchroniskaTurystyczne.Data
                 .HasOne(p => p.SavedRoute)
                 .WithMany(r => r.Points)
                 .HasForeignKey(p => p.IdSavedRoute);
-
-            //pola tekstowe
-            /*modelBuilder.Entity<Room>()
-                .Property(r => r.Status)
-            .HasMaxLength(50);*/
 
             modelBuilder.Entity<Review>()
                 .Property(r => r.Contents)

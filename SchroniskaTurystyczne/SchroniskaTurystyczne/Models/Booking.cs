@@ -13,10 +13,12 @@ namespace SchroniskaTurystyczne.Models
         public DateTime CheckInDate { get; set; }
         [Required]
         public DateTime CheckOutDate { get; set; }
+        public DateTime BookingDate { get; set; }
         public double Bill { get; set; }
         public bool Paid { get; set; }
-        public int? PaymentDate { get; set; }
+        public DateTime? PaymentDate { get; set; }
         public bool Verified { get; set; }
+        //public bool Valid { get; set; } //false jeżeli właściciel odrzuci rezerwację
 
         public virtual AppUser Guest { get; set; }
         public virtual ICollection<BookingRoom> BookingRooms { get; set; }

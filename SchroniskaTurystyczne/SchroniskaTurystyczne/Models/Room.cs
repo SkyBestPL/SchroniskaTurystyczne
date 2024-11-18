@@ -13,6 +13,8 @@ namespace SchroniskaTurystyczne.Models
         public string? Description { get; set; }
         public double PricePerNight { get; set; }
         public int Capacity { get; set; }
+        public bool HasConfirmedBooking { get; set; } //prawda jeżeli właściciel potwierdził jakąś rezerwację zawierajacą ten pokój
+        public bool IsActive { get; set; } //prawda jeżeli właściciel nie zablokuje możliwości rezerwacji tego pokoju
 
         public virtual Shelter Shelter { get; set; }
         public virtual RoomType RoomType { get; set; }

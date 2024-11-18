@@ -73,7 +73,7 @@
 
     <!-- Sekcja dla działek -->
     <div class="room-section plot-rooms">
-        <h3>Działki</h3>
+        <h3>Pola namiotowe</h3>
         <div id="plotRooms" class="room-container">
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 3))
             {
@@ -275,19 +275,24 @@
 
 <!-- Modal Podsumowania Rezerwacji -->
 <div style="z-index: 2000" class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content" style="background-color: #f0f8ff; color: #333;">
-            <div class="modal-header" style="background-color: #0066cc; color: #fff;">
-                <h5 class="modal-title" id="summaryModalLabel">Podsumowanie rezerwacji</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <!-- Zwiększona szerokość modalu -->
+        <div class="modal-content" style="background-color: darkcyan; color: #fff; border-radius: 12px;">
+            <div class="modal-header" style="background-color: aquamarine; color: black; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="summaryModalLabel" style="font-weight: bold;">Podsumowanie rezerwacji</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: darkcyan;"></button>
             </div>
-            <div class="modal-body">
-                <div id="reservationSummary"></div>
-                <p style="font-weight: bold; margin-top: 15px;">Łączna suma: <span id="totalPrice"></span> zł</p>
+            <div class="modal-body" style="text-align: center;">
+                <!-- Sekcja z typem pokoju -->
+                <div id="reservationSummary" style="margin-bottom: 15px; line-height: 1.5;">
+                    <p style="font-size: 1.1em; font-weight: bold;">Typ pokoju: <span id="roomType" style="color: aquamarine;">Deluxe</span></p> <!-- Przykładowy typ pokoju -->
+                    <p style="font-size: 1em;">Liczba osób: <span id="guestCount" style="color: aquamarine;">2</span></p> <!-- Można dodać licznik gości -->
+                </div>
+                <p style="font-weight: bold; font-size: 1.2em;">Łączna suma: <span id="totalPrice" style="color: aquamarine;"></span> zł</p>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-success" onclick="finalizeBooking()">Rezerwuj</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+            <div class="modal-footer" style="justify-content: center; border-top: none;">
+                <button type="button" class="btn btn-success" onclick="finalizeBooking()" style="background-color: aquamarine; color: black; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px;">Rezerwuj</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #f44336; color: white; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px; margin-left: 10px;">Anuluj</button>
             </div>
         </div>
     </div>

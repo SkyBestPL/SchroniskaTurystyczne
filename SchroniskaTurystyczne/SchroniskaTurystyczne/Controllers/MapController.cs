@@ -16,8 +16,18 @@ namespace SchroniskaTurystyczne.Controllers
         public IActionResult MapView(int id)
         {
             var shelters = _context.Shelters.ToList();
-            ViewBag.SelectedShelterId = id;  // Ustawienie ID wybranego schroniska
+            ViewBag.SelectedShelterId = id;
             return View(shelters);
+        }
+
+        public async Task<IActionResult> GetUserRoutes(string userId)
+        {
+            var routes = await _context.SavedRoutes
+                .Where(route => route.IdGuest == userId)
+                .Include(route => route.Points)
+                .ToListAsync();
+
+            return Json(routes);
         }
     }
 }

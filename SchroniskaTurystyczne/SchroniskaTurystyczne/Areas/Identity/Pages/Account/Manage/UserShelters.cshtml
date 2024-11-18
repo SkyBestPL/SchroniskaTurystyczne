@@ -1,7 +1,7 @@
 ﻿@page
 @model SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage.UserSheltersModel
 
-<h2>Moje Schroniska</h2>
+<h3>Moje Schroniska</h3>
 
 <div class="shelters-container">
     @foreach (var shelter in Model.Shelters)
@@ -29,9 +29,9 @@
             </div>
 
             <div class="card-footer text-end">
-                <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Shelters/Details", new { id = shelter.Id })'">Szczegóły</button>
+                <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Shelters", new { id = shelter.Id })'">Edytuj schronisko</button>
                 <button type="button" class="btn btn-info" onclick="location.href='@Url.Page("/Shelters/Reviews", new { id = shelter.Id })'">Zobacz recenzje</button>
-                <button type="button" class="btn btn-success" onclick="location.href='@Url.Page("/Shelters/ManageBookings", new { id = shelter.Id })'">Zarządzaj rezerwacjami</button>
+                <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("ManageBookings", "Shelters", new { id = shelter.Id })'">Zarządzaj rezerwacjami</button>
             </div>
         </div>
     }

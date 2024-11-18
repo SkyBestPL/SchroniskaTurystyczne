@@ -1,0 +1,457 @@
+﻿@model SchroniskaTurystyczne.Models.Shelter
+
+@{
+    ViewData["Title"] = "Edycja Schroniska";
+}
+<form asp-action="Edit" method="post" enctype="multipart/form-data" class="mb-5">
+    <div class="form-group d-flex align-items-center">
+    <h2>@ViewData["Title"]</h2> <button style="display: inline; margin-bottom: 10px; margin-left: 10px; font-size: 20px" type="submit" class="darkcyan-button">Zapisz Zmiany</button>
+    </div>
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Name" class="control-label">Nazwa Schroniska</label>
+        <input asp-for="Name" class="form-control" />
+        <span asp-validation-for="Name" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label">Opis</label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <h4 style="margin-top: 20px">Adres Schroniska</h4>
+    <div class="form-group">
+        <label asp-for="Country" class="control-label">Kraj</label>
+        <input asp-for="Country" class="form-control" />
+        <span asp-validation-for="Country" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="City" class="control-label">Miasto</label>
+        <input asp-for="City" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Street" class="control-label">Ulica</label>
+        <input asp-for="Street" class="form-control" />
+        <span asp-validation-for="Street" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="StreetNumber" class="control-label">Numer ulicy</label>
+        <input asp-for="StreetNumber" class="form-control" />
+        <span asp-validation-for="StreetNumber" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="ZipCode" class="control-label">Kod pocztowy</label>
+        <input asp-for="ZipCode" class="form-control" />
+        <span asp-validation-for="ZipCode" class="text-danger"></span>
+    </div>
+
+    <input type="hidden" asp-for="LocationLat" id="Latitude" />
+    <input type="hidden" asp-for="LocationLon" id="Longitude" />
+
+    <input type="hidden" id="shelter-lat" value="@Model.LocationLat"/>
+    <input type="hidden" id="shelter-lon" value="@Model.LocationLon"/>
+
+    <label>Lokalizacja schroniska:</label>
+    <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
+
+    <h4 style="margin-top: 20px">Zdjęcia schroniska</h4>
+
+    <div class="existing-photos mb-3">
+        @if (Model.Photos != null && Model.Photos.Any())
+        {
+            <h5>Istniejące zdjęcia:</h5>
+            <div class="row">
+                @foreach (var photo in Model.Photos)
+                {
+                    <div class="col-md-3 mb-3">
+                        <div class="card">
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.PhotoData)" 
+                                 class="card-img-top" alt="@photo.Name" />
+                            <div class="card-body">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" 
+                                           name="PhotosToDelete" value="@photo.Id" id="photo@(photo.Id)" />
+                                    <label class="form-check-label" for="photo@(photo.Id)">
+                                        Usuń
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+    <div class="form-group">
+        <label>Dodaj nowe zdjęcia:</label>
+        <input type="file" name="NewPhotos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
+    </div>
+
+    <h4 style="margin-top: 20px">Tagi</h4>
+    <div class="form-group">
+        <div id="tags-display" class="d-flex flex-wrap">
+            @foreach (var tag in Model.Tags)
+            {
+                <p class="tag-item" data-tag-id="@tag.Id">@tag.Name</p>
+            }
+        </div>
+        <input type="hidden" name="SelectedTags" id="selected-tags" value="@string.Join(",", Model.Tags.Select(t => t.Id))" />
+        <button type="button" style="margin-top: 5px;" class="btn btn-secondary" onclick="openTagsModal()">Edytuj Tagi</button>
+    </div>
+
+    <h4 style="margin-top: 20px">Pokoje</h4>
+    <div id="rooms-container">
+        <table class="table table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>Typ pokoju</th>
+                    <th>Nazwa pokoju</th>
+                    <th>Cena za noc (zł)</th>
+                    <th>Pojemność (w osobach)</th>
+                    <th>Udogodnienia</th>
+                    <th>Aktywny</th>
+                    <th>Usuń</th>
+                </tr>
+            </thead>
+            <tbody id="rooms-table-body">
+                @if (Model.Rooms != null)
+                {
+                    @for (var i = 0; i < Model.Rooms.Count; i++)
+                    {
+                        var room = Model.Rooms.ElementAt(i);
+                        <tr>
+                            <input type="hidden" name="Rooms[@i].Id" value="@room.Id" />
+                            <td>
+                                <select name="Rooms[@i].IdType" class="form-control">
+                                    @foreach (var type in ViewBag.RoomTypes)
+                                    {
+                                        if (type.Id == room.IdType)
+                                        {
+                                            <option value="@type.Id" selected>@type.Name</option>
+                                        }
+                                        else
+                                        {
+                                            <option value="@type.Id">@type.Name</option>
+                                        }
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" name="Rooms[@i].Name" value="@room.Name" class="form-control" />
+                            </td>
+                            <td>
+                                <input type="number" step="0.01" name="Rooms[@i].PricePerNight" 
+                                       value="@room.PricePerNight" class="form-control" />
+                            </td>
+                            <td>
+                                <input type="number" name="Rooms[@i].Capacity" 
+                                       value="@room.Capacity" class="form-control" />
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-secondary mb-2" 
+                                        onclick="openFacilitiesModal(@i)">Edytuj Udogodnienia</button>
+                                <!--<div id="facilities-display-@i" class="selected-facilities-container mt-2">
+                                    @foreach (var facility in room.Facilities)
+                                    {
+                                        <span class="badge badge-info m-1">@facility.Name</span>
+                                    }
+                                </div>-->
+                                <input type="hidden" name="Rooms[@i].SelectedFacilities" 
+                                       id="selected-facilities-@i" value="@room.SelectedFacilities" />
+                            </td>
+                            <td>
+                                <input type="checkbox" class="form-check-input is-active-checkbox" data-index="@i" onchange="updateIsActive(@i)" @(room.IsActive ? "checked" : "") />
+                                <input type="hidden" name="Rooms[@i].IsActive" id="is-active-@i" value="@room.IsActive" />
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger @(room.HasConfirmedBooking ? "btn-disabled" : "")" onclick="removeRoom(this)" @(room.HasConfirmedBooking ? "disabled" : "")>Usuń</button>
+                                @if (room.HasConfirmedBooking)
+                                {
+                                    <p class="text-muted" style="font-size: 12px">Pokój posiada potwierdzone rezerwacje</p>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+<button type="button" class="btn btn-secondary" onclick="addRoom()">Dodaj Pokój</button>
+</div>
+
+<button style="margin-left: 570px; margin-top: 10px; font-size: 20px" type="submit" class="darkcyan-button">Zapisz Zmiany</button>
+</form>
+
+ <script>
+    const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
+    var lat = document.getElementById('shelter-lat').value;
+    var lon = document.getElementById('shelter-lon').value;
+
+    const map = L.map('map').setView([lat, lon], 12);
+    L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
+        minZoom: 0,
+        maxZoom: 19,
+        attribution: '<a href="https://api.mapy.cz/copyright" target="_blank">&copy; Seznam.cz a.s. a další</a>',
+    }).addTo(map);
+
+    let marker = L.marker([lat, lon]).addTo(map);
+    document.getElementById('Latitude').value = lat;
+    document.getElementById('Longitude').value = lon;
+
+    map.on('click', function (e) {
+        marker.setLatLng(e.latlng);
+        document.getElementById('Latitude').value = e.latlng.lat;
+        document.getElementById('Longitude').value = e.latlng.lng;
+    });
+
+    function addRoom() {
+        const container = document.getElementById('rooms-table-body');
+        const index = container.getElementsByTagName('tr').length;
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <input type="hidden" name="Rooms[${index}].Id" value="0" />
+            <td>
+                <select name="Rooms[${index}].IdType" class="form-control">
+                    @foreach (var type in ViewBag.RoomTypes)
+                    {
+                        <option value="@type.Id">@type.Name</option>
+                    }
+                </select>
+            </td>
+            <td>
+                <input type="text" name="Rooms[${index}].Name" class="form-control" required />
+            </td>
+            <td>
+                <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" required />
+            </td>
+            <td>
+                <input type="number" name="Rooms[${index}].Capacity" class="form-control" required />
+            </td>
+            <td>
+                <button type="button" class="btn btn-secondary mb-2" onclick="openFacilitiesModal(${index})">
+                    Edytuj Udogodnienia
+                </button>
+                <div id="facilities-display-${index}" class="selected-facilities-container mt-2"></div>
+                <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
+            </td>
+            <td>
+                <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
+                <input type="hidden" name="Rooms[${index}].IsActive" id="is-active-${index}" value="true" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
+            </td>
+        `;
+        container.appendChild(row);
+    }
+
+    function updateIsActive(index) {
+        const checkbox = document.querySelector(`.is-active-checkbox[data-index="${index}"]`);
+        const hiddenField = document.getElementById(`is-active-${index}`);
+        hiddenField.value = checkbox.checked ? "true" : "false";
+    }
+
+    function removeRoom(button) {
+        const row = button.closest('tr');
+        const roomIndex = row.rowIndex - 1;
+
+        const confirmDeleteBtn = document.getElementById('confirmDeleteRoomBtn');
+        confirmDeleteBtn.onclick = function() {
+            row.remove();
+            updateRoomIndexes();
+            $('#deleteRoomModal').modal('hide');
+        };
+
+        $('#deleteRoomModal').modal('show');
+    }
+
+    function updateRoomIndexes() {
+        const rows = document.getElementById('rooms-table-body').getElementsByTagName('tr');
+        for (let i = 0; i < rows.length; i++) {
+            const inputs = rows[i].getElementsByTagName('input');
+            const selects = rows[i].getElementsByTagName('select');
+            for (let input of inputs) {
+                if (input.name) {
+                    input.name = input.name.replace(/\[\d+\]/, `[${i}]`);
+                }
+            }
+            for (let select of selects) {
+                if (select.name) {
+                    select.name = select.name.replace(/\[\d+\]/, `[${i}]`);
+                }
+            }
+        }
+    }
+
+    let currentRoomIndex = null;
+
+    function openFacilitiesModal(roomIndex) {
+        currentRoomIndex = roomIndex;
+        const selectedFacilities = document.getElementById(`selected-facilities-${roomIndex}`).value.split(',');
+            
+        document.querySelectorAll('#facilities-list input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = selectedFacilities.includes(checkbox.value);
+        });
+
+        document.getElementById('facilities-modal').style.display = 'block';
+        document.getElementById('modal-overlay').style.display = 'block';
+    }
+
+    function closeFacilitiesModal() {
+        document.getElementById('facilities-modal').style.display = 'none';
+        document.getElementById('modal-overlay').style.display = 'none';
+        currentRoomIndex = null;
+    }
+
+    function toggleFacility(checkbox, facilityName) {
+        const selectedFacilitiesInput = document.getElementById(`selected-facilities-${currentRoomIndex}`);
+        let selectedFacilities = selectedFacilitiesInput.value ? selectedFacilitiesInput.value.split(',') : [];
+
+        if (checkbox.checked) {
+            if (!selectedFacilities.includes(checkbox.value)) {
+                selectedFacilities.push(checkbox.value);
+            }
+        } else {
+            selectedFacilities = selectedFacilities.filter(id => id !== checkbox.value);
+        }
+
+        selectedFacilitiesInput.value = selectedFacilities.join(',');
+        updateFacilitiesListDisplay(currentRoomIndex, facilityName, checkbox.checked);
+    }
+
+    function updateFacilitiesListDisplay(roomIndex, facilityName, add) {
+        const displayElement = document.getElementById(`facilities-display-${roomIndex}`);
+            
+        if (add) {
+            const facilityItem = document.createElement('span');
+            facilityItem.className = 'badge badge-info m-1';
+            facilityItem.setAttribute('data-facility-name', facilityName);
+            facilityItem.innerText = facilityName;
+            displayElement.appendChild(facilityItem);
+        } else {
+            const existingFacility = displayElement.querySelector(`[data-facility-name="${facilityName}"]`);
+            if (existingFacility) {
+                existingFacility.remove();
+            }
+        }
+    }
+
+    let selectedTags = document.getElementById('selected-tags').value.split(',');
+
+    function openTagsModal() {
+        const selectedTagsInput = document.getElementById('selected-tags').value;
+        const selectedTagsArray = selectedTagsInput ? selectedTagsInput.split(',') : [];
+
+        document.querySelectorAll('#tags-list input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = selectedTagsArray.includes(checkbox.value);
+        });
+
+        document.getElementById('tags-modal').style.display = 'block';
+        document.getElementById('modal-overlay').style.display = 'block';
+    }
+
+    function closeTagsModal() {
+        document.getElementById('tags-modal').style.display = 'none';
+        document.getElementById('modal-overlay').style.display = 'none';
+
+        updateTagsDisplay();
+    }
+
+    function toggleTag(checkbox, tagName) {
+        const selectedTagsInput = document.getElementById('selected-tags');
+        let selectedTags = selectedTagsInput.value ? selectedTagsInput.value.split(',') : [];
+
+        if (checkbox.checked) {
+            if (!selectedTags.includes(checkbox.value)) {
+                selectedTags.push(checkbox.value);
+            }
+        } else {
+            selectedTags = selectedTags.filter(id => id !== checkbox.value);
+        }
+
+        selectedTagsInput.value = selectedTags.join(',');
+    }
+
+    function updateTagsDisplay() {
+        const selectedTagsInput = document.getElementById('selected-tags').value;
+        const selectedTagsArray = selectedTagsInput ? selectedTagsInput.split(',') : [];
+        const tagsDisplay = document.getElementById('tags-display');
+        tagsDisplay.innerHTML = '';
+
+        selectedTagsArray.forEach(tagId => {
+            const tag = document.querySelector(`#tags-list input[value="${tagId}"]`);
+            if (tag) {
+                const badge = document.createElement('p');
+                badge.className = 'tag-item';
+                badge.dataset.tagId = tagId;
+                badge.innerText = tag.nextSibling.textContent.trim();
+                tagsDisplay.appendChild(badge);
+            }
+        });
+    }
+</script>
+
+<!-- Modal Udogodnień -->
+<div id="facilities-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
+    <h4>Wybierz Udogodnienia</h4>
+    <ul id="facilities-list">
+        @foreach (var facility in ViewBag.Facilities)
+        {
+            <li>
+                <label>
+                    <input type="checkbox" value="@facility.Id" onclick="toggleFacility(this, '@facility.Name')" />
+                    @facility.Name
+                </label>
+            </li>
+        }
+    </ul>
+    <button type="button" class="btn btn-primary mt-3" onclick="closeFacilitiesModal()">Zamknij</button>
+</div>
+<div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<!-- Modal Tagów -->
+<div id="tags-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
+    <h4>Wybierz Tagi</h4>
+    <ul id="tags-list">
+        @foreach (var tag in ViewBag.Tags)
+        {
+            <li>
+                <label>
+                    <input type="checkbox" value="@tag.Id" onclick="toggleTag(this, '@tag.Name')"
+                    @(Model.Tags.Any(t => t.Id == tag.Id) ? "checked" : "") />
+                    @tag.Name
+                </label>
+            </li>
+        }
+    </ul>
+    <button type="button" class="btn btn-primary mt-3" onclick="closeTagsModal()">Zamknij</button>
+</div>
+<div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+<!-- Modal Ostrzeżeń -->
+<div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-labelledby="deleteRoomModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+        <div class="modal-content" style="background-color: white; color: black; border-radius: 12px;">
+            <div class="modal-header" style="background-color: darkcyan; color: white; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="deleteRoomModalLabel" style="font-weight: bold;">Potwierdzenie usunięcia pokoju</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: darkcyan;"></button>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <p style="font-size: 1.1em;">Czy na pewno chcesz usunąć ten pokój?</p>
+                <p style="font-size: 1em; color: #f44336;">Usunięcie jest nieodwracalne!</p>
+            </div>
+            <div class="modal-footer" style="justify-content: center; border-top: none;">
+                <button type="button" class="btn btn-danger" id="confirmDeleteRoomBtn" style="background-color: darkcyan; color: white; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px;">Usuń</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #f44336; color: white; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px; margin-left: 10px;">Anuluj</button>
+            </div>
+        </div>
+    </div>
+</div>

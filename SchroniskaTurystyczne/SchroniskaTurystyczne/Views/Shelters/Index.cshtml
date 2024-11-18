@@ -6,7 +6,7 @@
 
 <div class="search-bar">
     <form asp-action="Index" asp-controller="Shelters" method="get">
-        <label for="search-term">Filtruj schroniska:</label>
+        <label for="search-term">Szukaj schroniska:</label>
         <input type="text" id="search-term" name="searchTerm" placeholder="Wpisz nazwę lub miasto...">
         <button class="darkcyan-button" type="submit">Szukaj</button>
         <button class="dark-darkcyan-button" type="submit">Filtrowanie</button>
@@ -20,13 +20,16 @@
             <!-- Kolumna informacyjna -->
             <div class="shelter-info">
                 <h3>@shelter.Name</h3>
-                <p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>
+                <!--<p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>-->
 
                 <p class="shelter-description">
                     <strong>Opis:</strong> @shelter.Description
                 </p>
                 <p class="shelter-description">
                     <strong>Lokalizacja:</strong> @shelter.Country, @shelter.City
+                </p>
+                <p class="shelter-description">
+                    <strong>Ocena:</strong> 5/10 @shelter.Rating
                 </p>
 
                 <!--@if (shelter.Rooms != null && shelter.Rooms.Any())
@@ -61,7 +64,7 @@
             <div class="shelter-actions">
                 <!--<button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>-->
                 <a style="background-color:darkcyan" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
-                <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Rezerwuj</a>
+                <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Szczegóły</a>
             </div>
         </div>
         <!-- Mapa schroniska -->

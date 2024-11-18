@@ -20,38 +20,55 @@
         </div>
 
         <!-- Sekcja Szukanie noclegu -->
-        <div id="searchSection" class="tab-content active">
-            <!-- Domyślnie widoczna -->
-            <input type="text" id="searchInput" placeholder="Wpisz miejscowość" class="form-control" />
-            <select id="searchType" class="form-control">
-                <option value="regional">Ogólne</option>
+        <div id="searchSection" class="tab-content active p-3 rounded bg-light shadow">
+            <h4 class="mb-3 text-darkcyan">Szukaj noclegu</h4>
+            <input type="text" id="searchInput" placeholder="Wpisz miejscowość" class="form-control mb-3" />
+            <select id="searchType" class="form-control mb-3">
+                <option value="regional">Wybierz Tagi</option>
                 <option value="regional.country">Kraj</option>
                 <option value="regional.region">Region</option>
                 <option value="regional.street">Ulica</option>
                 <option value="regional.address" selected>Adres</option>
             </select>
-            <button onclick="searchLocation()">Szukaj</button>
-            <button onclick="fitToAllMarkers()">Wyświetl wszystkie schroniska</button>
+            <select id="searchType" class="form-control mb-3">
+                <option value="regional">Wybierz typ pokoju</option>
+                <option value="regional.country">Kraj</option>
+                <option value="regional.region">Region</option>
+                <option value="regional.street">Ulica</option>
+                <option value="regional.address" selected>Adres</option>
+            </select>
+            <div class="d-flex gap-2">
+                <button class="dark-darkcyan-button" onclick="searchLocation()">Szukaj</button>
+                <!--<button class="btn btn-secondary" onclick="fitToAllMarkers()">Wyświetl wszystkie schroniska</button>-->
+            </div>
         </div>
 
         <!-- Sekcja Planowanie trasy -->
-        <div id="planSection" class="tab-content">
-            <button onclick="toggleRouteCreation()">Twórz Trasę</button>
-            <button onclick="clearRoute()">Wyczyść trasę</button>
-            <form id="routeForm" asp-controller="Routes" asp-action="Create" method="post">
-                <div class="form-group">
-                    <label for="routeName">Nazwa Trasy</label>
+        <div id="planSection" class="tab-content p-3 rounded bg-light shadow mt-4">
+            <h4 class="mb-3 text-darkcyan">Planowanie Trasy</h4>
+            <div class="d-flex gap-2 mb-3">
+                <button class="dark-darkcyan-button" onclick="toggleRouteCreation()">Tryb Tworzenia Trasy</button>
+                <button class="btn btn-secondary" onclick="clearRoute()">Wyczyść Trasę</button>
+            </div>
+            <!--<div id="travelTimeDisplay" class="mt-2 text-darkcyan"></div>
+            <select id="travelMode" class="form-control mb-3">
+                <option value="foot_fast">Pieszo</option>
+                <option value="bicycle">Rowerem</option>
+            </select>-->
+            <form id="routeForm" asp-controller="Routes" asp-action="Create" method="post" class="mt-3">
+                <div class="form-group mb-3">
+                    <label for="routeName" class="form-label">Nazwa Trasy</label>
                     <input id="routeName" name="Name" class="form-control" />
                 </div>
                 <div id="routePoints"></div>
-                <button type="submit" class="btn btn-primary">Dodaj Trasę</button>
+                <button type="submit" class="aquamarine-button">Zapisz Trasę</button>
             </form>
         </div>
 
         <!-- Sekcja Moje trasy -->
-        <div id="savedRoutesSection" class="tab-content">
-            <h3>Twoje zapisane trasy</h3>
-            <div id="userRoutesList">
+        <div id="savedRoutesSection" class="tab-content p-3 rounded bg-light shadow mt-4">
+            <h4 class="mb-3 text-darkcyan">Twoje Zapisane Trasy</h4>
+            <div id="userRoutesList" class="mb-3">
                 <!-- W tym miejscu pojawią się zapisane trasy użytkownika -->
             </div>
         </div>
@@ -96,9 +113,9 @@
                     'line-cap': 'round',
                 },
                 paint: {
-                    'line-color': '#0033ff',
+                    'line-color': 'darkcyan',
                     'line-width': 8,
-                    'line-opacity': 0.6,
+                    'line-opacity': 1,
                 },
             }],
         },
@@ -114,9 +131,14 @@
             const marker = new maplibregl.Marker({ color: shelter.id == selectedShelterId ? 'red' : 'yellow' })
                 .setLngLat([parseFloat(shelter.locationLon), parseFloat(shelter.locationLat)])
                 .setPopup(new maplibregl.Popup({ offset: 25 })
-                    .setHTML(`<h3>${shelter.name}</h3>
-                    <p>${shelter.description}</p>
-                    <a href="/Booking/Index/${shelter.id}">Rezerwuj</a>`))
+                    .setHTML(`
+                        <h3 style="margin-top: 0;">${shelter.name}</h3>
+                        <p style="margin: 5px 0;">Ocena: ${shelter.rating}</p>
+                        <p style="margin: 5px 0;">Tagi: </p>
+                        <a href="/Booking/Index/${shelter.id}"
+                           style="display: inline-block; padding: 8px 12px; background-color: darkcyan; color: white; text-decoration: none; border-radius: 4px; text-align: center;">
+                            Szczegóły
+                        </a>`))
                 .addTo(map);
         });
 
@@ -296,6 +318,89 @@
         // Dodaj klasę active do klikniętego przycisku
         event.target.classList.add('active');
     }
+
+    /*async function calculateRoute(points) {
+        try {
+            const travelMode = document.getElementById("travelMode").value; // Pobierz tryb podróży
+            const url = new URL('https://api.mapy.cz/v1/routing/route');
+
+            url.searchParams.set('apikey', API_KEY);
+            url.searchParams.set('lang', 'pl');
+            url.searchParams.set('routeType', travelMode); // Użyj wybranego trybu podróży
+            url.searchParams.set('avoidToll', 'false');
+
+            url.searchParams.set('start', points[0].join(','));
+            url.searchParams.set('end', points[points.length - 1].join(','));
+
+            for (let i = 1; i < points.length - 1; i++) {
+                url.searchParams.append('waypoints', points[i].join(','));
+            }
+
+            const response = await fetch(url.toString(), { mode: 'cors' });
+            const json = await response.json();
+
+            const source = map.getSource('route-geometry');
+            if (source && json.geometry) {
+                source.setData(json.geometry);
+            }
+
+            const bounds = bbox(json.geometry.geometry.coordinates);
+            map.fitBounds(bounds, { padding: 40 });
+
+            // Wyciągnij i wyświetl czas trwania podróży
+            const travelTime = json.routeSummary.travelTime; // Czas w sekundach
+            displayTravelTime(travelTime);
+
+        } catch (error) {
+            console.log('Błąd podczas wyznaczania trasy:', error);
+        }
+    }
+
+    // Funkcja do wyświetlenia czasu podróży
+    function displayTravelTime(seconds) {
+        const hours = Math.floor(seconds / 3600);
+        const minutes = Math.floor((seconds % 3600) / 60);
+        const timeDisplay = hours > 0 ? `${hours} godz. ${minutes} min.` : `${minutes} min.`;
+
+        const travelTimeElement = document.getElementById("travelTimeDisplay");
+        travelTimeElement.textContent = `Czas podróży: ${timeDisplay}`;
+    }*/
+
+    /*async function loadUserRoutes() {
+        const userId = '';
+        try {
+            const response = await fetch(`/Routes/GetUserRoutes?userId=${userId}`);
+            const routes = await response.json();
+            displayRoutes(routes);
+        } catch (error) {
+            console.error("Błąd podczas pobierania tras:", error);
+        }
+    }
+
+    function displayRoutes(routes) {
+        const routesList = document.getElementById('userRoutesList');
+        routesList.innerHTML = '';
+
+        if (routes.length === 0) {
+            routesList.innerHTML = '<p>Nie masz zapisanych tras.</p>';
+            return;
+        }
+
+        routes.forEach(route => {
+            const routeElement = document.createElement('div');
+            routeElement.classList.add('route-item', 'mb-3', 'p-2', 'border', 'rounded');
+            routeElement.innerHTML = `
+                <h5>${route.name}</h5>
+                <p>Punkty trasy:</p>
+                <ul>
+                    ${route.points.map(point => `<li>${point.name || 'Punkt'} - (${point.locationLat}, ${point.locationLon})</li>`).join('')}
+                </ul>
+            `;
+            routesList.appendChild(routeElement);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', loadUserRoutes);*/
 
     map.on('load', function () {
         addShelterMarkers(shelters);

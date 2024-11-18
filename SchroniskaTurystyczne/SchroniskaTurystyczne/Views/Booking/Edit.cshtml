@@ -1,0 +1,194 @@
+﻿@model SchroniskaTurystyczne.Models.BookingEditViewModel
+
+@{
+    ViewData["Title"] = "Edycja rezerwacji";
+}
+
+<div class="booking-shelter-info">
+    <h1>@Model.Shelter.Name</h1>
+    <div class="booking-shelter-photos">
+        @foreach (var photo in Model.Shelter.Photos)
+        {
+            <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.PhotoData)" alt="Zdjęcie schroniska" class="booking-shelter-photo" />
+        }
+    </div>
+</div>
+
+<div class="date-reservation">
+    <h2 class="h2-rooms">Edycja rezerwacji w schronisku <span class="shelter-name">@Model.Shelter.Name</span></h2>
+
+    <div class="date-selection">
+        <div class="date-pair">
+            <label>Data zameldowania:</label>
+            <input type="date" id="checkInDate" value="@Model.CheckInDate.ToString("yyyy-MM-dd")" required />
+        </div>
+        <div class="date-pair">
+            <label>Data wymeldowania:</label>
+            <input type="date" id="checkOutDate" value="@Model.CheckOutDate.ToString("yyyy-MM-dd")" required />
+        </div>
+    </div>
+    <button class="confirm-booking-btn" onclick="confirmBookingEdit()">Zapisz zmiany</button>
+</div>
+
+<div style="height: 120px"></div>
+
+<div class="room-sections">
+    <!-- Sekcja dla pokoi prywatnych -->
+    <div class="room-section private-rooms">
+        <h3>Pokoje Prywatne</h3>
+        <div id="privateRooms" class="room-container">
+            @foreach (var room in Model.Shelter.Rooms.Where(r => r.IdType == 2))
+            {
+                var isSelected = Model.SelectedRooms.ContainsKey(room.Id);
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>
+                        <input type="checkbox" class="privateRoomCheckbox"
+                               data-room-name="@room.Name"
+                               data-room-id="@room.Id"
+                               data-capacity="@room.Capacity"
+                        @(isSelected ? "checked" : "") />
+                        Rezerwuj cały pokój
+                    </label>
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sekcja dla pokoi publicznych -->
+    <div class="room-section public-rooms">
+        <h3>Pokoje Publiczne</h3>
+        <div id="publicRooms" class="room-container">
+            @foreach (var room in Model.Shelter.Rooms.Where(r => r.IdType == 1))
+            {
+                var selectedPeople = Model.SelectedRooms.ContainsKey(room.Id) ? Model.SelectedRooms[room.Id] : 0;
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>Liczba osób:</label>
+                    <input type="number" class="numberOfPeople"
+                           data-room-name="@room.Name"
+                           data-room-id="@room.Id"
+                           min="0" max="@room.Capacity"
+                           value="@selectedPeople" />
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Sekcja dla działek -->
+    <div class="room-section plot-rooms">
+        <h3>Pola namiotowe</h3>
+        <div id="plotRooms" class="room-container">
+            @foreach (var room in Model.Shelter.Rooms.Where(r => r.IdType == 3))
+            {
+                var selectedPeople = Model.SelectedRooms.ContainsKey(room.Id) ? Model.SelectedRooms[room.Id] : 0;
+                <div class="room-card">
+                    <h4>@room.Name</h4>
+                    <p>Cena za osobę: @room.PricePerNight zł</p>
+                    <p>Pojemność osób: @room.Capacity</p>
+                    <label>Liczba osób:</label>
+                    <input type="number" class="numberOfPeople"
+                           data-room-name="@room.Name"
+                           data-room-id="@room.Id"
+                           min="1" max="@room.Capacity"
+                           value="@selectedPeople" />
+                    <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Inicjalizacja kalendarzy (taka sama jak w Index.cshtml)
+            document.querySelectorAll('.calendar').forEach(calendarDiv => {
+                const roomId = calendarDiv.getAttribute('data-room-id');
+                if (!roomId) {
+                    console.error("Błąd: roomId jest null lub nie istnieje dla elementu", calendarDiv);
+                    return;
+                }
+                const calendar = new FullCalendar.Calendar(calendarDiv, {
+                    initialView: 'dayGridMonth',
+                    locale: 'pl',
+                    events: function (fetchInfo, successCallback, failureCallback) {
+                        fetch(`/Booking/GetRoomBookings?roomId=${roomId}`)
+                            .then(response => response.json())
+                            .then(data => successCallback(data))
+                            .catch(error => {
+                                console.error("Błąd podczas ładowania danych rezerwacji:", error);
+                                failureCallback(error);
+                            });
+                    }
+                });
+                calendar.render();
+            });
+        });
+
+        async function confirmBookingEdit() {
+            const checkInDate = new Date(document.getElementById("checkInDate").value);
+            const checkOutDate = new Date(document.getElementById("checkOutDate").value);
+
+            if (!checkInDate || !checkOutDate || checkInDate >= checkOutDate) {
+                alert("Wybierz poprawne daty zameldowania i wymeldowania.");
+                return;
+            }
+
+            const selectedRooms = [];
+            const privateRooms = document.querySelectorAll('.privateRoomCheckbox:checked');
+            const publicRooms = document.querySelectorAll('.numberOfPeople');
+
+            // Zbierz dane pokoi prywatnych
+            privateRooms.forEach(roomCheckbox => {
+                const roomId = parseInt(roomCheckbox.getAttribute('data-room-id'));
+                const capacity = parseInt(roomCheckbox.getAttribute('data-capacity'));
+                selectedRooms.push({ roomId, numberOfPeople: capacity });
+            });
+
+            // Zbierz dane pokoi publicznych i działek
+            publicRooms.forEach(input => {
+                const roomId = parseInt(input.getAttribute('data-room-id'));
+                const numberOfPeople = parseInt(input.value);
+                if (numberOfPeople > 0) {
+                    selectedRooms.push({ roomId, numberOfPeople });
+                }
+            });
+
+            if (selectedRooms.length === 0) {
+                alert("Nie wybrano żadnego pokoju.");
+                return;
+            }
+
+            // Wyślij dane do kontrolera
+            fetch('/Booking/UpdateBooking', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    bookingId: @Model.BookingId,
+                    checkInDate: checkInDate.toISOString(),
+                    checkOutDate: checkOutDate.toISOString(),
+                    rooms: selectedRooms
+                }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Rezerwacja została zaktualizowana!");
+                        window.location.href = '/Identity/Account/Manage/UserReservations';
+                    } else {
+                        alert("Aktualizacja rezerwacji nie powiodła się: " + data.message);
+                    }
+                })
+                .catch(error => console.error("Błąd podczas aktualizacji rezerwacji:", error));
+        }
+    </script>
+}
