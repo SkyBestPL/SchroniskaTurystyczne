@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SchroniskaTurystyczne.Migrations
 {
     /// <inheritdoc />
-    public partial class mig : Migration
+    public partial class mig1 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,8 +32,8 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -211,10 +211,13 @@ namespace SchroniskaTurystyczne.Migrations
                     NumberOfPeople = table.Column<int>(type: "int", nullable: false),
                     CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Bill = table.Column<double>(type: "float", nullable: false),
                     Paid = table.Column<bool>(type: "bit", nullable: false),
-                    PaymentDate = table.Column<int>(type: "int", nullable: true),
-                    Verified = table.Column<bool>(type: "bit", nullable: false)
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Verified = table.Column<bool>(type: "bit", nullable: false),
+                    Valid = table.Column<bool>(type: "bit", nullable: false),
+                    Ended = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -289,6 +292,7 @@ namespace SchroniskaTurystyczne.Migrations
                     City = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StreetNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ZipCode = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LocationLon = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LocationLat = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -364,7 +368,9 @@ namespace SchroniskaTurystyczne.Migrations
                     Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PricePerNight = table.Column<double>(type: "float", nullable: false),
-                    Capacity = table.Column<int>(type: "int", nullable: false)
+                    Capacity = table.Column<int>(type: "int", nullable: false),
+                    HasConfirmedBooking = table.Column<bool>(type: "bit", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -517,14 +523,15 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1", null, "Admin", "Admin" },
-                    { "f2e1617d-82a0-47a7-adcb-2a498983669c", null, "User", "User" }
+                    { "8a00cf69-3628-4c7b-8edb-bc634ef77591", null, "Exhibitor", "Exhibitor" },
+                    { "9f0782bc-19b2-40ee-866f-aa5065a63661", null, "Guest", "Guest" },
+                    { "c1daeb1c-7f04-40d2-b14b-cb0a72739399", null, "Admin", "Admin" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
                 columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "06b90138-0c25-4e0a-8f12-472688a16f84", 0, "7186c787-1afd-4d1f-b6b0-2ac2ef3d69ab", "admin@admin.com", true, null, null, false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "16bd1f12-8561-462f-9ead-f2d1c95f61e8", false, "admin@admin.com" });
+                values: new object[] { "aaa74e14-afcc-4f08-ac88-81503fa53a1b", 0, "7c4dde4f-197c-4eec-af03-8ab9bb5251f6", "admin@admin.com", true, "Admin", "Admin", false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "34055e65-664a-462c-966e-a8f7945a3f21", false, "admin@admin.com" });
 
             migrationBuilder.InsertData(
                 table: "Facilities",
@@ -541,9 +548,9 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, null, "Pokój publiczny" },
-                    { 2, null, "Pokój prywatny" },
-                    { 3, null, "Miejsce na działce" }
+                    { 1, null, "Public" },
+                    { 2, null, "Private" },
+                    { 3, null, "Camping" }
                 });
 
             migrationBuilder.InsertData(
@@ -561,7 +568,7 @@ namespace SchroniskaTurystyczne.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "abc79468-fdd3-4fc6-9f9e-1a72efa0dab1", "06b90138-0c25-4e0a-8f12-472688a16f84" });
+                values: new object[] { "c1daeb1c-7f04-40d2-b14b-cb0a72739399", "aaa74e14-afcc-4f08-ac88-81503fa53a1b" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",

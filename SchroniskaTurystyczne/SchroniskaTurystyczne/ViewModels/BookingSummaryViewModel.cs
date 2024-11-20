@@ -1,4 +1,6 @@
-﻿namespace SchroniskaTurystyczne.Models
+﻿using SchroniskaTurystyczne.Models;
+
+namespace SchroniskaTurystyczne.ViewModels
 {
     public class BookingSummaryViewModel
     {

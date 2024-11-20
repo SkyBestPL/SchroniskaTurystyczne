@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SchroniskaTurystyczne.Data;
 using SchroniskaTurystyczne.Models;
+using SchroniskaTurystyczne.ViewModels;
 using System.Security.Claims;
 
 namespace SchroniskaTurystyczne.Controllers

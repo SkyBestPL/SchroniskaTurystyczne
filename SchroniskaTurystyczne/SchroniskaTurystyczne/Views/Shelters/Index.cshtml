@@ -1,27 +1,104 @@
-﻿@model IEnumerable<SchroniskaTurystyczne.Models.Shelter>
+﻿@model SchroniskaTurystyczne.ViewModels.ShelterSearchViewModel
 
 @{
     ViewData["Title"] = "Dostępne Schroniska";
 }
 
 <div class="search-bar">
-    <form asp-action="Index" asp-controller="Shelters" method="get">
-        <label for="search-term">Szukaj schroniska:</label>
-        <input type="text" id="search-term" name="searchTerm" placeholder="Wpisz nazwę lub miasto...">
-        <button class="darkcyan-button" type="submit">Szukaj</button>
-        <button class="dark-darkcyan-button" type="submit">Filtrowanie</button>
+    <form asp-action="Index" asp-controller="Shelters" method="get" id="mainSearchForm">
+        <div class="row">
+            <div class="col">
+                <input asp-for="SearchTerm" class="form-control" placeholder="Wpisz nazwę lub miasto..." />
+            </div>
+            <div class="col">
+                <input asp-for="City" class="form-control" placeholder="Miasto" />
+            </div>
+            <div class="col">
+                <input asp-for="Street" class="form-control" placeholder="Ulica" />
+            </div>
+
+            <!-- Ukryte pola dla filtrów -->
+            @if (Model.SelectedTagIds != null)
+            {
+                @foreach (var tagId in Model.SelectedTagIds)
+                {
+                    <input type="hidden" name="SelectedTagIds" value="@tagId" />
+                }
+            }
+
+            @if (Model.SelectedRoomTypeIds != null)
+            {
+                @foreach (var roomTypeId in Model.SelectedRoomTypeIds)
+                {
+                    <input type="hidden" name="SelectedRoomTypeIds" value="@roomTypeId" />
+                }
+            }
+
+            <div class="col">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                    Filtruj
+                </button>
+                <button type="submit" class="btn btn-primary">Szukaj</button>
+            </div>
+        </div>
     </form>
 </div>
 
+<!-- Filter Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Filtrowanie schronisk</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="filter-form">
+                    <h6>Tagi schronisk</h6>
+                    @foreach (var tag in Model.AvailableTags)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input tag-filter" type="checkbox"
+                                   value="@tag.Id"
+                                   id="tag-@tag.Id"
+                            @(Model.SelectedTagIds?.Contains(tag.Id) == true ? "checked" : "")>
+                            <label class="form-check-label" for="tag-@tag.Id">
+                                @tag.Name
+                            </label>
+                        </div>
+                    }
+
+                    <h6 class="mt-3">Typy pokoi</h6>
+                    @foreach (var roomType in Model.AvailableRoomTypes)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input room-type-filter" type="checkbox"
+                                   value="@roomType.Id"
+                                   id="roomType-@roomType.Id"
+                            @(Model.SelectedRoomTypeIds?.Contains(roomType.Id) == true ? "checked" : "")>
+                            <label class="form-check-label" for="roomType-@roomType.Id">
+                                @roomType.Name
+                            </label>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                <button type="button" class="btn btn-primary" id="applyFilters">Zastosuj filtry</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Shelter list (use ViewBag.Shelters) -->
 <div class="shelter-list">
-    @foreach (var shelter in Model)
+    @foreach (var shelter in Model.Shelters)
     {
         <div class="shelter-container">
-            <!-- Kolumna informacyjna -->
             <div class="shelter-info">
                 <h3>@shelter.Name</h3>
-                <!--<p><strong>Wystawiający:</strong> @shelter.Exhibitor.FirstName @shelter.Exhibitor.LastName</p>-->
-
                 <p class="shelter-description">
                     <strong>Opis:</strong> @shelter.Description
                 </p>
@@ -32,43 +109,27 @@
                     <strong>Ocena:</strong> 5/10 @shelter.Rating
                 </p>
 
-                <!--@if (shelter.Rooms != null && shelter.Rooms.Any())
-                {
-                        <h4>Pokoje:</h4>
-                        <ul>
-                        @foreach (var room in shelter.Rooms)
-                        {
-                        <li><strong>Nazwa:</strong> @room.Name, <strong>Pojemność:</strong> @room.Capacity</li>
-                            @if (room.Facilities != null && room.Facilities.Any())
-                            {
-                                 <p><strong>Udogodnienia:</strong>@string.Join(", ", room.Facilities.Select(fac => fac.Name))</p>
-                            }
-                        }
-                        </ul>
-                }-->
-
                 @if (shelter.Tags != null && shelter.Tags.Any())
                 {
-                    <p><strong>Tagi:</strong> @string.Join(", ", shelter.Tags.Select(tag => tag.Name))</p>
+                    @foreach(var tag in shelter.Tags)
+                    {
+                        <p class="tag-item">@tag.Name</p>
+                    }
                 }
             </div>
 
-            <!-- Kolumna ze zdjęciem -->
             <div class="shelter-photo">
-                @if (shelter.Photos != null && shelter.Photos.Any())
+                @if (!string.IsNullOrEmpty(shelter.MainPhotoBase64))
                 {
-                    <img src="data:image;base64,@Convert.ToBase64String(shelter.Photos.First().PhotoData)" alt="@shelter.Photos.First().Name" />
+                    <img src="data:image;base64,@shelter.MainPhotoBase64" alt="Zdjęcie schroniska" />
                 }
             </div>
 
             <div class="shelter-actions">
-                <!--<button style="background-color:darkcyan" onclick="openMap(@shelter.LocationLat, @shelter.LocationLon, '@shelter.Id')">Pokaż na mapie</button>-->
                 <a style="background-color:darkcyan" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
                 <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Szczegóły</a>
             </div>
         </div>
-        <!-- Mapa schroniska -->
-        <div style="column-span: all; width: 100%; height: 400px; display:none;" id="map-@shelter.Id"></div>
     }
 </div>
 
@@ -161,6 +222,38 @@
         document.addEventListener("DOMContentLoaded", function () {
             var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
             errorModal.show();
+        });
+    </script>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $('#applyFilters').on('click', function () {
+                // Usuwamy istniejące ukryte pola filtrów
+                $('#mainSearchForm input[name="SelectedTagIds"]').remove();
+                $('#mainSearchForm input[name="SelectedRoomTypeIds"]').remove();
+
+                // Dodajemy zaznaczone tagi
+                $('.tag-filter:checked').each(function () {
+                    $('#mainSearchForm').append(
+                        `<input type="hidden" name="SelectedTagIds" value="${$(this).val()}" />`
+                    );
+                });
+
+                // Dodajemy zaznaczone typy pokoi
+                $('.room-type-filter:checked').each(function () {
+                    $('#mainSearchForm').append(
+                        `<input type="hidden" name="SelectedRoomTypeIds" value="${$(this).val()}" />`
+                    );
+                });
+
+                // Zamykamy modal
+                $('#filterModal').modal('hide');
+
+                // Automatycznie wysyłamy formularz
+                $('#mainSearchForm').submit();
+            });
         });
     </script>
 }

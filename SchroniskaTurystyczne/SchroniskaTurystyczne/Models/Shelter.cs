@@ -28,5 +28,6 @@ namespace SchroniskaTurystyczne.Models
         public virtual ICollection<Review>? Reviews { get; set; }
         public virtual ICollection<Tag>? Tags { get; set; }
         public virtual ICollection<Point>? Points { get; set; }
+        public virtual ICollection<Booking>? Bookings { get; set; }
     }
 }

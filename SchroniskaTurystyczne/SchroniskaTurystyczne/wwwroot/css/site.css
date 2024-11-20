@@ -136,7 +136,7 @@ body {
 .shelter-container {
     display: grid;
     grid-template-columns: 3fr 2fr; /* Info zajmuje 3/4 szerokoœci, zdjêcie 1/4 */
-    background-color: #f9f9f9;
+    background-color: white;
     border: 1px solid #ddd;
     border-radius: 10px;
     padding: 20px;

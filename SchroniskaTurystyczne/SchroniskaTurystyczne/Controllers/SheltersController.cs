@@ -7,6 +7,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using SchroniskaTurystyczne.ViewModels;
 
 namespace SchroniskaTurystyczne.Controllers
 {
@@ -112,7 +113,7 @@ namespace SchroniskaTurystyczne.Controllers
         }
 
         // GET: Shelters
-        public async Task<IActionResult> Index()
+        /*public async Task<IActionResult> Index()
         {
             var shelters = await _context.Shelters
                 .Include(s => s.Rooms)
@@ -122,6 +123,98 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(s => s.Tags)
                 .ToListAsync();
             return View(shelters);
+        }*/
+
+        public IActionResult Index(ShelterSearchViewModel searchModel)
+        {
+            var query = _context.Shelters
+                .Include(s => s.Tags)
+                .Include(s => s.Rooms)
+                    .ThenInclude(r => r.RoomType)
+                .Include(s => s.Photos)
+                .AsQueryable();
+
+            // Aplikowanie filtrów
+            if (!string.IsNullOrEmpty(searchModel.SearchTerm))
+            {
+                query = query.Where(s =>
+                    s.Name.Contains(searchModel.SearchTerm) ||
+                    s.City.Contains(searchModel.SearchTerm));
+            }
+
+            if (!string.IsNullOrEmpty(searchModel.City))
+            {
+                query = query.Where(s => s.City == searchModel.City);
+            }
+
+            if (!string.IsNullOrEmpty(searchModel.Street))
+            {
+                query = query.Where(s => s.Street.Contains(searchModel.Street));
+            }
+
+            if (searchModel.SelectedTagIds != null && searchModel.SelectedTagIds.Any())
+            {
+                query = query.Where(s =>
+                    searchModel.SelectedTagIds.All(tagId =>
+                        s.Tags.Any(t => t.Id == tagId)
+                    )
+                );
+            }
+
+            if (searchModel.SelectedRoomTypeIds != null && searchModel.SelectedRoomTypeIds.Any())
+            {
+                query = query.Where(s =>
+                    searchModel.SelectedRoomTypeIds.All(roomTypeId =>
+                        s.Rooms.Any(r => r.RoomType.Id == roomTypeId)
+                    )
+                );
+            }
+
+            // Mapowanie na ViewModele
+            var shelterViewModels = query.Select(s => new ShelterViewModel
+            {
+                Id = s.Id,
+                Name = s.Name,
+                Description = s.Description,
+                Rating = s.Rating,
+                Country = s.Country,
+                City = s.City,
+                Street = s.Street,
+                StreetNumber = s.StreetNumber,
+                LocationLon = s.LocationLon,
+                LocationLat = s.LocationLat,
+                Tags = s.Tags.Select(t => new TagViewModel
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }),
+                MainPhotoBase64 = s.Photos != null && s.Photos.Any()
+                    ? Convert.ToBase64String(s.Photos.First().PhotoData)
+                    : null
+            }).ToList();
+
+            var viewModel = new ShelterSearchViewModel
+            {
+                SearchTerm = searchModel.SearchTerm,
+                City = searchModel.City,
+                Street = searchModel.Street,
+                SelectedTagIds = searchModel.SelectedTagIds,
+                SelectedRoomTypeIds = searchModel.SelectedRoomTypeIds,
+                AvailableTags = _context.Tags.Select(t => new TagViewModel
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList(),
+                AvailableRoomTypes = _context.RoomTypes.Select(rt => new RoomTypeViewModel
+                {
+                    Id = rt.Id,
+                    Name = rt.Name,
+                    Description = rt.Description
+                }).ToList(),
+                Shelters = shelterViewModels
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult CreateRoute()
