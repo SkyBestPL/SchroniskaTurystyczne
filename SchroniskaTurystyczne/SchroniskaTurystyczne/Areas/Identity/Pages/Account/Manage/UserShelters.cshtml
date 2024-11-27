@@ -32,6 +32,10 @@
                 <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Shelters", new { id = shelter.Id })'">Edytuj schronisko</button>
                 <button type="button" class="btn btn-info" onclick="location.href='@Url.Page("/Shelters/Reviews", new { id = shelter.Id })'">Zobacz recenzje</button>
                 <button type="button" class="btn btn-success" onclick="location.href='@Url.Action("ManageBookings", "Shelters", new { id = shelter.Id })'">Zarządzaj rezerwacjami</button>
+                <form method="post" asp-page-handler="Delete" class="d-inline">
+                    <input type="hidden" name="shelterId" value="@shelter.Id" />
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz usunąć to schronisko?')">Usuń</button>
+                </form>
             </div>
         </div>
     }

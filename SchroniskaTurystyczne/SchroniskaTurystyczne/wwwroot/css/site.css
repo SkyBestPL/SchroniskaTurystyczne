@@ -1,5 +1,33 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    margin: 0;
+    padding: 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+    position: fixed;
+    top: 0; /* Ustawienie na górze */
+    left: 0; /* Rozci¹ga od lewej */
+    width: 100%; /* Rozci¹ga na ca³¹ szerokoœæ okna */
+}
+
+main {
+    margin: 0;
+}
+
+.navbar {
+    margin-bottom: 0;
 }
 
 @media (min-width: 768px) {
@@ -12,13 +40,8 @@ html {
   box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
-  margin-bottom: 60px;
+  margin-bottom: 45px;
 }
 
 .navbar {
@@ -125,6 +148,25 @@ body {
         background-color: #016363;
     }
 
+.custom-footer {
+    background-color: #004d4d;
+    color: white;
+    padding: 1px 0;
+    font-size: 15px;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+}
+
+    .custom-footer a.footer-link {
+        color: #b3f0f0;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .custom-footer a.footer-link:hover {
+            color: #e0fafa;
+            text-decoration: underline;
+        }
+
 /* ----------------------------------------------------------Shelters/Index---------------------------------------------------------- */
 .shelter-list {
     display: flex;
@@ -202,6 +244,26 @@ body {
     background-color: #0056b3;
 }
 
+.shelter-rating {
+    display: flex;
+    font-size: 20px;
+    margin-top: -10px;
+    color: black;
+}
+
+.star {
+    font-size: 25px; /* Rozmiar gwiazdek */
+    color: gold; /* Kolor pe³nych gwiazdek */
+    -webkit-text-stroke: 0.5px orange; /* Kontur dla przegl¹darek obs³uguj¹cych WebKit */
+    text-stroke: 1px black; /* Kontur dla innych przegl¹darek */
+}
+
+    .star.empty {
+        color: lightgray; /* Kolor pustych gwiazdek */
+        -webkit-text-stroke: 0.5px orange; /* Kontur dla pustych gwiazdek */
+        text-stroke: 1px black;
+    }
+
 /* ------------------------------------------------------Booking/Index------------------------------------------------------ */
 
 .booking-shelter-info {
@@ -231,29 +293,6 @@ body {
     object-fit: cover; /* Dopasowanie, aby nie zniekszta³ciæ zdjêcia */
     border-radius: 8px; /* Zaokr¹glone rogi */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Delikatny cieñ dla lepszej widocznoœci */
-}
-
-.calendar {
-    max-width: 400px;
-    margin-top: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px;
-    background-color: #f9f9f9;
-}
-
-.button-calendar {
-    margin-top: 5px;
-    padding: 5px 10px;
-    background-color: #007bff;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.button-calendar:hover {
-    background-color: #0056b3;
 }
 
 #modalOverlay {
@@ -336,32 +375,96 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2em;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.room-section {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
 }
 
 .room-section h3 {
-    background-color: #f0f0f0;
-    padding: 10px;
+    background-color: #20c997;
+    color: white;
+    padding: 15px;
     margin: 0;
     text-align: center;
-    border-radius: 5px;
+    font-size: 1.2em;
 }
 
-.room-container {
-    padding: 1em;
+..room-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(500px, 100%), 1fr));
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 .room-card {
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 1em;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 15px;
 }
 
-.toggle-calendar-btn {
-    margin: 10px 0;
-    cursor: pointer;
+/*.room-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+}*/
+
+.room-card-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.room-card h4 {
+    color: #20c997;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+}
+
+.room-card p {
+    color: #6c757d;
+    margin: 5px 0;
+}
+
+.room-card .calendar {
+    width: 100%;
+    max-height: 500px;
+    min-height: 300px;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    overflow-y: auto;
+}
+
+.room-card .room-booking-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.room-card input[type="number"],
+.room-card input[type="checkbox"] {
+    margin-top: 5px;
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+}
+
+.room-card label {
+    color: #495057;
+    font-size: 0.9em;
 }
 
 .confirm-booking-btn {
@@ -454,17 +557,42 @@ body {
     display: block;
 }
 
-/*----------------------------------------------------------------Shelters/Edit--------------------------------------------------------------------*/
+/*-----------------------------------------------------------------Reviews/ShelterReviews------------------------------------------------------------------------*/
 
-.tag-item {
-    margin: 0 10px 5px 0; /* Odstêp miêdzy tagami */
-    padding: 5px 10px; /* Wewn¹trz tagu */
-    background-color: #f8f9fa; /* Jasne t³o */
-    border: 1px solid #ddd; /* Obramowanie */
-    border-radius: 15px; /* Zaokr¹glenie */
-    display: inline-block; /* Wyœwietlenie w jednej linii */
-    color: #333; /* Kolor tekstu */
-    font-size: 14px; /* Rozmiar czcionki */
+.review-container {
+    border: 2px solid aquamarine;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.user-review {
+    background-color: #ffffe0;
+}
+
+.review-author {
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.review-rating {
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.review-contents {
+    margin-bottom: 10px;
+}
+
+.review-date {
+    font-size: 12px;
+    color: gray;
+}
+
+.btn-warning {
+    background-color: #ffc107;
+    color: black;
 }
 
 /*----------------------------------------------------------------Areas/Identity.../Manage/UserReservations------------------------------------------------------*/
@@ -494,3 +622,141 @@ body {
     border-radius: 8px;
     padding: 15px;
 }
+
+/*-------------------------------Shared--------------------------------*/
+
+.tag-item {
+    margin: 0 10px 5px 0;
+    padding: 5px 10px;
+    background-color: #f8f9fa;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    display: inline-block;
+    color: black;
+    font-size: 14px;
+}
+
+/* Ogólny motyw kalendarza */
+.fc {
+    background-color: darkcyan !important;
+    color: white !important;
+}
+
+/* Dni */
+.fc-day-number {
+    color: white !important;
+    text-decoration: none !important;
+    font-weight: bold !important;
+    pointer-events: none; /* Wy³¹cz interakcje z linkami */
+}
+
+    /* Dodatkowe czyszczenie stylów linków */
+    .fc-day-number a {
+        color: white !important;
+        text-decoration: none !important;
+    }
+
+        .fc-day-number a:hover,
+        .fc-day-number a:focus {
+            color: white !important;
+            text-decoration: none !important;
+            outline: none !important;
+        }
+
+    /* Dni dzisiejsze */
+    .fc-day-number.fc-today {
+        background-color: #20c997 !important;
+        color: white !important;
+    }
+
+/* Nag³ówki dni tygodnia */
+.fc-day-header {
+    font-size: 0.7em !important;
+    padding: 3px !important;
+    background-color: #008B8B !important;
+    color: white !important;
+    border: none !important;
+}
+
+/* Nazwy miesiêcy */
+.fc-header-title h2 {
+    font-size: 1em !important;
+    color: white !important;
+}
+
+/* Siatka */
+.fc-unthemed .fc-divider,
+.fc-unthemed .fc-popover .fc-header,
+.fc-unthemed .fc-list-heading td {
+    background-color: #008B8B !important;
+}
+
+.fc-unthemed .fc-day-grid .fc-row {
+    border-color: rgba(255,255,255,0.2) !important;
+}
+
+.fc-unthemed .fc-day-grid .fc-cell-overlay {
+    background-color: rgba(255,255,255,0.1) !important;
+}
+
+/* Komórki dni */
+.fc-day-grid .fc-row .fc-bg {
+    background-color: darkcyan !important;
+}
+
+.fc-unthemed .fc-day-grid .fc-day {
+    border-color: rgba(255,255,255,0.2) !important;
+}
+
+/* Przyciski nawigacji */
+.fc-button {
+    background-color: #008B8B !important;
+    color: white !important;
+    border: none !important;
+    font-size: 0.7em !important;
+    padding: 3px 6px !important;
+    transition: background-color 0.3s ease !important;
+}
+
+    .fc-button:hover {
+        background-color: #20c997 !important;
+    }
+
+/*Events */
+.fc-day-grid-event {
+    background-color: #20c997 !important;
+    border: none !important;
+    color: white !important;
+    font-size: 0.6em !important;
+    border-radius: 4px !important;
+}
+
+/* Kompaktowy uk³ad */
+.fc-day-grid .fc-row {
+    min-height: 50px !important;
+    max-height: 60px !important;
+}
+
+.fc-daygrid-day-number {
+    color: white;
+    font-size: 15px;
+}
+
+fc-col-header-cell-cushion {
+    color: white;
+}
+
+fc-toolbar-title {
+    font-size: 0.6em !important;
+}
+/* Dodatkowe poprawki responsywnoœci */
+@media (max-width: 768px) {
+    .fc-day-number {
+        font-size: 0.5em !important;
+        width: 15px !important;
+        height: 15px !important;
+    }
+}
+
+/*------------------Home/Index-------------------*/
+

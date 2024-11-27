@@ -7,11 +7,23 @@
 {
     var user = await UserManager.GetUserAsync(User);
     <li class="nav-item">
-        <a  class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Zalogowano jako @user?.FirstName @user?.LastName</a>
+            <a class="nav-link text-light" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage"> <i class="bi bi-person-fill"></i> @user?.FirstName @user?.LastName</a>
     </li>
+    @if (User.IsInRole("Admin"))
+    {
+        <li>
+            <span class="badge bg-danger ms-2">Admin</span>
+        </li>
+    }
+    @if (User.IsInRole("Exhibitor"))
+    {
+        <li style="margin: 7px 0 0 -10px;">
+            <span class="badge ms-2 align-middle" style="background-color: #004d4d">Właściciel</span>
+        </li>
+    }
     <li class="nav-item">
         <form  class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Wyloguj</button>
+                <button type="submit" class="nav-link btn btn-link text-dark"> <i class="bi bi-box-arrow-left"></i> Wyloguj</button>
         </form>
     </li>
 }

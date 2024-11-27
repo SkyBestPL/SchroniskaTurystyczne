@@ -105,6 +105,7 @@
             const calendar = new FullCalendar.Calendar(calendarDiv, {
                 initialView: 'dayGridMonth',
                 locale: 'pl',
+                columnHeaderFormat: { weekday: 'narrow' },
                 events: function (fetchInfo, successCallback, failureCallback) {
                     // Pobierz dane rezerwacji dla pokoju z kontrolera
                     fetch(`/Booking/GetRoomBookings?roomId=${roomId}`)

@@ -1,8 +1,76 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Schroniarz wita";
+    ViewData["FullScreen"] = true;
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="full-background d-flex flex-column justify-content-center align-items-center text-center">
+    <div class="overlay"></div>
+    <h1 class="display-4 text-white mb-4">Schroniarz wita!</h1>
+    <p class="lead text-white mb-5">Dokąd się wybierasz?</p>
+
+    <form asp-action="Search" method="post" class="w-100" style="max-width: 400px;">
+        <div class="form-group">
+            <select class="form-control form-select" id="SelectedCategoryId" name="SelectedCategoryId">
+                <option value="">-- Wybierz kategorię --</option>
+                @foreach (var category in Model.AvailableCategories)
+                {
+                    <option value="@category.Id" selected="@(category.Id == Model.SelectedCategoryId ? "selected" : null)">
+                        @category.Name
+                    </option>
+                }
+            </select>
+        </div>
+        <button type="submit" class="btn btn-darkcyan w-100 mt-3">Szukaj</button>
+    </form>
 </div>
+
+<style>
+
+    .btn-darkcyan {
+        color: #fff;
+        background-color: darkcyan;
+        border-color: #004d4d;
+    }
+
+    .full-background {
+        position: relative;
+        background-image: url('/images/home-background.png');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+        .full-background .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Czarny z przezroczystością */
+            z-index: 1; /* Tło jest poniżej treści */
+        }
+
+        .full-background h1,
+        .full-background p,
+        .full-background form {
+            position: relative; /* Treść nad overlayem */
+            z-index: 2;
+        }
+
+    body {
+        padding: 0;
+    }
+
+    .container {
+        max-width: 100% !important;
+    }
+
+    main {
+        padding: 0 !important;
+    }
+</style>

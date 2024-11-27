@@ -18,19 +18,35 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             _userManager = userManager;
         }
 
-        public List<Booking> Bookings { get; set; }
+        public List<Booking> CurrentBookings { get; set; } // Rezerwacje aktualne
+        public List<Booking> PastBookings { get; set; } // Rezerwacje zakoñczone
+        public List<Booking> RejectedBookings { get; set; } // Rezerwacje odrzucone
 
         public async Task<IActionResult> OnGetAsync()
         {
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            Bookings = await _context.Bookings
+            // Pobierz wszystkie rezerwacje u¿ytkownika
+            var bookings = await _context.Bookings
                 .Where(r => r.IdGuest == user.Id)
                 .Include(b => b.BookingRooms)
                     .ThenInclude(br => br.Room)
                         .ThenInclude(room => room.Shelter)
                 .ToListAsync();
+
+            // Podzia³ rezerwacji na kategorie
+            CurrentBookings = bookings
+                .Where(b => !b.Ended && b.Valid)
+                .ToList();
+
+            PastBookings = bookings
+                .Where(b => b.Ended && b.Valid)
+                .ToList();
+
+            RejectedBookings = bookings
+                .Where(b => !b.Valid)
+                .ToList();
 
             return Page();
         }

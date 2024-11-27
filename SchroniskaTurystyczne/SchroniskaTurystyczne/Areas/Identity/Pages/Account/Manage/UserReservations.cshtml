@@ -4,46 +4,128 @@
 
 <h3>Moje rezerwacje</h3>
 
+<!-- Sekcja aktualnych rezerwacji -->
+<h4>Aktualne rezerwacje</h4>
 <div class="reservations-container">
-    @foreach (var booking in Model.Bookings)
+    @if (Model.CurrentBookings.Any())
     {
-        <div class="reservations-card mb-4">
-            <div class="card-header">
-                <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
-            </div>
+        @foreach (var booking in Model.CurrentBookings)
+        {
+            <div class="reservations-card mb-4">
+                <div class="card-header">
+                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                </div>
 
-            <div class="card-body">
-                <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd-MM-yyyy")</p>
-                <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd-MM-yyyy")</p>
-                <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
+                <div class="card-body">
+                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
-                <h6>Pokoje:</h6>
-                <ul>
-                    @foreach (var bookingRoom in booking.BookingRooms)
+                    <h6>Pokoje:</h6>
+                    <ul>
+                        @foreach (var bookingRoom in booking.BookingRooms)
+                        {
+                            <li>@bookingRoom.Room?.Name</li>
+                        }
+                    </ul>
+
+                    <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
+                    <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
+                    <p><strong>Status rezerwacji:</strong> @(booking.Verified ? "Potwierdzone" : "Niepotwierdzone")</p>
+                </div>
+
+                <div class="card-footer text-end">
+                    <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Booking/Details", new { id = booking.Id })'">Szczegóły</button>
+
+                    @if (!booking.Verified)
                     {
-                        <li>@bookingRoom.Room?.Name</li>
+                        <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
+                        <button type="button" class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
                     }
-                </ul>
 
-                <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
-                <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
-                <p><strong>Status rezerwacji:</strong> @(booking.Verified ? "Potwierdzone" : "Niepotwierdzone")</p>
+                    @if (!booking.Paid)
+                    {
+                        <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
+                    }
+                </div>
             </div>
+        }
+    }
+    else
+    {
+        <p>Brak aktualnych rezerwacji.</p>
+    }
+</div>
 
-            <div class="card-footer text-end">
-                <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Booking/Details", new { id = booking.Id })'">Szczegóły</button>
+<!-- Sekcja zakończonych rezerwacji -->
+<h4>Zakończone rezerwacje</h4>
+<div class="reservations-container">
+    @if (Model.PastBookings.Any())
+    {
+        @foreach (var booking in Model.PastBookings)
+        {
+            <div class="reservations-card mb-4">
+                <div class="card-header">
+                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                </div>
 
-                @if (!booking.Verified)
-                {
-                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
-                    <button type="button" class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
-                }
+                <div class="card-body">
+                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
-                @if (!booking.Paid)
-                {
-                    <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
-                }
+                    <h6>Pokoje:</h6>
+                    <ul>
+                        @foreach (var bookingRoom in booking.BookingRooms)
+                        {
+                            <li>@bookingRoom.Room?.Name</li>
+                        }
+                    </ul>
+
+                    <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
+                    <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
+                </div>
             </div>
-        </div>
+        }
+    }
+    else
+    {
+        <p>Brak zakończonych rezerwacji.</p>
+    }
+</div>
+
+<!-- Sekcja odrzuconych rezerwacji -->
+<h4>Odrzucone rezerwacje</h4>
+<div class="reservations-container">
+    @if (Model.RejectedBookings.Any())
+    {
+        @foreach (var booking in Model.RejectedBookings)
+        {
+            <div class="reservations-card mb-4">
+                <div class="card-header">
+                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                </div>
+
+                <div class="card-body">
+                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
+
+                    <h6>Pokoje:</h6>
+                    <ul>
+                        @foreach (var bookingRoom in booking.BookingRooms)
+                        {
+                            <li>@bookingRoom.Room?.Name</li>
+                        }
+                    </ul>
+
+                    <p><strong>Powód odrzucenia:</strong> (tu można dodać pole, jeśli takie istnieje)</p>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <p>Brak odrzuconych rezerwacji.</p>
     }
 </div>

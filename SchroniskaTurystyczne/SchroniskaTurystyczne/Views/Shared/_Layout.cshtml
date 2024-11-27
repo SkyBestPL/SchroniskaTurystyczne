@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="~/SchroniskaTurystyczne.styles.css" asp-append-version="true" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+Knujsl5+5hb7U4/Q5x5WE5Bt5WE+03O12Rb5oEw5+qbyQK" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-8zc8BG/Dk5r0HZ5tA/4W8HhweOf4h5Vt0MBiPrr6vHJo+5SzfBdOztD5OTf7jtXT" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <script src="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.js"></script>
     <link href="https://unpkg.com/maplibre-gl@2.4.0/dist/maplibre-gl.css" rel="stylesheet" />
@@ -20,7 +21,7 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-dark bg-darkcyan border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-dark bg-darkcyan box-shadow">
             <div class="container-fluid">
                 <!-- Logo i nazwa strony -->
                 <a class="navbar-brand title-name" asp-area="" asp-controller="Shelters" asp-action="Index">
@@ -36,34 +37,38 @@
                 <!-- Elementy nawigacji -->
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav me-auto">
-                        <!-- Sekcja Dla Gości -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="guestDropdown" role="button" data-bs-toggle="dropdown"
-                               aria-expanded="false">
-                                Dla gości
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="guestDropdown">
-                                <li><a class="dropdown-item" href="/Shelters/Index">Lista schronisk</a></li>
-                                <li><a class="dropdown-item" asp-controller="Shelters" asp-action="CreateRoute">Tworzenie trasy</a></li>
-                                <li><a class="dropdown-item" asp-controller="Routes" asp-action="UserRoutes">Twoje trasy</a></li>
-                            </ul>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            if (User.IsInRole("Exhibitor"))
+                            {
+                                <li class="nav-item">
+                                    <a style="color: gold;" class="nav-link" href="/Shelters/MyShelter"> <i class="bi bi-house-fill"></i> Moje schronisko</a>
+                                </li>
+                            }
+
+                            if (User.IsInRole("Guest"))
+                            {
+                                <!--<li class="nav-item">
+                                    <a class="nav-link" href="/Shelters/Index">Lista schronisk</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Shelters/CreateRoute">Tworzenie trasy</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/Routes/UserRoutes">Twoje trasy</a>
+                                </li>-->
+                                <li class="nav-item">
+                                    <a style="color: white;" class="nav-link" href="/Identity/Account/Manage/UserReservations"> <i class="bi bi-calendar-check-fill"></i> Moje rezerwacje</a>
+                                </li>
+                            }
+                        }
+
+                        <li class="nav-item">
+                            <a style="color: white;" class="nav-link" href="/Shelters/Index"> <i class="bi bi-houses-fill"></i> Lista schronisk</a>
                         </li>
 
-                        <!-- Sekcja Dla Właścicieli -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="ownerDropdown" role="button" data-bs-toggle="dropdown"
-                               aria-expanded="false">
-                                Dla właścicieli
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="ownerDropdown">
-                                <li><a class="dropdown-item" href="/Shelters/Create">Dodaj schronisko</a></li>
-                            </ul>
-                        </li>
-
-                        <li style="color: white;" class="nav-item">
-                            <a style="color: white;" class="nav-link" href="/Map/MapView">
-                                Mapa schronisk
-                            </a>
+                        <li class="nav-item">
+                            <a style="color: white;" class="nav-link" href="/Map/MapView"> <i class="bi bi-geo-alt-fill"></i> Mapa schronisk</a>
                         </li>
                     </ul>
 
@@ -75,15 +80,25 @@
             </div>
         </nav>
     </header>
-    <div class="container">
+
+    @if (ViewData["FullScreen"] as bool? == true)
+    {
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
-    </div>
+    }
+    else
+    {
+        <div style ="margin-top: 80px; margin-bottom: 80px" class="container">
+            <main role="main" class="pb-3">
+                @RenderBody()
+            </main>
+        </div>
+    }
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2024 - SchroniskaTurystyczne - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer" style="background-color: #004d4d">
+        <div class="custom-footer container">
+            &copy; 2024 - Szymon Gwoździej
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>

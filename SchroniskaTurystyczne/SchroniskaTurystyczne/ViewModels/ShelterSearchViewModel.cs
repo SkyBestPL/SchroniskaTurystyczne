@@ -9,9 +9,17 @@ namespace SchroniskaTurystyczne.ViewModels
         public string? Street { get; set; }
         public List<int>? SelectedTagIds { get; set; }
         public List<int>? SelectedRoomTypeIds { get; set; }
+        public int? SelectedCategoryId { get; set; }
         public List<TagViewModel> AvailableTags { get; set; }
         public List<RoomTypeViewModel> AvailableRoomTypes { get; set; }
         public IEnumerable<ShelterViewModel> Shelters { get; set; }
+        public List<CategoryViewModel> AvailableCategories { get; set; }
+    }
+
+    public class CategoryViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 
     public class ShelterViewModel
@@ -26,6 +34,7 @@ namespace SchroniskaTurystyczne.ViewModels
         public string StreetNumber { get; set; }
         public string LocationLon { get; set; }
         public string LocationLat { get; set; }
+        public int AmountOfReviews { get; set; }
         public IEnumerable<TagViewModel> Tags { get; set; }
         public string? MainPhotoBase64 { get; set; }
     }

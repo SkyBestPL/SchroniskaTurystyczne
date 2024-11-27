@@ -8,6 +8,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using SchroniskaTurystyczne.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Diagnostics;
 
 namespace SchroniskaTurystyczne.Controllers
 {
@@ -22,86 +24,134 @@ namespace SchroniskaTurystyczne.Controllers
             _userManager = userManager;
         }
 
-        // GET: Shelters/Create
         [Authorize(Policy = "RequireExhibitorRole")]
         public IActionResult Create()
         {
-            ViewBag.RoomTypes = _context.RoomTypes.ToList();
-            ViewBag.Tags = _context.Tags.ToList();
-            ViewBag.Facilities = _context.Facilities.ToList();
-            return View();
+            var viewModel = new ShelterCreateViewModel
+            {
+                Categories = _context.Categories.Select(c => new SelectListItem
+                {
+                    Value = c.Id.ToString(),
+                    Text = c.Name
+                }).ToList(),
+                RoomTypes = _context.RoomTypes.Select(rt => new SelectListItem
+                {
+                    Value = rt.Id.ToString(),
+                    Text = rt.Name
+                }).ToList(),
+                Tags = _context.Tags.ToList(),
+                Facilities = _context.Facilities.ToList(),
+                Rooms = new List<RoomViewModel>()
+            };
+
+            return View(viewModel);
         }
 
         [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-        [Bind("Name,Description,Country,City,Street,StreetNumber,ZipCode,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags, IFormFileCollection Photos)
+        public async Task<IActionResult> Create(ShelterCreateViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    Debug.WriteLine(error.ErrorMessage);
+                }
+
+                model.Categories = await _context.Categories
+                    .Select(c => new SelectListItem
+                    {
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToListAsync();
+
+                model.RoomTypes = await _context.RoomTypes
+                    .Select(rt => new SelectListItem
+                    {
+                        Value = rt.Id.ToString(),
+                        Text = rt.Name
+                    }).ToListAsync();
+
+                model.Tags = await _context.Tags.ToListAsync();
+                model.Facilities = await _context.Facilities.ToListAsync();
+
+                if (model.SelectedTags != null && model.SelectedTags.Any())
+                {
+                    foreach (var tagId in model.SelectedTags)
+                    {
+                        var tag = model.Tags.FirstOrDefault(t => t.Id == tagId);
+                    }
+                }
+
+                if (model.Rooms != null && model.Rooms.Any())
+                {
+                    foreach (var room in model.Rooms)
+                    {
+                        if (room.SelectedFacilities != null && room.SelectedFacilities.Any())
+                        {
+                            room.SelectedFacilitiesString = string.Join(",", room.SelectedFacilities);
+                        }
+                    }
+                }
+
+                return View(model);
+            }
+
             var user = await _userManager.GetUserAsync(User);
             if (user == null)
             {
                 return RedirectToPage("/Account/Login", new { area = "Identity" });
             }
 
-            shelter.IdExhibitor = user.Id;
-            shelter.Exhibitor = user;
-
-            // Przypisz pokoje i ich udogodnienia do schroniska
-            if (shelter.Rooms != null)
+            var shelter = new Shelter
             {
-                foreach (var room in shelter.Rooms)
+                Name = model.Name,
+                Description = model.Description,
+                Country = model.Country,
+                City = model.City,
+                Street = model.Street,
+                StreetNumber = model.StreetNumber,
+                ZipCode = model.ZipCode,
+                LocationLat = model.LocationLat,
+                LocationLon = model.LocationLon,
+                IdCategory = (int)model.IdCategory,
+                IdExhibitor = user.Id,
+                ConfirmedShelter = false,
+                Tags = await _context.Tags.Where(t => model.SelectedTags.Contains(t.Id)).ToListAsync(),
+                Rooms = model.Rooms != null ? model.Rooms.Select(r => new Room
                 {
-                    room.Shelter = shelter;
-                    room.HasConfirmedBooking = false;
+                    IdType = (int)r.IdType,
+                    Name = r.Name,
+                    PricePerNight = (double)r.PricePerNight,
+                    Capacity = r.Capacity,
+                    IsActive = r.IsActive,
+                    Facilities = r.SelectedFacilities?.Any() == true ? _context.Facilities.Where(f => r.SelectedFacilities.Contains(f.Id)).ToList() : new List<Facility>()
+                }).ToList() : new List<Room>()
+            };
 
-                    if (!string.IsNullOrEmpty(room.SelectedFacilities))
-                    {
-                        var facilityIds = room.SelectedFacilities
-                            .Split(',')
-                            .Where(id => !string.IsNullOrWhiteSpace(id))
-                            .Select(int.Parse)
-                            .ToList();
-
-                        room.Facilities = await _context.Facilities
-                            .Where(facility => facilityIds.Contains(facility.Id))
-                            .ToListAsync();
-                    }
+            if (model.Photos != null && model.Photos.Any())
+            {
+                if (shelter.Photos == null)
+                {
+                    shelter.Photos = new List<Photo>();
                 }
-            }
 
-            // Przypisz wybrane tagi do schroniska
-            if (!string.IsNullOrEmpty(SelectedTags))
-            {
-                var tagIds = SelectedTags.Split(',').Select(int.Parse).ToList();
-                shelter.Tags = await _context.Tags.Where(tag => tagIds.Contains(tag.Id)).ToListAsync();
-            }
-
-            shelter.Photos = new List<Photo>();
-            foreach (var photoFile in Photos)
-            {
-                if (photoFile != null && photoFile.Length > 0)
+                foreach (var photoFile in model.Photos)
                 {
-                    using (var memoryStream = new MemoryStream())
+                    using var memoryStream = new MemoryStream();
+                    await photoFile.CopyToAsync(memoryStream);
+
+                    if (memoryStream.Length < 10097152)
                     {
-                        await photoFile.CopyToAsync(memoryStream);
-
-                        if (memoryStream.Length < 10097152) // Limit 10 MB na zdjęcie
+                        shelter.Photos.Add(new Photo
                         {
-                            var shelterPhoto = new Photo
-                            {
-                                IdShelter = shelter.Id,
-                                Name = photoFile.FileName,
-                                PhotoData = memoryStream.ToArray(),
-                                Shelter = shelter
-                            };
-
-                            shelter.Photos.Add(shelterPhoto);
-                        }
-                        else
-                        {
-                            ModelState.AddModelError("Photos", "Jedno ze zdjęć jest za duże. Maksymalny rozmiar to 10 MB.");
-                            return View(shelter);
-                        }
+                            Name = photoFile.FileName,
+                            PhotoData = memoryStream.ToArray()
+                        });
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("Photos", "Jedno ze zdjęć jest za duże. Maksymalny rozmiar to 10 MB.");
+                        return View(model);
                     }
                 }
             }
@@ -132,7 +182,14 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(s => s.Rooms)
                     .ThenInclude(r => r.RoomType)
                 .Include(s => s.Photos)
+                .Include(s => s.Category)
                 .AsQueryable();
+
+            // Filtruj według kategorii
+            if (searchModel.SelectedCategoryId.HasValue)
+            {
+                query = query.Where(s => s.IdCategory == searchModel.SelectedCategoryId.Value);
+            }
 
             // Aplikowanie filtrów
             if (!string.IsNullOrEmpty(searchModel.SearchTerm))
@@ -183,6 +240,7 @@ namespace SchroniskaTurystyczne.Controllers
                 StreetNumber = s.StreetNumber,
                 LocationLon = s.LocationLon,
                 LocationLat = s.LocationLat,
+                AmountOfReviews = s.AmountOfReviews,
                 Tags = s.Tags.Select(t => new TagViewModel
                 {
                     Id = t.Id,
@@ -200,6 +258,7 @@ namespace SchroniskaTurystyczne.Controllers
                 Street = searchModel.Street,
                 SelectedTagIds = searchModel.SelectedTagIds,
                 SelectedRoomTypeIds = searchModel.SelectedRoomTypeIds,
+                SelectedCategoryId = searchModel.SelectedCategoryId,
                 AvailableTags = _context.Tags.Select(t => new TagViewModel
                 {
                     Id = t.Id,
@@ -211,7 +270,12 @@ namespace SchroniskaTurystyczne.Controllers
                     Name = rt.Name,
                     Description = rt.Description
                 }).ToList(),
-                Shelters = shelterViewModels
+                Shelters = shelterViewModels,
+                AvailableCategories = _context.Categories.Select(c => new CategoryViewModel
+                {
+                    Id = c.Id,
+                    Name = c.Name
+                }).ToList()
             };
 
             return View(viewModel);
@@ -537,7 +601,7 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(b => b.Guest)
                 .Include(b => b.BookingRooms)
                     .ThenInclude(br => br.Room)
-                .Where(b => b.BookingRooms.Any(br => br.Room.IdShelter == id))
+                .Where(b => b.BookingRooms.Any(br => br.Room.IdShelter == id) && b.Valid == true)
                 .ToListAsync();
 
             var viewModel = new ManageBookingsViewModel
@@ -622,8 +686,12 @@ namespace SchroniskaTurystyczne.Controllers
             if (shelter.IdExhibitor != currentUserId)
                 return Forbid();
 
-            _context.BookingRooms.RemoveRange(booking.BookingRooms);
-            _context.Bookings.Remove(booking);
+            booking.Verified = false;
+            booking.Valid = false;
+            booking.Ended = false;
+
+            //_context.BookingRooms.RemoveRange(booking.BookingRooms);
+            //_context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(ManageBookings), new { id = shelter.Id });
@@ -650,11 +718,57 @@ namespace SchroniskaTurystyczne.Controllers
             if (shelter.IdExhibitor != currentUserId)
                 return Forbid();
 
-            _context.BookingRooms.RemoveRange(booking.BookingRooms);
-            _context.Bookings.Remove(booking);
+            booking.Ended = true;
+
+            //_context.BookingRooms.RemoveRange(booking.BookingRooms);
+            //_context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(ManageBookings), new { id = shelter.Id });
+        }
+
+        public async Task<IActionResult> MyShelter()
+        {
+            var user = await _userManager.GetUserAsync(User);
+
+            // Znajdź schronisko użytkownika
+            var shelter = await _context.Shelters
+                .Include(s => s.Rooms)
+                .FirstOrDefaultAsync(s => s.IdExhibitor == user.Id);
+
+            if (shelter == null)
+            {
+                return View(new MyShelterViewModel
+                {
+                    HasShelter = false
+                });
+            }
+
+            // Statystyki rezerwacji
+            var approvedBookings = await _context.Bookings
+                .Where(b => b.IdShelter == shelter.Id && b.Verified)
+                .CountAsync();
+
+            var pendingBookings = await _context.Bookings
+                .Where(b => b.IdShelter == shelter.Id && !b.Verified)
+                .CountAsync();
+
+            var endedBookings = await _context.Bookings
+                .Where(b => b.IdShelter == shelter.Id && b.Ended)
+                .CountAsync();
+
+            return View(new MyShelterViewModel
+            {
+                HasShelter = true,
+                Shelter = shelter,
+                Rooms = shelter.Rooms.ToList(),
+                BookingStatistics = new Dictionary<string, int>
+            {
+                { "Approved", approvedBookings },
+                { "Pending", pendingBookings },
+                { "Ended", endedBookings }
+            }
+            });
         }
     }
 }

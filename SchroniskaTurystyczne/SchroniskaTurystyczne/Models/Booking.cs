@@ -23,7 +23,7 @@ namespace SchroniskaTurystyczne.Models
         public bool Ended { get; set; } //true - okres rezerwacji się zakończył, false - rezerwacja jeszcze trwa
 
         public virtual AppUser Guest { get; set; }
-        public virtual Shelter Shelter { get; set; }
+        public virtual Shelter? Shelter { get; set; }
         public virtual ICollection<BookingRoom> BookingRooms { get; set; }
     }
 }

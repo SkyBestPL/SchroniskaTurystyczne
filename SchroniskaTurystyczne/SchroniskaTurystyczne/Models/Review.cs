@@ -6,7 +6,7 @@ namespace SchroniskaTurystyczne.Models
     {
         [Key]
         public int Id { get; set; }
-        public int IdShelter { get; set; }
+        public int? IdShelter { get; set; }
         public string IdUser { get; set; }
         public string Date { get; set; }
         public int Rating { get; set; }

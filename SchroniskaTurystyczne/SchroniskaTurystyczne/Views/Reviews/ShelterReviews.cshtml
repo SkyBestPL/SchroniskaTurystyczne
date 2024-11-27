@@ -1,0 +1,53 @@
+﻿@model SchroniskaTurystyczne.ViewModels.ReviewsViewModel
+
+<h2>Recenzje schroniska @Model.ShelterName</h2>
+
+@if (Model.ExistingUserReview != null)
+{
+    <div class="review-container user-review">
+        <h3>Twoja recenzja:</h3>
+        <form asp-action="EditReview" method="post">
+            <input type="hidden" name="ReviewId" value="@Model.ExistingUserReview.Id" />
+            <div class="form-group">
+                <label>Ocena (1-10):</label>
+                <input type="number" name="Rating" value="@Model.ExistingUserReview.Rating" min="1" max="10" required class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Treść recenzji:</label>
+                <textarea name="Contents" class="form-control" rows="4">@Model.ExistingUserReview.Contents</textarea>
+            </div>
+            <button type="submit" class="btn btn-warning">Zaktualizuj recenzję</button>
+        </form>
+    </div>
+}
+else if (Model.CanAddReview)
+{
+    <div class="review-container add-review">
+        <h3>Dodaj swoją recenzję:</h3>
+        <form asp-action="AddReview" method="post">
+            <input type="hidden" name="ShelterId" value="@Model.ShelterId" />
+            <div class="form-group">
+                <label>Ocena (1-10):</label>
+                <input type="number" name="Rating" min="1" max="10" required class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Treść recenzji:</label>
+                <textarea name="Contents" class="form-control" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Dodaj recenzję</button>
+        </form>
+    </div>
+}
+
+<div class="reviews-list">
+    <h3>Wszystkie recenzje:</h3>
+    @foreach (var review in Model.Reviews.OrderByDescending(r => r.Date))
+    {
+        <div class="review-container">
+            <p class="review-author" style="color: darkcyan;">@review.User.FirstName @review.User.LastName</p>
+            <p class="review-rating">Ocena: <strong>@review.Rating/10</strong></p>
+            <p class="review-contents">@review.Contents</p>
+            <p class="review-date">Data: @review.Date</p>
+        </div>
+    }
+</div>

@@ -18,28 +18,34 @@ namespace SchroniskaTurystyczne.Data
             : base(options)
         {
         }
+
         public DbSet<AppUser> AppUsers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingRoom> BookingRooms { get; set; }
         public DbSet<Facility> Facilities { get; set; }
         public DbSet<Message> Messages { get; set; }
-        //public DbSet<Payment> Payments { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Point> Points { get; set; }
         public DbSet<Review> Reviews { get; set; }
         public DbSet<Room> Rooms { get; set; }
-        //public DbSet<RoomFacility> RoomFacilities { get; set; }
         public DbSet<RoomPhoto> RoomPhotos { get; set; }
         public DbSet<RoomType> RoomTypes { get; set; }
-        //public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<SavedRoute> SavedRoutes { get; set; }
         public DbSet<Shelter> Shelters { get; set; }
-        //public DbSet<ShelterTag> ShelterTags { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<News> ShelterNews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            //jeden do jednego
+            modelBuilder.Entity<Shelter>()
+                .HasOne(s => s.Exhibitor)
+                .WithOne(u => u.Shelter)
+                .HasForeignKey<Shelter>(s => s.IdExhibitor)
+                .OnDelete(DeleteBehavior.Cascade); //użytkownik może mieć tylko 1 schronisko
 
             //wiele do wielu
             modelBuilder.Entity<Shelter>()
@@ -60,27 +66,33 @@ namespace SchroniskaTurystyczne.Data
                     r => r.HasOne(typeof(Room)).WithMany().HasForeignKey("IdRoom").HasPrincipalKey(nameof(Room.Id)),
                     j => j.HasKey("IdRoom", "IdFacility"));
 
-            // Konfiguracja klucza złożonego dla BookingRoom
             modelBuilder.Entity<BookingRoom>()
                 .HasKey(br => new { br.IdBooking, br.IdRoom });
 
-            // Opcjonalnie: konfiguracja relacji, jeśli potrzebne
             modelBuilder.Entity<BookingRoom>()
                 .HasOne(br => br.Booking)
                 .WithMany(b => b.BookingRooms)
-                .HasForeignKey(br => br.IdBooking);
+                .HasForeignKey(br => br.IdBooking)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BookingRoom>()
                 .HasOne(br => br.Room)
                 .WithMany(r => r.BookingRooms)
-                .HasForeignKey(br => br.IdRoom);
+                .HasForeignKey(br => br.IdRoom)
+                .OnDelete(DeleteBehavior.NoAction);
 
-            //rel jeden do wielu
+            //jeden do wielu
             modelBuilder.Entity<Booking>()
                 .HasOne(b => b.Guest)
                 .WithMany(u => u.Bookings)
                 .HasForeignKey(b => b.IdGuest)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Booking>()
+                .HasOne(b => b.Shelter)
+                .WithMany(s => s.Bookings)
+                .HasForeignKey(b => b.IdShelter)
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.Shelter)
@@ -88,12 +100,15 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(r => r.IdShelter)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            //rel dla IdUser
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.IdUser)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Review>()
+                .Property(r => r.Contents)
+                .HasMaxLength(500);
 
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Shelter)
@@ -105,7 +120,7 @@ namespace SchroniskaTurystyczne.Data
                 .HasOne(r => r.RoomType)
                 .WithMany(rt => rt.Rooms)
                 .HasForeignKey(r => r.IdType)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Photo>()
                 .HasOne(p => p.Shelter)
@@ -128,56 +143,32 @@ namespace SchroniskaTurystyczne.Data
             modelBuilder.Entity<SavedRoute>()
                 .HasOne(sr => sr.Guest)
                 .WithMany(u => u.SavedRoutes)
-                .HasForeignKey(sr => sr.IdGuest);
+                .HasForeignKey(sr => sr.IdGuest)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            //jeden-do-wielu
             modelBuilder.Entity<Point>()
                 .HasOne(p => p.SavedRoute)
                 .WithMany(r => r.Points)
-                .HasForeignKey(p => p.IdSavedRoute);
+                .HasForeignKey(p => p.IdSavedRoute)
+                .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<Review>()
-                .Property(r => r.Contents)
-                .HasMaxLength(500);
-
-            //indeksy
-            modelBuilder.Entity<Room>()
-                .HasIndex(r => r.Name)
-                .IsUnique();
-
-            //rel dla SenderId
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.Sender)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.IdSender)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
-            //rel dla ReceiverId
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.Receiver)
                 .WithMany(u => u.ReceivedMessages)
                 .HasForeignKey(m => m.IdReceiver)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            //rel z Bookings
-            modelBuilder.Entity<BookingRoom>()
-                .HasOne(br => br.Booking)
-                .WithMany(b => b.BookingRooms)
-                .HasForeignKey(br => br.IdBooking)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            //rel z Rooms
-            modelBuilder.Entity<BookingRoom>()
-                .HasOne(br => br.Room)
-                .WithMany(r => r.BookingRooms)
-                .HasForeignKey(br => br.IdRoom)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Shelter>()
-                .HasOne(s => s.Exhibitor)
-                .WithMany(u => u.Shelters)
-                .HasForeignKey(s => s.IdExhibitor)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasOne(s => s.Category)
+                .WithMany(c => c.Shelters)
+                .HasForeignKey(s => s.IdCategory)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Role>(b =>
             {
@@ -187,33 +178,6 @@ namespace SchroniskaTurystyczne.Data
                 .IsRequired();
             });
 
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.Reviews)
-                .WithOne(r => r.User)
-                .HasForeignKey(r => r.IdUser);
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.Bookings)
-                .WithOne(b => b.Guest)
-                .HasForeignKey(b => b.IdGuest);
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.SentMessages)
-                .WithOne(m => m.Sender)
-                .HasForeignKey(m => m.IdSender)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.ReceivedMessages)
-                .WithOne(m => m.Receiver)
-                .HasForeignKey(m => m.IdReceiver)
-                .OnDelete(DeleteBehavior.Restrict);
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.Shelters)
-                .WithOne(s => s.Exhibitor)
-                .HasForeignKey(s => s.IdExhibitor);
-            modelBuilder.Entity<AppUser>()
-                .HasMany(u => u.SavedRoutes)
-                .WithOne(sr => sr.Guest)
-                .HasForeignKey(sr => sr.IdGuest);
-
             modelBuilder.Entity<AppUser>(b =>
             {
                 b.HasMany(e => e.UserRoles)
@@ -221,6 +185,12 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(ur => ur.UserId)
                 .IsRequired();
             });
+
+            modelBuilder.Entity<News>()
+                .HasOne(r => r.Shelter)
+                .WithMany(s => s.ShelterNews)
+                .HasForeignKey(r => r.IdShelter)
+                .OnDelete(DeleteBehavior.Cascade);
 
             Seed(modelBuilder);
         }
@@ -271,19 +241,22 @@ namespace SchroniskaTurystyczne.Data
             var roomPublic = new RoomType()
             {
                 Id = 1,
-                Name = "Public"
+                Name = "Pokój publiczny",
+                Description = "Pokój rezerwowany wspólnie z innymi gośćmi"
             };
 
             var roomPrivate = new RoomType()
             {
                 Id = 2,
-                Name = "Private"
+                Name = "Pokój prywatny",
+                Description = "Pokój rezerwowany na własność"
             };
 
             var roomCamping = new RoomType()
             {
                 Id = 3,
-                Name = "Camping"
+                Name = "Pole namiotowe",
+                Description = "Wspólne miejsce dla gości na zewnątrz"
             };
 
             builder.Entity<RoomType>().HasData(roomPublic);
@@ -347,6 +320,55 @@ namespace SchroniskaTurystyczne.Data
             builder.Entity<Tag>().HasData(roomTag);
             builder.Entity<Tag>().HasData(barTag);
             builder.Entity<Tag>().HasData(parkingTag);
+
+            var tatryCategory = new Category()
+            {
+                Id = 1,
+                Name = "Tatry",
+                Description = "Schroniska znajdujace się na paśmie górskim Tatr"
+            };
+
+            var bieszczadyCategory = new Category()
+            {
+                Id = 2,
+                Name = "Bieszczady",
+                Description = "Schroniska znajdujace się na paśmaie górskim Bieszczad"
+            };
+
+            var beskidZywieckiCategory = new Category()
+            {
+                Id = 3,
+                Name = "Beskid Żywiecki",
+                Description = "Schroniska znajdujace się na paśmaie górskim Beskidu Żywieckiego"
+            };
+
+            var beskidSlaskiCategory = new Category()
+            {
+                Id = 4,
+                Name = "Beskid Śląski",
+                Description = "Schroniska znajdujace się na paśmie górskim Beskidu Śląskiego"
+            };
+
+            var karkonoszeCategory = new Category()
+            {
+                Id = 5,
+                Name = "Karkonosze",
+                Description = "Schroniska znajdujace się na paśmie górskim Karkonoszy"
+            };
+
+            var otherCategory = new Category()
+            {
+                Id = 6,
+                Name = "Inne",
+                Description = "Schroniska znajdujace się na regionach innych niż pasma górskie"
+            };
+
+            builder.Entity<Category>().HasData(tatryCategory);
+            builder.Entity<Category>().HasData(bieszczadyCategory);
+            builder.Entity<Category>().HasData(beskidZywieckiCategory);
+            builder.Entity<Category>().HasData(beskidSlaskiCategory);
+            builder.Entity<Category>().HasData(karkonoszeCategory);
+            builder.Entity<Category>().HasData(otherCategory);
         }
     }
 }

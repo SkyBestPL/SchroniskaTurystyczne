@@ -41,7 +41,7 @@ namespace SchroniskaTurystyczne.Controllers
         {
             // Pobierz wszystkie rezerwacje dla danego pokoju
             var bookings = _context.BookingRooms
-                .Where(br => br.IdRoom == roomId)
+                .Where(br => br.IdRoom == roomId && br.Booking.Valid == true && br.Booking.Ended != true)
                 .Select(br => new
                 {
                     CheckInDate = br.Booking.CheckInDate,
@@ -122,6 +122,12 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
+            var firstRoomId = rooms.First().RoomId;
+            var shelter = await _context.Rooms
+                .Where(r => r.Id == firstRoomId)
+                .Select(r => r.Shelter)
+                .FirstOrDefaultAsync();
+
             // Dodaj nową rezerwację do bazy
             var booking = new Booking
             {
@@ -132,7 +138,11 @@ namespace SchroniskaTurystyczne.Controllers
                 BookingDate = DateTime.UtcNow,
                 Bill = rooms.Sum(r => r.NumberOfPeople * _context.Rooms.Where(ro => ro.Id == r.RoomId).Select(ro => ro.PricePerNight).FirstOrDefault() * (checkOutDate - checkInDate).Days),
                 Paid = false,
-                Verified = false
+                Verified = false,
+                Valid = true,
+                Ended = false,
+                Shelter = shelter,
+                IdShelter = shelter.Id
             };
             _context.Bookings.Add(booking);
             await _context.SaveChangesAsync();

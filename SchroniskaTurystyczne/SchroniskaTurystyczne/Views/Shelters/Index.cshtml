@@ -41,6 +41,11 @@
                 <button type="submit" class="btn btn-primary">Szukaj</button>
             </div>
         </div>
+        <div class="col">
+            <select asp-for="SelectedCategoryId" class="form-select" asp-items="@(new SelectList(Model.AvailableCategories, "Id", "Name"))">
+                <option value="">Wszystkie schroniska</option>
+            </select>
+        </div>
     </form>
 </div>
 
@@ -92,21 +97,31 @@
 </div>
 
 
-<!-- Shelter list (use ViewBag.Shelters) -->
+<!-- Shelter list  -->
 <div class="shelter-list">
     @foreach (var shelter in Model.Shelters)
     {
         <div class="shelter-container">
             <div class="shelter-info">
-                <h3>@shelter.Name</h3>
+                <h3 style="color:black"><strong>@shelter.Name</strong></h3>
+                <div class="shelter-rating">
+
+                    @if (shelter.Rating != null)
+                    {
+                        <span class="star full">&#9733;</span>
+                        <p> <strong style="color:black">@shelter.Rating</strong>/10</p> <p style="font-size: 15px; margin: 10px 0 0 5px">(@shelter.AmountOfReviews)</p>
+                    }
+                    else
+                    {
+                        <span class="star empty">&#9733;</span>
+                        <p><strong> Brak ocen</strong></p>
+                    }
+                </div>
                 <p class="shelter-description">
                     <strong>Opis:</strong> @shelter.Description
                 </p>
                 <p class="shelter-description">
                     <strong>Lokalizacja:</strong> @shelter.Country, @shelter.City
-                </p>
-                <p class="shelter-description">
-                    <strong>Ocena:</strong> 5/10 @shelter.Rating
                 </p>
 
                 @if (shelter.Tags != null && shelter.Tags.Any())
@@ -128,6 +143,7 @@
             <div class="shelter-actions">
                 <a style="background-color:darkcyan" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
                 <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Szczegóły</a>
+                <a style="background-color:gold; color: black" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@shelter.Id">Recenzje</a>
             </div>
         </div>
     }

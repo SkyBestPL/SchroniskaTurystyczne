@@ -52,5 +52,41 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
 
             return Page();
         }
+
+        public async Task<IActionResult> OnPostDeleteAsync(int shelterId)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return NotFound();
+
+            // ZnajdŸ schronisko nale¿¹ce do u¿ytkownika
+            var shelter = await _context.Shelters
+                .Where(s => s.IdExhibitor == user.Id && s.Id == shelterId)
+                .FirstOrDefaultAsync();
+
+            if (shelter == null)
+            {
+                TempData["Error"] = "Nie znaleziono schroniska lub brak uprawnieñ do jego usuniêcia.";
+                return RedirectToPage();
+            }
+
+            // Usuñ wszystkie powi¹zane dane (np. pokoje, rezerwacje)
+            var rooms = _context.Rooms.Where(r => r.IdShelter == shelter.Id);
+            foreach (var room in rooms)
+            {
+                var bookingRooms = _context.BookingRooms.Where(br => br.IdRoom == room.Id);
+                _context.BookingRooms.RemoveRange(bookingRooms);
+            }
+            _context.Rooms.RemoveRange(rooms);
+
+            var bookings = _context.Bookings.Where(b => b.BookingRooms.Any(br => br.Room.IdShelter == shelter.Id));
+            _context.Bookings.RemoveRange(bookings);
+
+            // Usuñ samo schronisko
+            _context.Shelters.Remove(shelter);
+            await _context.SaveChangesAsync();
+
+            TempData["Success"] = "Schronisko zosta³o pomyœlnie usuniête.";
+            return RedirectToPage();
+        }
     }
 }

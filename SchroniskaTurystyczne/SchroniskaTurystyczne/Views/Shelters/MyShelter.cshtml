@@ -1,0 +1,62 @@
+﻿@model SchroniskaTurystyczne.ViewModels.MyShelterViewModel
+
+<h1>Moje Schronisko</h1>
+
+@if (!Model.HasShelter)
+{
+    <div class="text-center">
+        <h3>Nie posiadasz jeszcze żadnego schroniska.</h3>
+        <a asp-action="Create" class="btn btn-primary">Dodaj swoje schronisko</a>
+    </div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header">
+            <h2>@Model.Shelter.Name</h2>
+            <p>@Model.Shelter.City, @Model.Shelter.Street @Model.Shelter.StreetNumber</p>
+        </div>
+        <div class="card-body">
+            <p><strong>Ocena:</strong> @(Model.Shelter.Rating?.ToString("0.0") ?? "Brak oceny")</p>
+            <p><strong>Kategoria:</strong> @Model.Shelter.Category?.Name</p>
+            <p><strong>Tagi:</strong> @string.Join(", ", Model.Shelter.Tags?.Select(t => t.Name) ?? new List<string>())</p>
+        </div>
+    </div>
+
+    <h3 class="mt-4">Statystyki rezerwacji</h3>
+    <ul class="list-group mb-4">
+        <li class="list-group-item">Zatwierdzone rezerwacje: @Model.BookingStatistics["Approved"]</li>
+        <li class="list-group-item">Oczekujące rezerwacje: @Model.BookingStatistics["Pending"]</li>
+        <li class="list-group-item">Zakończone rezerwacje: @Model.BookingStatistics["Ended"]</li>
+    </ul>
+
+    <h3>Pokoje</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Opis</th>
+                <th>Cena za noc</th>
+                <th>Pojemność</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var room in Model.Rooms)
+            {
+                <tr>
+                    <td>@room.Name</td>
+                    <td>@room.Description</td>
+                    <td>@room.PricePerNight.ToString("C")</td>
+                    <td>@room.Capacity</td>
+                    <td>@(room.IsActive ? "Aktywny" : "Zablokowany")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-4">
+        <a asp-action="Edit" asp-route-id="@Model.Shelter.Id" class="btn btn-warning">Edytuj Schronisko</a>
+        <a asp-action="ManageBookings" asp-route-id="@Model.Shelter.Id" class="btn btn-success">Zarządzaj rezerwacjami</a>
+    </div>
+}
