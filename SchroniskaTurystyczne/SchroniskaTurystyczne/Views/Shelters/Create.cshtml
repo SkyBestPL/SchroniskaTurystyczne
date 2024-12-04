@@ -7,7 +7,7 @@
 
 <h2>@ViewData["Title"]</h2>
 
-<form asp-action="Create" method="post" enctype="multipart/form-data" class="mb-5">
+<form id="formularz" asp-action="Create" method="post" enctype="multipart/form-data" class="mb-5">
 
     <div class="form-group">
         <label asp-for="IdCategory" class="control-label">Kategoria</label>
@@ -89,6 +89,7 @@
                     <th>Cena za noc (zł)</th>
                     <th>Pojemność (w osobach)</th>
                     <th>Udogodnienia</th>
+                    <th>Zdjęcia</th>
                     <th>Aktywny</th>
                     <th>Usuń</th>
                 </tr>
@@ -103,23 +104,41 @@
 
 <script>
     const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
-    var lat = 52.06936257159014, lon = 19.48022053933678;
+    let lat = 52.06936257159014, lon = 19.48022053933678;
 
-    const map = L.map('map').setView([lat, lon], 6);
-    L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
-        minZoom: 0,
-        maxZoom: 19,
-        attribution: '<a href="https://api.mapy.cz/copyright" target="_blank">&copy; Seznam.cz a.s. a další</a>',
-    }).addTo(map);
+    const map = new maplibregl.Map({
+        container: 'map',
+        center: [lon, lat],
+        zoom: 6,
+        style: {
+            version: 8,
+            sources: {
+                'basic-tiles': {
+                    type: 'raster',
+                    url: `https://api.mapy.cz/v1/maptiles/basic/tiles.json?apikey=${API_KEY}`,
+                    tileSize: 256,
+                },
+            },
+            layers: [{
+                id: 'tiles',
+                type: 'raster',
+                source: 'basic-tiles',
+            }],
+        },
+    });
 
-    let marker = L.marker([lat, lon]).addTo(map);
+    let marker = new maplibregl.Marker({ color: 'darkcyan' })
+        .setLngLat([lon, lat])
+        .addTo(map);
+
     document.getElementById('Latitude').value = lat;
     document.getElementById('Longitude').value = lon;
 
     map.on('click', function (e) {
-        marker.setLatLng(e.latlng);
-        document.getElementById('Latitude').value = e.latlng.lat;
-        document.getElementById('Longitude').value = e.latlng.lng;
+        const coords = e.lngLat;
+        marker.setLngLat([coords.lng, coords.lat]);
+        document.getElementById('Latitude').value = coords.lat;
+        document.getElementById('Longitude').value = coords.lng;
     });
 
     function addRoom() {
@@ -128,37 +147,54 @@
 
         const row = document.createElement('tr');
         row.innerHTML = `
-                <td>
-                    <select name="Rooms[${index}].IdType" class="form-control">
-                        @foreach (var type in Model.RoomTypes)
-                        {
-                             <option value="@type.Value">@type.Text</option>
-                        }
-                    </select>
-                </td>
-                <td>
-                    <input type="text" name="Rooms[${index}].Name" class="form-control" />
-                </td>
-                <td>
-                    <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" />
-                </td>
-                <td>
-                    <input type="number" name="Rooms[${index}].Capacity" class="form-control" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-secondary mb-2" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
-                    <div id="facilities-display-${index}" class="selected-facilities-container mt-2"></div>
-                    <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
-                </td>
-                <td>
-                    <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
-                    <input type="hidden" name="Rooms[${index}].IsActive" id="is-active-${index}" value="true" />
-                </td>
-                <td>
-                    <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
-                </td>
-            `;
+            <td>
+                <select name="Rooms[${index}].IdType" class="form-control" data-val="true" data-val-required="Wybór typu pokoju jest wymagany.">
+                    @foreach (var type in Model.RoomTypes)
+                    {
+                         <option value="@type.Value">@type.Text</option>
+                    }
+                </select>
+                <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].IdType" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                <input type="text" name="Rooms[${index}].Name" class="form-control" data-val="true" data-val-required="Nazwa pokoju jest wymagana." />
+                <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].Name" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" data-val="true" data-val-required="Cena pokoju jest wymagana." />
+                <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].PricePerNight" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                <input type="number" name="Rooms[${index}].Capacity" class="form-control" data-val="true" data-val-required="Pojemność pokoju jest wymagana." />
+                <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].Capacity" data-valmsg-replace="true"></span>
+            </td>
+            <td>
+                <button type="button" class="btn btn-secondary mb-2" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
+                <div id="facilities-display-${index}" class="selected-facilities-container mt-2"></div>
+                <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
+            </td>
+            <td>
+                <input type="file" name="Rooms[${index}].RoomPhotos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
+                <small class="form-text text-muted">Max 3 zdjęcia, każde do 5MB</small>
+            </td>
+            <td>
+                <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
+                <input type="hidden" name="Rooms[${index}].IsActive" id="is-active-${index}" value="true" />
+            </td>
+            <td>
+                <button type="button" class="btn btn-danger" onclick="removeRoom(this)">Usuń</button>
+            </td>
+        `;
         container.appendChild(row);
+
+        /*var form = $('#formularz')
+
+        form.removeData("validator")
+            .removeData("unobtrusiveValidation");
+
+        console.log(form);
+
+        $.validator.unobtrusive.parse(form);*/
     }
 
     function updateIsActive(index) {
@@ -175,10 +211,15 @@
     let selectedTags = [];
 
     function openTagsModal() {
-        // Zaznacz istniejące tagi w modalu
+        const selectedTagsInput = document.getElementById('selected-tags');
+        const selectedTags = selectedTagsInput.value
+            ? JSON.parse(selectedTagsInput.value)
+            : [];
+
         document.querySelectorAll('#tags-list input[type="checkbox"]').forEach(checkbox => {
-            checkbox.checked = selectedTags.includes(checkbox.value);
+            checkbox.checked = selectedTags.includes(Number(checkbox.value));
         });
+
         document.getElementById('tags-modal').style.display = 'block';
         document.getElementById('tags-modal-overlay').style.display = 'block';
     }
@@ -190,7 +231,9 @@
 
     function toggleTag(checkbox, tagName) {
         const selectedTagsInput = document.getElementById('selected-tags');
-        let selectedTags = selectedTagsInput.value ? selectedTagsInput.value.split(',').map(Number) : [];
+        let selectedTags = selectedTagsInput.value
+            ? JSON.parse(selectedTagsInput.value)
+            : [];
 
         if (checkbox.checked) {
             if (!selectedTags.includes(Number(checkbox.value))) {
@@ -202,7 +245,7 @@
             updateTagsDisplay(tagName, false);
         }
 
-        selectedTagsInput.value = selectedTags.join(',');
+        selectedTagsInput.value = JSON.stringify(selectedTags);
     }
 
     function updateTagsDisplay(tagName, add) {
@@ -244,7 +287,7 @@
         const selectedFacilitiesInput = document.getElementById(`selected-facilities-${currentRoomIndex}`);
 
         let selectedFacilities = selectedFacilitiesInput.value ?
-            selectedFacilitiesInput.value.split(',').filter(id => id.trim() !== '').map(Number) : [];
+            JSON.parse(selectedFacilitiesInput.value) : [];
 
         if (checkbox.checked) {
             if (!selectedFacilities.includes(Number(checkbox.value))) {
@@ -254,7 +297,7 @@
             selectedFacilities = selectedFacilities.filter(id => id !== Number(checkbox.value));
         }
 
-        selectedFacilitiesInput.value = selectedFacilities.join(',');
+        selectedFacilitiesInput.value = JSON.stringify(selectedFacilities);
         updateFacilitiesListDisplay(currentRoomIndex, facilityName, checkbox.checked);
     }
 
@@ -272,115 +315,32 @@
             });
         }
     }
-
-    function validateTags() {
-        const selectedTagsInput = document.getElementById('selected-tags');
-        const tagsErrorSpan = document.createElement('span');
-        tagsErrorSpan.className = 'text-danger tags-error';
-        tagsErrorSpan.id = 'tags-validation-error';
-
-        if (!selectedTagsInput.value) {
-            tagsErrorSpan.textContent = 'Wybierz przynajmniej jeden tag';
-            document.querySelector('.btn-secondary[onclick="openTagsModal()"]').after(tagsErrorSpan);
-            return false;
-        } else {
-            const existingError = document.getElementById('tags-validation-error');
-            if (existingError) existingError.remove();
-            return true;
-        }
-    }
-
-    function validateRooms() {
-        const roomsContainer = document.getElementById('rooms-table-body');
-        const roomsErrorSpan = document.createElement('span');
-        roomsErrorSpan.className = 'text-danger rooms-error';
-        roomsErrorSpan.id = 'rooms-validation-error';
-
-        if (roomsContainer.children.length === 0) {
-            roomsErrorSpan.textContent = 'Dodaj przynajmniej jeden pokój';
-            document.querySelector('button[onclick="addRoom()"]').after(roomsErrorSpan);
-            return false;
-        } else {
-            const existingError = document.getElementById('rooms-validation-error');
-            if (existingError) existingError.remove();
-            return validateRoomFields();
-        }
-    }
-
-    function validateRoomFields() {
-        let isValid = true;
-        const rooms = document.getElementById('rooms-table-body').children;
-
-        for (let i = 0; i < rooms.length; i++) {
-            const room = rooms[i];
-            const typeSelect = room.querySelector('select[name$=".IdType"]');
-            const nameInput = room.querySelector('input[name$=".Name"]');
-            const priceInput = room.querySelector('input[name$=".PricePerNight"]');
-            const capacityInput = room.querySelector('input[name$=".Capacity"]');
-
-            room.querySelectorAll('.text-danger').forEach(el => el.remove());
-
-            if (!typeSelect.value) {
-                const error = document.createElement('span');
-                error.className = 'text-danger';
-                error.textContent = 'Wybierz typ pokoju';
-                typeSelect.after(error);
-                isValid = false;
-            }
-
-            if (!nameInput.value.trim()) {
-                const error = document.createElement('span');
-                error.className = 'text-danger';
-                error.textContent = 'Nazwa pokoju jest wymagana';
-                nameInput.after(error);
-                isValid = false;
-            }
-
-            if (!priceInput.value || parseFloat(priceInput.value) <= 0) {
-                const error = document.createElement('span');
-                error.className = 'text-danger';
-                error.textContent = 'Podaj prawidłową cenę';
-                priceInput.after(error);
-                isValid = false;
-            }
-
-            if (!capacityInput.value || parseInt(capacityInput.value) <= 0) {
-                const error = document.createElement('span');
-                error.className = 'text-danger';
-                error.textContent = 'Podaj prawidłową pojemność';
-                capacityInput.after(error);
-                isValid = false;
-            }
-        }
-
-        return isValid;
-    }
-
-    document.querySelector('form').addEventListener('submit', function (e) {
-        const tagsValid = validateTags();
-        const roomsValid = validateRooms();
-
-        if (!tagsValid || !roomsValid) {
-            e.preventDefault();
-        }
-    });
 </script>
 
 @if (Model.SelectedTags != null && Model.SelectedTags.Any())
 {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-        @foreach (var tagId in Model.SelectedTags)
-        {
-            <text>
-                        var checkbox = document.querySelector(`#tags-list input[value="${tagId}"]`);
-                        if (checkbox) {
-                            checkbox.checked = true;
-                        toggleTag(checkbox, checkbox.nextElementSibling.textContent);
-                            }
-            </text>
-        }
-                });
+            const selectedTags = @Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model.SelectedTags));
+            const tagsDisplay = document.getElementById('tags-display');
+            const hiddenTagsInput = document.getElementById('selected-tags');
+
+            hiddenTagsInput.value = JSON.stringify(selectedTags);
+
+            selectedTags.forEach(function (tagId) {
+                const checkbox = document.querySelector(`#tags-list input[value="${tagId}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    const tagName = checkbox.parentElement.textContent.trim();
+                    const tagItem = document.createElement('p');
+                    tagItem.className = 'tag-item';
+                    tagItem.innerText = tagName;
+                    tagItem.dataset.tagName = tagName;
+                    tagItem.dataset.tagId = tagId;
+                    tagsDisplay.appendChild(tagItem);
+                }
+            });
+        });
     </script>
 }
 
@@ -388,44 +348,51 @@
 {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-        @foreach (var room in Model.Rooms)
+        @for (int roomIndex = 0; roomIndex < Model.Rooms.Count; roomIndex++)
         {
+            var room = Model.Rooms[roomIndex];
             <text>
                         addRoom();
                         var lastRow = document.getElementById('rooms-table-body').lastElementChild;
 
                         // Ustaw typ pokoju
-                        if (lastRow.querySelector('select[name$=".IdType"]')) {
-                            lastRow.querySelector('select[name$=".IdType"]').value = "@room.IdType";
+                        var roomTypeSelect = lastRow.querySelector('select[name$=".IdType"]');
+                        if (roomTypeSelect) {
+                            roomTypeSelect.value = "@room.IdType";
                             }
 
                         // Ustaw nazwę pokoju
-                        if (lastRow.querySelector('input[name$=".Name"]')) {
-                            lastRow.querySelector('input[name$=".Name"]').value = "@room.Name";
+                        var roomNameInput = lastRow.querySelector('input[name$=".Name"]');
+                        if (roomNameInput) {
+                            roomNameInput.value = "@room.Name";
                             }
 
                         // Ustaw cenę
-                        if (lastRow.querySelector('input[name$=".PricePerNight"]')) {
-                            lastRow.querySelector('input[name$=".PricePerNight"]').value = "@room.PricePerNight";
+                        var roomPriceInput = lastRow.querySelector('input[name$=".PricePerNight"]');
+                        if (roomPriceInput) {
+                            roomPriceInput.value = "@room.PricePerNight";
                             }
 
                         // Ustaw pojemność
-                        if (lastRow.querySelector('input[name$=".Capacity"]')) {
-                            lastRow.querySelector('input[name$=".Capacity"]').value = "@room.Capacity";
+                        var roomCapacityInput = lastRow.querySelector('input[name$=".Capacity"]');
+                        if (roomCapacityInput) {
+                            roomCapacityInput.value = "@room.Capacity";
                             }
 
                         // Obsługa udogodnień pokoju
                 @if (room.SelectedFacilities != null && room.SelectedFacilities.Any())
                 {
                     <text>
-                                var roomIndex = document.getElementById('rooms-table-body').children.length - 1;
-                                var selectedFacilities = "@string.Join(",", room.SelectedFacilities)".split(',');
+                                var roomIndex = @roomIndex;
+                                var selectedFacilities = [@string.Join(",", room.SelectedFacilities)];
 
                                 selectedFacilities.forEach(function(facilityId) {
                                         var checkbox = document.querySelector(`#facilities-list input[value="${facilityId}"]`);
                                 if (checkbox) {
                                     currentRoomIndex = roomIndex;
-                                toggleFacility(checkbox, checkbox.nextElementSibling.textContent);
+                                var facilityName = checkbox.parentElement.textContent.trim();
+                                checkbox.checked = true;
+                                toggleFacility(checkbox, facilityName);
                                         }
                                     });
                     </text>
@@ -480,3 +447,30 @@
     <button type="button" class="btn btn-primary mt-3" onclick="closeTagsModal()">Zamknij</button>
 </div>
 <div id="tags-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">Błąd</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @Html.Raw(TempData["ErrorMessage"])
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+            errorModal.show();
+        });
+    </script>
+}

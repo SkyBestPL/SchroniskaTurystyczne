@@ -393,24 +393,19 @@ body {
     font-size: 1.2em;
 }
 
-..room-container {
+.room-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(min(500px, 100%), 1fr));
-    max-width: 1600px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
     margin: 0 auto;
 }
 
 .room-card {
-    background-color: white;
-    border-radius: 12px;
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Wyœrodkowanie elementów */
+    text-align: left; /* Tekst pozostaje wyrównany do lewej */
 }
 
 /*.room-card:hover {
@@ -454,17 +449,29 @@ body {
     margin-top: 10px;
 }
 
-.room-card input[type="number"],
-.room-card input[type="checkbox"] {
-    margin-top: 5px;
-    padding: 8px;
+.room-card input[type="number"] {
+    width: 80px; /* Ustalona szerokoœæ */
+    padding: 5px;
     border: 1px solid #ced4da;
     border-radius: 4px;
+    font-size: 0.9em;
+    text-align: center; /* Wyœrodkowanie liczby w polu */
+    appearance: textfield; /* Ukrycie strza³ek w przegl¹darkach */
 }
+
+    .room-card input[type="number"]::-webkit-inner-spin-button,
+    .room-card input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none; /* Ukrycie strza³ek w WebKit */
+        margin: 0;
+    }
 
 .room-card label {
     color: #495057;
     font-size: 0.9em;
+}
+
+.room-card .numberOfPeople {
+    display: inline-block;
 }
 
 .confirm-booking-btn {
@@ -503,7 +510,6 @@ body {
     display: flex;
     height: 100vh;
     width: 100vw;
-    margin-left: -23%;
     margin-top: -16px;
 }
 
@@ -555,6 +561,14 @@ body {
 
 .tab-content.active {
     display: block;
+}
+
+#route-context-menu div:hover {
+    background-color: #f0f0f0;
+}
+
+#route-context-menu div:active {
+    background-color: #e0e0e0;
 }
 
 /*-----------------------------------------------------------------Reviews/ShelterReviews------------------------------------------------------------------------*/

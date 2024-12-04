@@ -41,9 +41,9 @@ namespace SchroniskaTurystyczne.Data
             base.OnModelCreating(modelBuilder);
 
             //jeden do jednego
-            modelBuilder.Entity<Shelter>()
-                .HasOne(s => s.Exhibitor)
-                .WithOne(u => u.Shelter)
+            modelBuilder.Entity<AppUser>()
+                .HasOne(s => s.Shelter)
+                .WithOne(u => u.Exhibitor)
                 .HasForeignKey<Shelter>(s => s.IdExhibitor)
                 .OnDelete(DeleteBehavior.Cascade); //użytkownik może mieć tylko 1 schronisko
 

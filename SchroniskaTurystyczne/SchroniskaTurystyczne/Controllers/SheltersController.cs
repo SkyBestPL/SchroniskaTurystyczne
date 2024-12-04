@@ -50,12 +50,52 @@ namespace SchroniskaTurystyczne.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ShelterCreateViewModel model)
         {
+            if (model.SelectedTags == null)
+            {
+                model.SelectedTags = new List<int>();
+            }
+
             if (!ModelState.IsValid)
             {
-                foreach (var error in ModelState.Values.SelectMany(v => v.Errors))
+                var errorMessages = new List<string>();
+
+                foreach (var state in ModelState)
                 {
-                    Debug.WriteLine(error.ErrorMessage);
+                    string key = state.Key;
+                    var errors = state.Value.Errors;
+
+                    foreach (var error in errors)
+                    {
+                        if (!string.IsNullOrEmpty(error.ErrorMessage))
+                        {
+                            if (key.StartsWith("Rooms"))
+                            {
+                                if (key.Contains(".Name"))
+                                {
+                                    errorMessages.Add("Jeden lub więcej pokoi nie ma nazwy.");
+                                }
+                                else if (key.Contains(".Capacity"))
+                                {
+                                    errorMessages.Add("Jeden lub więcej pokoi nie ma poprawnie określonej ilości miejsc.");
+                                }
+                                else if (key.Contains(".PricePerNight"))
+                                {
+                                    errorMessages.Add("Jeden lub więcej pokoi nie ma poprawnie określonej ceny.");
+                                }
+                            }
+                            else
+                            {
+                                errorMessages.Add("Przy tworzeniu schroniska wystąpiły błędy, należy ponownie uzupełnić formularz.");
+                            }
+                        }
+                    }
                 }
+
+                errorMessages.Add("Uwaga: Jeżeli dodawane były jakieś zdjęcia, należy wgrać je ponownie.");
+                errorMessages = errorMessages.Distinct().ToList();
+                TempData["ErrorMessage"] = string.Join("<br>", errorMessages);
+
+                model.SelectedTags ??= new List<int>();
 
                 model.Categories = await _context.Categories
                     .Select(c => new SelectListItem
@@ -74,25 +114,43 @@ namespace SchroniskaTurystyczne.Controllers
                 model.Tags = await _context.Tags.ToListAsync();
                 model.Facilities = await _context.Facilities.ToListAsync();
 
-                if (model.SelectedTags != null && model.SelectedTags.Any())
+                if (model.Rooms == null || model.Rooms.Count == 0)
                 {
-                    foreach (var tagId in model.SelectedTags)
-                    {
-                        var tag = model.Tags.FirstOrDefault(t => t.Id == tagId);
-                    }
+                    model.Rooms = new List<RoomViewModel>();
                 }
 
-                if (model.Rooms != null && model.Rooms.Any())
-                {
-                    foreach (var room in model.Rooms)
+                return View(model);
+            }
+
+            var photoErrors = CheckPhotos(model);
+
+            if (photoErrors.Any())
+            {
+                model.SelectedTags ??= new List<int>();
+
+                model.Categories = await _context.Categories
+                    .Select(c => new SelectListItem
                     {
-                        if (room.SelectedFacilities != null && room.SelectedFacilities.Any())
-                        {
-                            room.SelectedFacilitiesString = string.Join(",", room.SelectedFacilities);
-                        }
-                    }
+                        Value = c.Id.ToString(),
+                        Text = c.Name
+                    }).ToListAsync();
+
+                model.RoomTypes = await _context.RoomTypes
+                    .Select(rt => new SelectListItem
+                    {
+                        Value = rt.Id.ToString(),
+                        Text = rt.Name
+                    }).ToListAsync();
+
+                model.Tags = await _context.Tags.ToListAsync();
+                model.Facilities = await _context.Facilities.ToListAsync();
+
+                if (model.Rooms == null || model.Rooms.Count == 0)
+                {
+                    model.Rooms = new List<RoomViewModel>();
                 }
 
+                TempData["ErrorMessage"] = string.Join("<br>", photoErrors);
                 return View(model);
             }
 
@@ -117,16 +175,53 @@ namespace SchroniskaTurystyczne.Controllers
                 IdExhibitor = user.Id,
                 ConfirmedShelter = false,
                 Tags = await _context.Tags.Where(t => model.SelectedTags.Contains(t.Id)).ToListAsync(),
-                Rooms = model.Rooms != null ? model.Rooms.Select(r => new Room
-                {
-                    IdType = (int)r.IdType,
-                    Name = r.Name,
-                    PricePerNight = (double)r.PricePerNight,
-                    Capacity = r.Capacity,
-                    IsActive = r.IsActive,
-                    Facilities = r.SelectedFacilities?.Any() == true ? _context.Facilities.Where(f => r.SelectedFacilities.Contains(f.Id)).ToList() : new List<Facility>()
-                }).ToList() : new List<Room>()
+                Rooms = new List<Room>()
             };
+
+            foreach (var room in model.Rooms)
+            {
+                var roomEntity = new Room
+                {
+                    IdType = room.IdType ?? 0,
+                    Name = room.Name,
+                    PricePerNight = (double)room.PricePerNight,
+                    Capacity = room.Capacity,
+                    IsActive = room.IsActive,
+                    Facilities = room.SelectedFacilities?.Any() == true
+                        ? _context.Facilities.Where(f => room.SelectedFacilities.Contains(f.Id)).ToList()
+                        : new List<Facility>(),
+                    RoomPhotos = new List<RoomPhoto>()
+                };
+
+                if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                {
+                    if (room.RoomPhotos.Count > 3)
+                    {
+                        ModelState.AddModelError("", "Można dodać maksymalnie 3 zdjęcia na pokój.");
+                        return View(model);
+                    }
+
+                    foreach (var photoFile in room.RoomPhotos)
+                    {
+                        if (photoFile.Length > 5242880)
+                        {
+                            ModelState.AddModelError("", "Każde zdjęcie może mieć maksymalnie 5 MB.");
+                            return View(model);
+                        }
+
+                        using var memoryStream = new MemoryStream();
+                        await photoFile.CopyToAsync(memoryStream);
+
+                        roomEntity.RoomPhotos.Add(new RoomPhoto
+                        {
+                            Name = photoFile.FileName,
+                            PhotoData = memoryStream.ToArray()
+                        });
+                    }
+                }
+
+                shelter.Rooms.Add(roomEntity);
+            }
 
             if (model.Photos != null && model.Photos.Any())
             {
@@ -156,10 +251,60 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
+            user.IdShelter = shelter.Id;
+            user.Shelter = shelter;
+
             _context.Add(shelter);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
+        }
+
+        private List<string> CheckPhotos(ShelterCreateViewModel model)
+        {
+            var errorMessages = new List<string>();
+
+            // Sprawdź zdjęcia schroniska
+            if (model.Photos != null && model.Photos.Count > 5) // Przykład: limit 5 zdjęć
+            {
+                errorMessages.Add("Schronisko może mieć maksymalnie 5 zdjęć.");
+            }
+
+            if (model.Photos != null)
+            {
+                foreach (var photo in model.Photos)
+                {
+                    if (photo.Length > 5 * 1024 * 1024) // Przykład: limit 5 MB
+                    {
+                        errorMessages.Add($"Zdjęcie {photo.FileName} przekracza dopuszczalny rozmiar 5 MB.");
+                    }
+                }
+            }
+
+            // Sprawdź zdjęcia pokoi
+            if (model.Rooms != null)
+            {
+                foreach (var room in model.Rooms)
+                {
+                    if (room.RoomPhotos != null && room.RoomPhotos.Count > 3) // Przykład: limit 3 zdjęcia na pokój
+                    {
+                        errorMessages.Add($"Pokój {room.Name} może mieć maksymalnie 3 zdjęcia.");
+                    }
+
+                    if (room.RoomPhotos != null)
+                    {
+                        foreach (var photo in room.RoomPhotos)
+                        {
+                            if (photo.Length > 5 * 1024 * 1024) // Przykład: limit 5 MB
+                            {
+                                errorMessages.Add($"Zdjęcie {photo.FileName} w pokoju {room.Name} przekracza dopuszczalny rozmiar 5 MB.");
+                            }
+                        }
+                    }
+                }
+            }
+
+            return errorMessages;
         }
 
         // GET: Shelters

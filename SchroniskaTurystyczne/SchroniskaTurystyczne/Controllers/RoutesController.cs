@@ -9,7 +9,7 @@ namespace SchroniskaTurystyczne.Controllers
 {
     public class RoutesController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        /*private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
 
         public RoutesController(ApplicationDbContext context, UserManager<AppUser> userManager)
@@ -92,6 +92,6 @@ namespace SchroniskaTurystyczne.Controllers
                 .ToListAsync();
 
             return View(routes);
-        }
+        }*/
     }
 }
