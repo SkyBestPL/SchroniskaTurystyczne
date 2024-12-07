@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace SchroniskaTurystyczne.Models
 {
@@ -16,8 +17,10 @@ namespace SchroniskaTurystyczne.Models
         public bool HasConfirmedBooking { get; set; } //prawda jeżeli właściciel potwierdził jakąś rezerwację zawierajacą ten pokój
         public bool IsActive { get; set; } //prawda jeżeli właściciel nie zablokuje możliwości rezerwacji tego pokoju
 
+        [JsonIgnore]
         public virtual Shelter Shelter { get; set; }
         public virtual RoomType RoomType { get; set; }
+        [JsonIgnore]
         public virtual ICollection<BookingRoom>? BookingRooms { get; set; }
         public virtual ICollection<Facility>? Facilities { get; set; }
         public virtual ICollection<RoomPhoto>? RoomPhotos { get; set; }

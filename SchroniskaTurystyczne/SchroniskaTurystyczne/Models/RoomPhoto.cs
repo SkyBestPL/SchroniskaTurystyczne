@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace SchroniskaTurystyczne.Models
 {
@@ -9,6 +10,7 @@ namespace SchroniskaTurystyczne.Models
         public string? Name { get; set; }
         [Required]
         public byte[] PhotoData { get; set; }
+        [JsonIgnore]
         public virtual Room Room { get; set; }
     }
 }

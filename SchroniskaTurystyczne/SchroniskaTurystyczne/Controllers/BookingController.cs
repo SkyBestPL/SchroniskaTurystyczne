@@ -23,7 +23,7 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
-                    .ThenInclude(r => r.BookingRooms)
+                    .ThenInclude(r => r.RoomPhotos)
                 .Include(s => s.Photos)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -32,9 +32,61 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound();
             }
 
-            shelter.Rooms = shelter.Rooms.Where(r => r.IsActive).ToList();
+            var shelterViewModel = new ShelterBookingViewModel
+            {
+                Id = shelter.Id,
+                IdExhibitor = shelter.IdExhibitor,
+                IdCategory = shelter.IdCategory,
+                Name = shelter.Name,
+                Description = shelter.Description,
+                Rating = shelter.Rating,
+                AmountOfReviews = shelter.AmountOfReviews,
+                ConfirmedShelter = shelter.ConfirmedShelter,
+                Country = shelter.Country,
+                City = shelter.City,
+                Street = shelter.Street,
+                StreetNumber = shelter.StreetNumber,
+                ZipCode = shelter.ZipCode,
+                LocationLon = shelter.LocationLon,
+                LocationLat = shelter.LocationLat,
+                Rooms = shelter.Rooms?
+                .Where(r => r.IsActive)
+                .Select(r => new RoomBookingViewModel
+                {
+                    Id = r.Id,
+                    IdShelter = r.IdShelter,
+                    IdType = r.IdType,
+                    Name = r.Name,
+                    Description = r.Description,
+                    PricePerNight = r.PricePerNight,
+                    Capacity = r.Capacity,
+                    HasConfirmedBooking = r.HasConfirmedBooking,
+                    IsActive = r.IsActive,
+                    RoomType = r.RoomType != null ? new RoomTypeBookingViewModel
+                    {
+                        Id = r.RoomType.Id,
+                        Name = r.RoomType.Name,
+                        Description = r.RoomType.Description
+                    } : null,
+                    RoomPhotos = r.RoomPhotos?.Select(p => new RoomPhotoBookingViewModel
+                    {
+                        Id = p.Id,
+                        IdRoom = p.IdRoom,
+                        Name = p.Name,
+                        PhotoData = p.PhotoData != null ? p.PhotoData : null
+                    }).ToList()
+                })
+                .ToList() ?? new List<RoomBookingViewModel>(),
+                Photos = shelter.Photos?.Select(p => new PhotoBookingViewModel
+                {
+                    Id = p.Id,
+                    IdShelter = p.IdShelter,
+                    Name = p.Name,
+                    PhotoData = p.PhotoData
+                }).ToList()
+            };
 
-            return View(shelter);
+            return View(shelterViewModel);
         }
 
         public IActionResult GetRoomBookings(int roomId)

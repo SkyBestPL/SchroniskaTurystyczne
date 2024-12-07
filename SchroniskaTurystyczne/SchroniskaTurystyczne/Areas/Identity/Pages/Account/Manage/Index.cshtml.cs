@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages.Manage;
 using SchroniskaTurystyczne.Models;
 
 namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
@@ -30,6 +31,7 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
         ///     directly from your code. This API may change or be removed in future releases.
         /// </summary>
+        [Display(Name = "Email")]
         public string Username { get; set; }
 
         /// <summary>
@@ -59,10 +61,10 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Numer telefonu")]
             public string PhoneNumber { get; set; }
-
+            [Display(Name = "Imię")]
             [Required(ErrorMessage = "Imię jest wymagane.")]
             public string FirstName { get; set; }
-
+            [Display(Name = "Nazwisko")]
             [Required(ErrorMessage = "Nazwisko jest wymagane.")]
             public string LastName { get; set; }
         }

@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "Mapa Schronisk";
     ViewData["FullScreen"] = true;
-    var selectedShelterId = ViewBag.SelectedShelterId ?? "";  // ID wybranego schroniska, jeśli istnieje
+    var selectedShelterId = ViewBag.SelectedShelterId ?? "";
 }
 
 <div class="map-container">
@@ -13,7 +13,7 @@
     <div class="sidebar">
         <h2>@ViewData["Title"]</h2>
 
-        <!-- Zakładki nawigacyjne -->
+        <!-- Zakładki -->
         <div class="tabs">
             <button onclick="showSection('searchSection')" class="tab-button active">Szukanie noclegu</button>
             <button onclick="showSection('planSection')" class="tab-button">Planowanie trasy</button>
@@ -44,13 +44,17 @@
             </div>
         </div>
 
+        <div id="searchSection2" class="tab-content active p-3 rounded bg-light shadow">
+            <span>Kliknij na schronisko, zeby wyświetlić proponowane trasy.</span>
+        </div>
+
         <!-- Sekcja Planowanie trasy -->
         <div id="planSection" class="tab-content p-3 rounded bg-light shadow mt-4">
             <h4 class="mb-3 text-darkcyan">Planowanie Trasy</h4>
             <div class="d-flex gap-2 mb-3">
-                <button onclick="toggleRouteCreation()" class="btn darkcyan-button">
+                <!--<button onclick="toggleRouteCreation()" class="btn darkcyan-button">
                     <span id="routeCreationToggleText">Włącz tryb tworzenia trasy</span>
-                </button>
+                </button>-->
                 <button class="btn btn-secondary" onclick="clearRoute()">Wyczyść Trasę</button>
             </div>
             <!--<div id="travelTimeDisplay" class="mt-2 text-darkcyan"></div>
@@ -90,7 +94,7 @@
     let routePoints = [];
     let markers = [];
     let shelterMarkers = [];
-    let isCreatingRoute = false;
+    let isCreatingRoute = true;
 
     const map = new maplibregl.Map({
         container: 'map',
@@ -179,7 +183,7 @@
             const showRouteBtn = document.createElement('button');
             showRouteBtn.textContent = 'Pokaż na mapie';
             showRouteBtn.classList.add('btn', 'btn-sm', 'darkcyan-button', 'me-2');
-            showRouteBtn.onclick = () => showRouteOnMap(route);
+            showRouteBtn.onclick = () => showRouteOnMap(route.Id);
 
             // Button to delete route (you'll need to implement this server-side)
             const deleteRouteBtn = document.createElement('button');
@@ -427,6 +431,15 @@
         if (routePoints.length > 1) {
             calculateRoute(routePoints);
         }
+        else {
+            const source = map.getSource('route-geometry');
+            if (source) {
+                source.setData({
+                    type: "LineString",
+                    coordinates: [], // Resetuj dane na puste
+                });
+            }
+        }
 
         updateRoutePointsInput(routePoints);
     }
@@ -659,8 +672,8 @@
         document.querySelector('button[onclick="showSection(\'searchSection\')"]').click();
 
         // Create a container for shelter details and routes
-        const searchSection = document.getElementById('searchSection');
-        searchSection.innerHTML = `
+        const searchSection2 = document.getElementById('searchSection2');
+        searchSection2.innerHTML = `
             <h4 class="mb-3 text-darkcyan">Schronisko: ${shelter.name}</h4>
             <div class="shelter-details">
                 <p>Ocena: ${shelter.rating}</p>
@@ -889,6 +902,14 @@
                 }
             });
 
+        const source = map.getSource('route-geometry');
+        if (source) {
+            source.setData({
+                type: "LineString",
+                coordinates: [], // Resetuj dane na puste
+            });
+        }
+
         // Resetuj tablice i stan
         routePoints = [];
         markers.forEach(marker => marker.remove());
@@ -942,6 +963,11 @@
 
         // Pokaż wybraną sekcję i ustaw aktywny przycisk
         document.getElementById(sectionId).classList.add('active');
+
+        if (sectionId == 'searchSection') 
+        { 
+            document.getElementById('searchSection2').classList.add('active');
+        }
 
         // Dodaj klasę active do klikniętego przycisku
         event.target.classList.add('active');

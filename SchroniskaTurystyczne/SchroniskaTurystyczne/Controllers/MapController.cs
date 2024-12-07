@@ -113,34 +113,36 @@ namespace SchroniskaTurystyczne.Controllers
                 })
                 .ToList();
 
-            // Fetch user's routes with limited data to avoid circular references
-            var userRoutes = _context.SavedRoutes
-                .Where(r => r.IdGuest == currentUser.Id)
-                .Select(r => new
-                {
-                    Id = r.Id,
-                    Name = r.Name,
-                    Points = r.Points
-                        .OrderBy(p => p.Number)
-                        .Select(p => new
-                        {
-                            Id = p.Id,
-                            LocationLon = p.LocationLon,
-                            LocationLat = p.LocationLat,
-                            Number = p.Number,
-                            ShelterId = p.IdShelter // Include shelter ID if available
-                        })
-                        .ToList()
-                })
-                .ToList();
+            if(currentUser != null)
+            {
+                // Fetch user's routes with limited data to avoid circular references
+                var userRoutes = _context.SavedRoutes
+                    .Where(r => r.IdGuest == currentUser.Id)
+                    .Select(r => new
+                    {
+                        Id = r.Id,
+                        Name = r.Name,
+                        Points = r.Points
+                            .OrderBy(p => p.Number)
+                            .Select(p => new
+                            {
+                                Id = p.Id,
+                                LocationLon = p.LocationLon,
+                                LocationLat = p.LocationLat,
+                                Number = p.Number,
+                                ShelterId = p.IdShelter // Include shelter ID if available
+                            })
+                            .ToList()
+                    })
+                    .ToList();
 
-            Debug.WriteLine(userRoutes);
+                Debug.WriteLine(userRoutes);
+
+                ViewBag.UserRoutes = System.Text.Json.JsonSerializer.Serialize(userRoutes);
+            }
 
             // Pass the selected shelter ID if needed
             ViewBag.SelectedShelterId = id;
-
-            // Serialize routes to be used in JavaScript
-            ViewBag.UserRoutes = System.Text.Json.JsonSerializer.Serialize(userRoutes);
 
             return View(shelters);
         }

@@ -280,19 +280,18 @@ body {
 .booking-shelter-photos {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px; /* Odstêp miêdzy zdjêciami */
-    justify-content: center; /* Wyœrodkowanie zdjêæ */
+    gap: 15px;
+    justify-content: center;
     margin-top: 20px;
 }
 
-/* Styl dla du¿ych zdjêæ */
 .booking-shelter-photo {
-    max-width: 100%; /* Skalowanie zdjêcia */
-    width: 400px; /* Szerokoœæ zdjêcia */
-    height: 300px; /* Wysokoœæ zdjêcia */
-    object-fit: cover; /* Dopasowanie, aby nie zniekszta³ciæ zdjêcia */
-    border-radius: 8px; /* Zaokr¹glone rogi */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Delikatny cieñ dla lepszej widocznoœci */
+    max-width: 100%;
+    width: 400px;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #modalOverlay {
@@ -306,7 +305,6 @@ body {
     z-index: 999;
 }
 
-/* General modal styling */
 #summaryModal {
     position: fixed;
     top: 50%;
@@ -372,6 +370,7 @@ body {
 }
 
 .room-sections {
+    background-color: #f8f9fa;
     display: flex;
     flex-direction: column;
     gap: 2em;
@@ -379,7 +378,7 @@ body {
 
 .room-section {
     background-color: #f8f9fa;
-    border-radius: 12px;
+    border-radius: 30px;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     overflow: hidden;
 }
@@ -394,6 +393,7 @@ body {
 }
 
 .room-container {
+    background-color: #f8f9fa;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 20px;
@@ -408,16 +408,9 @@ body {
     text-align: left; /* Tekst pozostaje wyrównany do lewej */
 }
 
-/*.room-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
-}*/
-
-.room-card-details {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    width: 100%;
+.room-card:hover {
+    /*transform: translateY(-3px);*/
+    box-shadow: 10px 10px 10px 5px rgba(0, 0, 0, 0.15);
 }
 
 .room-card h4 {
@@ -426,9 +419,14 @@ body {
     font-size: 1.2em;
 }
 
-.room-card p {
-    color: #6c757d;
-    margin: 5px 0;
+.room-card {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .room-card .calendar {
@@ -440,13 +438,6 @@ body {
     padding: 10px;
     background-color: #f8f9fa;
     overflow-y: auto;
-}
-
-.room-card .room-booking-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
 }
 
 .room-card input[type="number"] {
@@ -504,6 +495,97 @@ body {
     display: flex;
     flex-direction: column;
 }
+
+.room-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.room-photo-preview {
+    width: 150px;
+    height: 100px;
+    cursor: pointer;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+    .room-photo-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.room-photo-modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.room-photo-modal-content {
+    position: relative;
+    max-width: 90%;
+    max-height: 90%;
+}
+
+.room-photo-slides {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.room-photo-slide {
+    display: none;
+    width: 100%;
+    height: 100%;
+}
+
+    .room-photo-slide.active {
+        display: block;
+    }
+
+    .room-photo-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
+
+.room-photo-modal .close {
+    position: absolute;
+    top: -40px;
+    right: 0;
+    color: white;
+    font-size: 35px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.photo-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    font-size: 30px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+    .photo-nav.prev {
+        left: 10px;
+    }
+
+    .photo-nav.next {
+        right: 10px;
+    }
 /* ---------------------------------------------Map/MapView--------------------------------------------*/
 
 .map-container {

@@ -1,4 +1,4 @@
-﻿@model SchroniskaTurystyczne.Models.Shelter
+﻿@model SchroniskaTurystyczne.ViewModels.ShelterBookingViewModel
 
 @{
     ViewData["Title"] = "Rezerwacja";
@@ -34,19 +34,30 @@
 
 <div class="room-sections">
     <!-- Sekcja dla pokoi prywatnych -->
-    <div class="room-section private-rooms">
+    <div class="room-section">
         <h3>Pokoje Prywatne</h3>
         <div id="privateRooms" class="room-container">
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 2))
             {
                 <div class="room-card">
-                    <h4>@room.Name</h4>
-                    <p>Cena za osobę: @room.PricePerNight zł</p>
-                    <p>Pojemność osób: @room.Capacity</p>
-                    <label>
-                        <input type="checkbox" class="privateRoomCheckbox" data-room-name="@room.Name" data-room-id="@room.Id" data-capacity="@room.Capacity" />
-                        Rezerwuj cały pokój
-                    </label>
+                    <div class="room-header">
+                        <div class="room-info">
+                            <h4>@room.Name</h4>
+                            <p>Cena za osobę: @room.PricePerNight zł</p>
+                            <p>Pojemność osób: @room.Capacity</p>
+                            <label>
+                                <input type="checkbox" class="privateRoomCheckbox" data-room-name="@room.Name" data-room-id="@room.Id" data-capacity="@room.Capacity" />
+                                Rezerwuj cały pokój
+                            </label>
+                        </div>
+                        @if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                        {
+                            var firstPhoto = room.RoomPhotos.First();
+                            <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                            </div>
+                        }
+                    </div>
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
                 </div>
             }
@@ -54,7 +65,7 @@
     </div>
 
     <!-- Sekcja dla pokoi publicznych -->
-    <div class="room-section public-rooms">
+    <div class="room-section">
         <h3>Pokoje Publiczne</h3>
         <div id="publicRooms" class="room-container">
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 1))
@@ -65,6 +76,13 @@
                     <p>Pojemność osób: @room.Capacity</p>
                     <label>Liczba osób:</label>
                     <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="0" max="@room.Capacity" />
+                    @if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                    {
+                        var firstPhoto = room.RoomPhotos.First();
+                        <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                        </div>
+                    }
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
                 </div>
             }
@@ -72,7 +90,7 @@
     </div>
 
     <!-- Sekcja dla działek -->
-    <div class="room-section plot-rooms">
+    <div class="room-section">
         <h3>Pola namiotowe</h3>
         <div id="plotRooms" class="room-container">
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 3))
@@ -83,6 +101,13 @@
                     <p>Pojemność osób: @room.Capacity</p>
                     <label>Liczba osób:</label>
                     <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="1" max="@room.Capacity" />
+                    @if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                    {
+                        var firstPhoto = room.RoomPhotos.First();
+                        <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                        </div>
+                    }
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
                 </div>
             }
@@ -270,6 +295,67 @@
     function closeSummaryModal() {
         document.getElementById("modalOverlay").style.display = 'none';
         document.getElementById("summaryModal").style.display = 'none';
+    }
+
+    function openRoomPhotoModal(roomId) {
+        // Znajdź pokój o danym ID
+        const rooms = @Html.Raw(Json.Serialize(Model.Rooms));
+
+        const room = rooms.find(r => r.id === roomId);
+        if (!room || !Array.isArray(room.roomPhotos) || room.roomPhotos.length === 0) {
+            alert('Brak zdjęć dla tego pokoju.');
+            return;
+        }
+
+        // Zbuduj HTML dla modala ze zdjęciami
+        let photosHtml = room.roomPhotos.map((photo, index) => `
+            <div class="room-photo-slide ${index === 0 ? 'active' : ''}">
+                <img src="data:image/jpeg;base64,${photo.photoData}" alt="Zdjęcie pokoju ${index + 1}" />
+            </div>
+        `).join('');
+
+        let navigationHtml = room.roomPhotos.length > 1 ? `
+            <button class="photo-nav prev" onclick="changeSlide(${roomId}, -1)">&#10094;</button>
+            <button class="photo-nav next" onclick="changeSlide(${roomId}, 1)">&#10095;</button>
+        ` : '';
+
+        // Wstrzyknij modal do dokumentu
+        const modalHtml = `
+            <div id="roomPhotoModal-${roomId}" class="room-photo-modal">
+                <div class="room-photo-modal-content">
+                    <span class="close" onclick="closeRoomPhotoModal(${roomId})">&times;</span>
+                    <div class="room-photo-slides">
+                        ${photosHtml}
+                    </div>
+                    ${navigationHtml}
+                </div>
+            </div>
+        `;
+
+        // Dodaj modal do body
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+    }
+
+    function changeSlide(roomId, direction) {
+        const slides = document.querySelectorAll(`#roomPhotoModal-${roomId} .room-photo-slide`);
+        const currentSlide = document.querySelector(`#roomPhotoModal-${roomId} .room-photo-slide.active`);
+        let currentIndex = Array.from(slides).indexOf(currentSlide);
+
+        currentSlide.classList.remove('active');
+
+        currentIndex += direction;
+
+        if (currentIndex < 0) currentIndex = slides.length - 1;
+        if (currentIndex >= slides.length) currentIndex = 0;
+
+        slides[currentIndex].classList.add('active');
+    }
+
+    function closeRoomPhotoModal(roomId) {
+        const modal = document.getElementById(`roomPhotoModal-${roomId}`);
+        if (modal) {
+            modal.remove();
+        }
     }
 
 </script>
