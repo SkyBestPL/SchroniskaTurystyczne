@@ -384,7 +384,7 @@ body {
 }
 
 .room-section h3 {
-    background-color: #20c997;
+    background-color: darkcyan;
     color: white;
     padding: 15px;
     margin: 0;
@@ -404,8 +404,8 @@ body {
 .room-card {
     display: flex;
     flex-direction: column;
-    align-items: center; /* Wyœrodkowanie elementów */
-    text-align: left; /* Tekst pozostaje wyrównany do lewej */
+    align-items: center;
+    text-align: left;
 }
 
 .room-card:hover {
@@ -419,8 +419,13 @@ body {
     font-size: 1.2em;
 }
 
+.room-card p {
+    margin-bottom: 0px;
+}
+
 .room-card {
     display: flex;
+    max-width: 385px;
     flex-direction: column;
     background-color: #f8f9fa;
     border-radius: 12px;
@@ -429,30 +434,30 @@ body {
     margin-bottom: 20px;
 }
 
-.room-card .calendar {
-    width: 100%;
-    max-height: 500px;
-    min-height: 300px;
-    border: 1px solid #e9ecef;
-    border-radius: 8px;
-    padding: 10px;
-    background-color: #f8f9fa;
-    overflow-y: auto;
-}
+    .room-card .calendar {
+        width: 100%;
+        max-height: 500px;
+        min-height: 300px;
+        border: 1px solid #004d4d;
+        border-radius: 8px;
+        padding: 10px;
+        background-color: #004d4d;
+        overflow-y: auto;
+    }
 
 .room-card input[type="number"] {
-    width: 80px; /* Ustalona szerokoœæ */
+    width: 80px;
     padding: 5px;
     border: 1px solid #ced4da;
     border-radius: 4px;
     font-size: 0.9em;
-    text-align: center; /* Wyœrodkowanie liczby w polu */
-    appearance: textfield; /* Ukrycie strza³ek w przegl¹darkach */
+    text-align: center;
+    appearance: textfield;
 }
 
     .room-card input[type="number"]::-webkit-inner-spin-button,
     .room-card input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none; /* Ukrycie strza³ek w WebKit */
+        -webkit-appearance: none;
         margin: 0;
     }
 
@@ -494,12 +499,6 @@ body {
     z-index: 100;
     display: flex;
     flex-direction: column;
-}
-
-.room-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .room-photo-preview {
@@ -586,8 +585,49 @@ body {
     .photo-nav.next {
         right: 10px;
     }
-/* ---------------------------------------------Map/MapView--------------------------------------------*/
 
+.facilities-tooltip {
+    position: absolute;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    z-index: 1000;
+    max-width: 200px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+    .facilities-tooltip p {
+        margin: 0;
+        padding: 2px 0;
+    }
+
+.facilities-tooltip-trigger {
+    cursor: pointer;
+    color: #004d4d;
+    font-weight: bold;
+}
+
+.room-text {
+    cursor: pointer;
+    color: #444;
+    font-weight: bold;
+}
+
+.room-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+}
+
+.room-info {
+    flex: 1;
+    text-align: left;
+}
+/* ---------------------------------------------Map/MapView--------------------------------------------*/
 .map-container {
     display: flex;
     height: 100vh;
@@ -854,5 +894,30 @@ fc-toolbar-title {
     }
 }
 
-/*------------------Home/Index-------------------*/
+/*------------------Message/Index-------------------*/
 
+.conversations-list .list-group-item.active {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.message-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+    .message.sent {
+        background-color: #e6f2ff;
+        text-align: right;
+    }
+
+    .message.received {
+        background-color: #f0f0f0;
+        text-align: left;
+    }

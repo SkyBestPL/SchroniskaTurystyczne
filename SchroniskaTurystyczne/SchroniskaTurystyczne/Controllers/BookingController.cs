@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using SchroniskaTurystyczne.Data;
 using SchroniskaTurystyczne.Models;
 using SchroniskaTurystyczne.ViewModels;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing;
 using System.Security.Claims;
 
 namespace SchroniskaTurystyczne.Controllers
@@ -23,7 +26,9 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
-                    .ThenInclude(r => r.RoomPhotos)
+                    .ThenInclude(r => r.RoomPhotos.Take(1))
+                .Include(s => s.Rooms)
+                    .ThenInclude(r => r.Facilities)
                 .Include(s => s.Photos)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -73,7 +78,13 @@ namespace SchroniskaTurystyczne.Controllers
                         Id = p.Id,
                         IdRoom = p.IdRoom,
                         Name = p.Name,
-                        PhotoData = p.PhotoData != null ? p.PhotoData : null
+                        //PhotoData = p.PhotoData != null ? p.PhotoData : null,
+                        ThumbnailData = p.ThumbnailData != null ? p.ThumbnailData : null
+                    }).ToList(),
+                    Facilities = r.Facilities?.Select(f => new FacilityBookingViewModel
+                    {
+                        Id = f.Id,
+                        Name = f.Name
                     }).ToList()
                 })
                 .ToList() ?? new List<RoomBookingViewModel>(),

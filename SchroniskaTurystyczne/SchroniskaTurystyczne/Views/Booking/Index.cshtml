@@ -12,6 +12,7 @@
             <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.PhotoData)" alt="Zdjęcie schroniska" class="booking-shelter-photo" />
         }
     </div>
+    <a style="background-color:aquamarine; color: black" asp-action="Index" asp-controller="Message" asp-route-shelterId="@Model.Id">Napisz do właściciela</a>
 </div>
 
 <div class="date-reservation">
@@ -43,8 +44,15 @@
                     <div class="room-header">
                         <div class="room-info">
                             <h4>@room.Name</h4>
-                            <p>Cena za osobę: @room.PricePerNight zł</p>
-                            <p>Pojemność osób: @room.Capacity</p>
+                            <p><span class="room-text">Cena:</span> @room.PricePerNight zł</p>
+                            <p><span class="room-text">Pojemność:</span> @room.Capacity <i class="bi bi-person"></i></p>
+                            @if (room.Facilities != null && room.Facilities.Any())
+                            {
+                                <p class="facilities-tooltip-trigger" data-facilities="@string.Join(',', room.Facilities.Select(f => f.Name))">
+                                    Lista udogodnień
+                                </p>
+                                <div class="facilities-tooltip" style="display: none;"></div>
+                            }
                             <label>
                                 <input type="checkbox" class="privateRoomCheckbox" data-room-name="@room.Name" data-room-id="@room.Id" data-capacity="@room.Capacity" />
                                 Rezerwuj cały pokój
@@ -54,7 +62,7 @@
                         {
                             var firstPhoto = room.RoomPhotos.First();
                             <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.ThumbnailData)" alt="Zdjęcie pokoju" />
                             </div>
                         }
                     </div>
@@ -71,43 +79,65 @@
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 1))
             {
                 <div class="room-card">
-                    <h4>@room.Name</h4>
-                    <p>Cena za osobę: @room.PricePerNight zł</p>
-                    <p>Pojemność osób: @room.Capacity</p>
-                    <label>Liczba osób:</label>
-                    <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="0" max="@room.Capacity" />
-                    @if (room.RoomPhotos != null && room.RoomPhotos.Any())
-                    {
-                        var firstPhoto = room.RoomPhotos.First();
-                        <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                    <div class="room-header">
+                        <div class="room-info">
+                            <h4>@room.Name</h4>
+                            <p><span class="room-text">Cena:</span> @room.PricePerNight zł</p>
+                            <p><span class="room-text">Pojemność:</span> @room.Capacity <i class="bi bi-person"></i></p>
+                            @if (room.Facilities != null && room.Facilities.Any())
+                            {
+                                <p class="facilities-tooltip-trigger" data-facilities="@string.Join(',', room.Facilities.Select(f => f.Name))">
+                                    Lista udogodnień
+                                </p>
+                                <div class="facilities-tooltip" style="display: none;"></div>
+                            }
+                            <label>Liczba osób:</label>
+                            <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="0" max="@room.Capacity" />
                         </div>
-                    }
+                        @if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                        {
+                            var firstPhoto = room.RoomPhotos.First();
+                            <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.ThumbnailData)" alt="Zdjęcie pokoju" />
+                            </div>
+                        }
+                    </div>
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
                 </div>
             }
         </div>
     </div>
 
-    <!-- Sekcja dla działek -->
+    <!-- Sekcja dla pól namiotowych -->
     <div class="room-section">
-        <h3>Pola namiotowe</h3>
+        <h3>Pola Namiotowe</h3>
         <div id="plotRooms" class="room-container">
             @foreach (var room in Model.Rooms.Where(r => r.IdType == 3))
             {
                 <div class="room-card">
-                    <h4>@room.Name</h4>
-                    <p>Cena za osobę: @room.PricePerNight zł</p>
-                    <p>Pojemność osób: @room.Capacity</p>
-                    <label>Liczba osób:</label>
-                    <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="1" max="@room.Capacity" />
-                    @if (room.RoomPhotos != null && room.RoomPhotos.Any())
-                    {
-                        var firstPhoto = room.RoomPhotos.First();
-                        <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.PhotoData)" alt="Zdjęcie pokoju" />
+                    <div class="room-header">
+                        <div class="room-info">
+                            <h4>@room.Name</h4>
+                            <p><span class="room-text">Cena:</span> @room.PricePerNight zł</p>
+                            <p><span class="room-text">Pojemność:</span> @room.Capacity <i class="bi bi-person"></i></p>
+                            @if (room.Facilities != null && room.Facilities.Any())
+                            {
+                                <p class="facilities-tooltip-trigger" data-facilities="@string.Join(',', room.Facilities.Select(f => f.Name))">
+                                    Lista udogodnień
+                                </p>
+                                <div class="facilities-tooltip" style="display: none;"></div>
+                            }
+                            <label>Liczba osób:</label>
+                            <input type="number" class="numberOfPeople" data-room-name="@room.Name" data-room-id="@room.Id" min="1" max="@room.Capacity" />
                         </div>
-                    }
+                        @if (room.RoomPhotos != null && room.RoomPhotos.Any())
+                        {
+                            var firstPhoto = room.RoomPhotos.First();
+                            <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(firstPhoto.ThumbnailData)" alt="Zdjęcie pokoju" />
+                            </div>
+                        }
+                    </div>
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
                 </div>
             }
@@ -130,7 +160,6 @@
             const calendar = new FullCalendar.Calendar(calendarDiv, {
                 initialView: 'dayGridMonth',
                 locale: 'pl',
-                columnHeaderFormat: { weekday: 'narrow' },
                 events: function (fetchInfo, successCallback, failureCallback) {
                     // Pobierz dane rezerwacji dla pokoju z kontrolera
                     fetch(`/Booking/GetRoomBookings?roomId=${roomId}`)
@@ -358,6 +387,30 @@
         }
     }
 
+    document.addEventListener('DOMContentLoaded', () => {
+        const triggers = document.querySelectorAll('.facilities-tooltip-trigger');
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('mouseover', (e) => {
+                const facilities = e.target.dataset.facilities.split(',');
+                const tooltip = e.target.nextElementSibling;
+
+                // Wypełnij tooltip
+                tooltip.innerHTML = facilities.map(facility => `<p>${facility}</p>`).join('');
+                tooltip.style.display = 'block';
+
+                // Pozycjonowanie tooltipa
+                tooltip.style.left = `${e.pageX + 10}px`;
+                tooltip.style.top = `${e.pageY + 10}px`;
+            });
+
+            trigger.addEventListener('mouseout', (e) => {
+                const tooltip = e.target.nextElementSibling;
+                tooltip.style.display = 'none';
+            });
+        });
+    });
+
 </script>
 
 <!-- Modal Podsumowania Rezerwacji -->
@@ -372,8 +425,8 @@
             <div class="modal-body" style="text-align: center;">
                 <!-- Sekcja z typem pokoju -->
                 <div id="reservationSummary" style="margin-bottom: 15px; line-height: 1.5;">
-                    <p style="font-size: 1.1em; font-weight: bold;">Typ pokoju: <span id="roomType" style="color: aquamarine;">Deluxe</span></p> <!-- Przykładowy typ pokoju -->
-                    <p style="font-size: 1em;">Liczba osób: <span id="guestCount" style="color: aquamarine;">2</span></p> <!-- Można dodać licznik gości -->
+                    <p style="font-size: 1.1em; font-weight: bold;">Typ pokoju: <span id="roomType" style="color: aquamarine;">Deluxe</span></p>
+                    <p style="font-size: 1em;">Liczba osób: <span id="guestCount" style="color: aquamarine;">2</span></p>
                 </div>
                 <p style="font-weight: bold; font-size: 1.2em;">Łączna suma: <span id="totalPrice" style="color: aquamarine;"></span> zł</p>
             </div>

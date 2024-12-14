@@ -10,7 +10,7 @@ namespace SchroniskaTurystyczne.Models
         public string IdSender { get; set; }
         [Required]
         public string IdReceiver { get; set; }
-        public string Date { get; set; }
+        public DateTime Date { get; set; }
         public string Contents { get; set; }
 
         public virtual AppUser Sender { get; set; }

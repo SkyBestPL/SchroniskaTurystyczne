@@ -53,6 +53,7 @@
         public int Id { get; set; }
         public int IdRoom { get; set; }
         public string? Name { get; set; }
+        public byte[] ThumbnailData { get; set; }
         public byte[] PhotoData { get; set; }
     }
 

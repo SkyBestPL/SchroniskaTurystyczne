@@ -1,0 +1,111 @@
+﻿@model SchroniskaTurystyczne.ViewModels.MessageViewModel
+
+<div class="container-fluid">
+    <div class="row">
+        <!-- Conversations List -->
+        <div class="col-md-3 conversations-list">
+            @if (Model.Conversations != null)
+            {
+                <h3>Rozmowy</h3>
+                <ul class="list-group">
+                    @foreach (var conversation in Model.Conversations)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center
+                        @(Model.CurrentConversation?.OtherUserId == conversation.OtherUserId ? "active" : "")"
+                            data-user-id="@conversation.OtherUserId"
+                            data-shelter-id="@(conversation.RelatedShelter?.Id)">
+                            <div>
+                                @if (conversation.RelatedShelter != null)
+                                {
+                                    <strong>@conversation.RelatedShelter.Name</strong>
+                                }
+                                else
+                                {
+                                    <strong>@conversation.OtherUserName</strong>
+                                }
+                                <small class="d-block text-muted">
+                                    @conversation.Messages.LastOrDefault()?.Contents
+                                </small>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+
+        <!-- Message Window -->
+        <div class="col-md-9 message-window">
+            @if (Model.CurrentConversation != null)
+            {
+                <div class="card">
+                    <div class="card-header">
+                        @if (Model.CurrentConversation.RelatedShelter != null)
+                        {
+                            <h4>@Model.CurrentConversation.RelatedShelter.Name</h4>
+                        }
+                        else
+                        {
+                            <h4>@Model.CurrentConversation.OtherUserName</h4>
+                        }
+                    </div>
+                    <div class="card-body message-list">
+                        @foreach (var message in Model.CurrentConversation.Messages)
+                        {
+                            <div class="message @(message.IsSentByCurrentUser ? "sent" : "received")">
+                                <p>@message.Contents</p>
+                                <small>@message.SentAt.ToString("yyyy-MM-dd HH:mm")</small>
+                            </div>
+                        }
+                    </div>
+                    <div class="card-footer">
+                        <form asp-action="SendMessage" method="post">
+                            <input type="hidden" asp-for="Receiver.Id" value="@Model.Receiver.Id" />
+                            <input type="hidden" asp-for="InitialShelterId" value="@Model.InitialShelterId" />
+                            <div class="input-group">
+                                <input asp-for="NewMessageContent" class="form-control" placeholder="Napisz wiadomość..." />
+                                <div class="input-group-append">
+                                    <button type="submit" class="btn btn-primary">Wyślij</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center">
+                    <p>Wybierz rozmowę lub rozpocznij nową.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function scrollToBottom() {
+            var messageList = document.querySelector('.message-list');
+            if (messageList) {
+                messageList.scrollTop = messageList.scrollHeight;
+            }
+        }
+        scrollToBottom();
+
+        var conversationItems = document.querySelectorAll('.conversations-list .list-group-item');
+        conversationItems.forEach(function (item) {
+            item.addEventListener('click', function () {
+                conversationItems.forEach(el => el.classList.remove('active'));
+                this.classList.add('active');
+
+                var userId = this.getAttribute('data-user-id');
+                var shelterId = this.getAttribute('data-shelter-id');
+
+                if (shelterId) {
+                    window.location.href = `/Message/Index?shelterId=${shelterId}`;
+                } else if (userId) {
+                    window.location.href = `/Message/Index?userId=${userId}`;
+                }
+            });
+        });
+    });
+</script>

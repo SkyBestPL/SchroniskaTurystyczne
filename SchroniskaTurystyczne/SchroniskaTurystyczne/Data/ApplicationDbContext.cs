@@ -34,7 +34,6 @@ namespace SchroniskaTurystyczne.Data
         public DbSet<Shelter> Shelters { get; set; }
         public DbSet<Tag> Tags { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<News> ShelterNews { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -185,12 +184,6 @@ namespace SchroniskaTurystyczne.Data
                 .HasForeignKey(ur => ur.UserId)
                 .IsRequired();
             });
-
-            modelBuilder.Entity<News>()
-                .HasOne(r => r.Shelter)
-                .WithMany(s => s.ShelterNews)
-                .HasForeignKey(r => r.IdShelter)
-                .OnDelete(DeleteBehavior.Cascade);
 
             Seed(modelBuilder);
         }

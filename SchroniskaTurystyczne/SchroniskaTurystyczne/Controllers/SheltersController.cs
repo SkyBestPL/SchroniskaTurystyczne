@@ -10,6 +10,9 @@ using System.Security.Claims;
 using SchroniskaTurystyczne.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Diagnostics;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
+using System.Drawing;
 
 namespace SchroniskaTurystyczne.Controllers
 {
@@ -43,7 +46,6 @@ namespace SchroniskaTurystyczne.Controllers
                 Facilities = _context.Facilities.ToList(),
                 Rooms = new List<RoomViewModel>()
             };
-
             return View(viewModel);
         }
 
@@ -150,6 +152,7 @@ namespace SchroniskaTurystyczne.Controllers
                     model.Rooms = new List<RoomViewModel>();
                 }
 
+                photoErrors.Add("Uwaga: Wszystkie wgrane wcześniej zdjęcia należy załadować ponownie.");
                 TempData["ErrorMessage"] = string.Join("<br>", photoErrors);
                 return View(model);
             }
@@ -215,7 +218,8 @@ namespace SchroniskaTurystyczne.Controllers
                         roomEntity.RoomPhotos.Add(new RoomPhoto
                         {
                             Name = photoFile.FileName,
-                            PhotoData = memoryStream.ToArray()
+                            PhotoData = memoryStream.ToArray(),
+                            ThumbnailData = ResizeImage(memoryStream.ToArray())
                         });
                     }
                 }
@@ -260,12 +264,39 @@ namespace SchroniskaTurystyczne.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        private byte[] ResizeImage(byte[] originalImage, int width = 80, int height = 80)
+        {
+            using (var ms = new MemoryStream(originalImage))
+            using (var originalBitmap = Image.FromStream(ms))
+            using (var resizedBitmap = new Bitmap(width, height))
+            {
+                using (var graphics = Graphics.FromImage(resizedBitmap))
+                {
+                    graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                    graphics.InterpolationMode = InterpolationMode.Low;
+                    graphics.CompositingMode = CompositingMode.SourceCopy;
+
+                    graphics.DrawImage(
+                        originalBitmap,
+                        0, 0,
+                        width,
+                        height
+                    );
+                }
+
+                using (var outputMs = new MemoryStream())
+                {
+                    resizedBitmap.Save(outputMs, ImageFormat.Jpeg);
+                    return outputMs.ToArray();
+                }
+            }
+        }
+
         private List<string> CheckPhotos(ShelterCreateViewModel model)
         {
             var errorMessages = new List<string>();
 
-            // Sprawdź zdjęcia schroniska
-            if (model.Photos != null && model.Photos.Count > 5) // Przykład: limit 5 zdjęć
+            if (model.Photos != null && model.Photos.Count > 5)
             {
                 errorMessages.Add("Schronisko może mieć maksymalnie 5 zdjęć.");
             }
@@ -274,19 +305,18 @@ namespace SchroniskaTurystyczne.Controllers
             {
                 foreach (var photo in model.Photos)
                 {
-                    if (photo.Length > 5 * 1024 * 1024) // Przykład: limit 5 MB
+                    if (photo.Length > 5 * 1024 * 1024)
                     {
                         errorMessages.Add($"Zdjęcie {photo.FileName} przekracza dopuszczalny rozmiar 5 MB.");
                     }
                 }
             }
 
-            // Sprawdź zdjęcia pokoi
             if (model.Rooms != null)
             {
                 foreach (var room in model.Rooms)
                 {
-                    if (room.RoomPhotos != null && room.RoomPhotos.Count > 3) // Przykład: limit 3 zdjęcia na pokój
+                    if (room.RoomPhotos != null && room.RoomPhotos.Count > 3)
                     {
                         errorMessages.Add($"Pokój {room.Name} może mieć maksymalnie 3 zdjęcia.");
                     }
@@ -295,7 +325,7 @@ namespace SchroniskaTurystyczne.Controllers
                     {
                         foreach (var photo in room.RoomPhotos)
                         {
-                            if (photo.Length > 5 * 1024 * 1024) // Przykład: limit 5 MB
+                            if (photo.Length > 5 * 1024 * 1024)
                             {
                                 errorMessages.Add($"Zdjęcie {photo.FileName} w pokoju {room.Name} przekracza dopuszczalny rozmiar 5 MB.");
                             }
@@ -422,9 +452,8 @@ namespace SchroniskaTurystyczne.Controllers
                     Name = c.Name
                 }).ToList()
             };
-
             return View(viewModel);
-        }
+        } 
 
         public IActionResult CreateRoute()
         {

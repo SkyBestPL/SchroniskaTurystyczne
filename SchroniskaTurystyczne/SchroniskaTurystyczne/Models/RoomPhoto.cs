@@ -9,6 +9,7 @@ namespace SchroniskaTurystyczne.Models
         public int IdRoom { get; set; }
         public string? Name { get; set; }
         [Required]
+        public byte[] ThumbnailData { get; set; }
         public byte[] PhotoData { get; set; }
         [JsonIgnore]
         public virtual Room Room { get; set; }

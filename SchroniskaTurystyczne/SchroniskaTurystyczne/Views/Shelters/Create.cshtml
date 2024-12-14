@@ -69,14 +69,19 @@
     <h4 style="margin-top: 20px">Zdjęcia schroniska</h4>
 
     <div class="form-group">
-        <input type="file" name="Photos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
+        <input type="file" name="Photos" class="form-control" multiple accept=".jpg, .jpeg, .png"
+               onchange="validatePhotos(this)" />
+        <small class="form-text text-muted">Max 5 zdjęć, każde do 5MB</small>
+        <span id="photo-error" class="text-danger" style="display: block;"></span>
     </div>
+
+    <div id="selected-photos-display" class="selected-photos-container mt-2"></div>
 
     <h4 style="margin-top: 20px">Wybierz Tagi</h4>
     <div class="form-group">
         <div id="tags-display" class="selected-tags-container mt-2"></div>
         <input type="hidden" name="SelectedTags" id="selected-tags" />
-        <button style="margin-top: 5px;" type="button" class="btn btn-secondary mb-3" onclick="openTagsModal()">Wybierz Tagi</button>
+        <button style="margin-top: 5px;" type="button" class="dark-darkcyan-button" onclick="openTagsModal()">Wybierz Tagi</button>
     </div>
 
     <h4 style="margin-top: 20px">Dodaj Pokoje</h4>
@@ -86,8 +91,8 @@
                 <tr>
                     <th>Typ pokoju</th>
                     <th>Nazwa pokoju</th>
-                    <th>Cena za noc (zł)</th>
-                    <th>Pojemność (w osobach)</th>
+                    <th>Cena za osobę (zł)</th>
+                    <th>Liczba miejsc</th>
                     <th>Udogodnienia</th>
                     <th>Zdjęcia</th>
                     <th>Aktywny</th>
@@ -96,10 +101,11 @@
             </thead>
             <tbody id="rooms-table-body"></tbody>
         </table>
-        <button type="button" class="btn btn-secondary" onclick="addRoom()">Dodaj Pokój</button>
+        <button type="button" class="dark-darkcyan-button" onclick="addRoom()">Dodaj Pokój</button>
     </div>
-
-    <button style="margin-left: 570px; margin-top: 10px; font-size: 20px" type="submit" class="darkcyan-button">Stwórz Schronisko</button>
+    <div style="display: flex; justify-content: center; align-items: center">
+        <button style="margin-top: 10px; font-size: 20px" type="submit" class="darkcyan-button">Stwórz Schronisko</button>
+    </div>
 </form>
 
 <script>
@@ -127,6 +133,24 @@
         },
     });
 
+    class LogoControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'maplibregl-ctrl';
+            this._container.innerHTML = '<a href="http://mapy.cz/" target="_blank"><img  width="100px" src="https://api.mapy.cz/img/api/logo.svg" ></a>';
+
+            return this._container;
+        }
+
+        onRemove() {
+            this._container.parentNode.removeChild(this._container);
+            this._map = undefined;
+        }
+    }
+
+    map.addControl(new LogoControl(), 'bottom-left');
+
     let marker = new maplibregl.Marker({ color: 'darkcyan' })
         .setLngLat([lon, lat])
         .addTo(map);
@@ -148,34 +172,47 @@
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>
-                <select name="Rooms[${index}].IdType" class="form-control" data-val="true" data-val-required="Wybór typu pokoju jest wymagany.">
-                    @foreach (var type in Model.RoomTypes)
-                    {
-                         <option value="@type.Value">@type.Text</option>
-                    }
+                <select name="Rooms[${index}].IdType" class="form-control" data-val="true" data-val-required="Wybierz typ pokoju.">
+                @foreach (var type in Model.RoomTypes)
+                {
+                   <option value="@type.Value">@type.Text</option>
+                }
                 </select>
                 <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].IdType" data-valmsg-replace="true"></span>
             </td>
             <td>
-                <input type="text" name="Rooms[${index}].Name" class="form-control" data-val="true" data-val-required="Nazwa pokoju jest wymagana." />
+                <input type="text" name="Rooms[${index}].Name" class="form-control" data-val="true"
+                    data-val-required="Nazwa pokoju jest wymagana."
+                    data-val-maxlength="Nazwa pokoju może mieć maksymalnie 100 znaków."
+                    data-val-maxlength-max="100" />
                 <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].Name" data-valmsg-replace="true"></span>
             </td>
             <td>
-                <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" data-val="true" data-val-required="Cena pokoju jest wymagana." />
+                <input type="number" step="0.01" name="Rooms[${index}].PricePerNight" class="form-control" data-val="true"
+                    data-val-required="Cena pokoju jest wymagana."
+                    data-val-range="Cena musi być pomiędzy 0.00 a 10 000."
+                    data-val-range-min="0.00"
+                    data-val-range-max="10000" />
                 <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].PricePerNight" data-valmsg-replace="true"></span>
             </td>
             <td>
-                <input type="number" name="Rooms[${index}].Capacity" class="form-control" data-val="true" data-val-required="Pojemność pokoju jest wymagana." />
+                <input type="number" name="Rooms[${index}].Capacity" class="form-control" data-val="true"
+                    data-val-required="Pojemność pokoju jest wymagana."
+                    data-val-range="Pojemność musi wynosić co najmniej 1."
+                    data-val-range-min="1" />
                 <span class="text-danger field-validation-valid" data-valmsg-for="Rooms[${index}].Capacity" data-valmsg-replace="true"></span>
             </td>
             <td>
-                <button type="button" class="btn btn-secondary mb-2" onclick="openFacilitiesModal(${index})">Dodaj Udogodnienia</button>
+                <button type="button" class="dark-darkcyan-button" onclick="openFacilitiesModal(${index})">Wybierz</button>
                 <div id="facilities-display-${index}" class="selected-facilities-container mt-2"></div>
                 <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
             </td>
             <td>
-                <input type="file" name="Rooms[${index}].RoomPhotos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
+                <input type="file" name="Rooms[${index}].RoomPhotos" class="form-control" multiple accept=".jpg, .jpeg, .png"
+                    onchange="updateRoomPhotosDisplay(this, ${index})" />
                 <small class="form-text text-muted">Max 3 zdjęcia, każde do 5MB</small>
+                <span id="photo-error-${index}" class="text-danger" style="display: block;"></span>
+                <div id="room-photos-display-${index}" class="room-photos-container"></div>
             </td>
             <td>
                 <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
@@ -187,14 +224,110 @@
         `;
         container.appendChild(row);
 
-        /*var form = $('#formularz')
+        var form = $('#formularz')
 
         form.removeData("validator")
             .removeData("unobtrusiveValidation");
 
-        console.log(form);
+        $.validator.unobtrusive.parse(form);
+    }
 
-        $.validator.unobtrusive.parse(form);*/
+    function validatePhotos(input) {
+        const errorSpan = document.getElementById('photo-error');
+        let errorMessage = '';
+
+        if (input.files.length > 5) {
+            errorMessage = `Możesz przesłać maksymalnie 5 zdjęć.`;
+        }
+
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            const fileSizeMB = file.size / (1024 * 1024);
+
+            if (fileSizeMB > 5) {
+                errorMessage = `Plik "${file.name}" jest za duży. Maksymalny rozmiar to 5MB.`;
+                break;
+            }
+        }
+
+        if (errorMessage) {
+            errorSpan.textContent = errorMessage;
+            input.value = "";
+            updateSelectedPhotosDisplay(input);
+        } else {
+            errorSpan.textContent = "";
+            updateSelectedPhotosDisplay(input);
+        }
+    }
+
+    function validateRoomPhotos(input, index) {
+        const errorSpan = document.getElementById(`photo-error-${index}`);
+        let errorMessage = '';
+
+        if (input.files.length > 3) {
+            errorMessage = `Możesz przesłać maksymalnie 3 zdjęcia.`;
+        }
+
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            const fileSizeMB = file.size / (1024 * 1024);
+
+            if (fileSizeMB > 5) {
+                errorMessage = `Plik "${file.name}" jest za duży. Maksymalny rozmiar to 5MB.`;
+                break;
+            }
+        }
+
+        if (errorMessage) {
+            errorSpan.textContent = errorMessage;
+            input.value = "";
+        } else {
+            errorSpan.textContent = "";
+        }
+    }
+
+    function updateRoomPhotosDisplay(input, index) {
+        const displayElement = document.getElementById(`room-photos-display-${index}`);
+        displayElement.innerHTML = '';
+
+        validateRoomPhotos(input, index);
+
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            const fileReader = new FileReader();
+
+            fileReader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'selected-photo';
+                img.width = 85;
+                img.style.margin = '2px';
+                displayElement.appendChild(img);
+            };
+
+            fileReader.readAsDataURL(file);
+        }
+    }
+
+    function updateSelectedPhotosDisplay(input) {
+        const displayElement = document.getElementById('selected-photos-display');
+        displayElement.innerHTML = '';
+
+        for (let i = 0; i < input.files.length; i++) {
+            const file = input.files[i];
+            const fileReader = new FileReader();
+
+            fileReader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.className = 'selected-photo';
+                img.width = 100;
+                img.style.margin = '5px';
+                displayElement.appendChild(img);
+            };
+
+            fileReader.readAsDataURL(file);
+        }
     }
 
     function updateIsActive(index) {
@@ -298,22 +431,6 @@
         }
 
         selectedFacilitiesInput.value = JSON.stringify(selectedFacilities);
-        updateFacilitiesListDisplay(currentRoomIndex, facilityName, checkbox.checked);
-    }
-
-    function updateFacilitiesListDisplay(roomIndex, facilityName, add) {
-        const displayElement = document.getElementById(`facilities-display-${roomIndex}`);
-        const facilityItem = document.createElement('span');
-        facilityItem.className = 'badge badge-info m-1';
-        facilityItem.innerText = facilityName;
-
-        if (add) {
-            displayElement.appendChild(facilityItem);
-        } else {
-            [...displayElement.children].forEach(child => {
-                if (child.innerText === facilityName) child.remove();
-            });
-        }
     }
 </script>
 
@@ -355,48 +472,44 @@
                         addRoom();
                         var lastRow = document.getElementById('rooms-table-body').lastElementChild;
 
-                        // Ustaw typ pokoju
                         var roomTypeSelect = lastRow.querySelector('select[name$=".IdType"]');
                         if (roomTypeSelect) {
                             roomTypeSelect.value = "@room.IdType";
                             }
 
-                        // Ustaw nazwę pokoju
                         var roomNameInput = lastRow.querySelector('input[name$=".Name"]');
                         if (roomNameInput) {
                             roomNameInput.value = "@room.Name";
                             }
 
-                        // Ustaw cenę
                         var roomPriceInput = lastRow.querySelector('input[name$=".PricePerNight"]');
                         if (roomPriceInput) {
                             roomPriceInput.value = "@room.PricePerNight";
                             }
 
-                        // Ustaw pojemność
                         var roomCapacityInput = lastRow.querySelector('input[name$=".Capacity"]');
                         if (roomCapacityInput) {
                             roomCapacityInput.value = "@room.Capacity";
                             }
 
                         // Obsługa udogodnień pokoju
-                @if (room.SelectedFacilities != null && room.SelectedFacilities.Any())
-                {
-                    <text>
-                                var roomIndex = @roomIndex;
-                                var selectedFacilities = [@string.Join(",", room.SelectedFacilities)];
+                        @if (room.SelectedFacilities != null && room.SelectedFacilities.Any())
+                        {
+                            <text>
+                                        var roomIndex = @roomIndex;
+                                        var selectedFacilities = [@string.Join(",", room.SelectedFacilities)];
 
-                                selectedFacilities.forEach(function(facilityId) {
-                                        var checkbox = document.querySelector(`#facilities-list input[value="${facilityId}"]`);
-                                if (checkbox) {
-                                    currentRoomIndex = roomIndex;
-                                var facilityName = checkbox.parentElement.textContent.trim();
-                                checkbox.checked = true;
-                                toggleFacility(checkbox, facilityName);
-                                        }
-                                    });
-                    </text>
-                }
+                                        selectedFacilities.forEach(function(facilityId) {
+                                                var checkbox = document.querySelector(`#facilities-list input[value="${facilityId}"]`);
+                                        if (checkbox) {
+                                            currentRoomIndex = roomIndex;
+                                        var facilityName = checkbox.parentElement.textContent.trim();
+                                        checkbox.checked = true;
+                                        toggleFacility(checkbox, facilityName);
+                                                }
+                                            });
+                            </text>
+                        }
 
                         // Ustaw aktywność pokoju
                         var activeCheckbox = lastRow.querySelector('.is-active-checkbox');
@@ -425,7 +538,7 @@
         }
     </ul>
     <p style="margin-top: 5px; font-size: 13px; color: darkgray">Brakuje jakiegoś udogodnienia? Napisz do nas, a rozważymy jego dodanie!</p>
-    <button type="button" class="btn btn-primary mt-3" onclick="closeFacilitiesModal()">Zamknij</button>
+    <button type="button" class="dark-darkcyan-button" onclick="closeFacilitiesModal()">Zamknij</button>
 </div>
 <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
 
@@ -444,7 +557,7 @@
         }
     </ul>
     <p style="margin-top: 5px; font-size: 13px; color: darkgray">Brakuje jakiegoś tagu? Napisz do nas, a rozważymy jego dodanie!</p>
-    <button type="button" class="btn btn-primary mt-3" onclick="closeTagsModal()">Zamknij</button>
+    <button type="button" class="dark-darkcyan-button" onclick="closeTagsModal()">Zamknij</button>
 </div>
 <div id="tags-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
 
