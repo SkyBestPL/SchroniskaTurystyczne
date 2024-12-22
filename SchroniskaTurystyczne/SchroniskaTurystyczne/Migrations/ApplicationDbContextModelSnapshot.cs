@@ -155,6 +155,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("IdShelter")
+                        .HasColumnType("int");
+
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -207,9 +210,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "aaa74e14-afcc-4f08-ac88-81503fa53a1b",
+                            Id = "b7384669-b8c4-477e-a97d-3e0f35d2f87f",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "7c4dde4f-197c-4eec-af03-8ab9bb5251f6",
+                            ConcurrencyStamp = "b63c8f67-5138-4868-990d-f7651f7fbb45",
                             Email = "admin@admin.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -219,7 +222,7 @@ namespace SchroniskaTurystyczne.Migrations
                             NormalizedUserName = "ADMIN@ADMIN.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "34055e65-664a-462c-966e-a8f7945a3f21",
+                            SecurityStamp = "b6d13393-f877-4f00-94b0-41f76d97158b",
                             TwoFactorEnabled = false,
                             UserName = "admin@admin.com"
                         });
@@ -252,6 +255,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<int>("IdShelter")
+                        .HasColumnType("int");
+
                     b.Property<int>("NumberOfPeople")
                         .HasColumnType("int");
 
@@ -270,6 +276,8 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("IdGuest");
+
+                    b.HasIndex("IdShelter");
 
                     b.ToTable("Bookings");
                 });
@@ -290,6 +298,65 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasIndex("IdRoom");
 
                     b.ToTable("BookingRooms");
+                });
+
+            modelBuilder.Entity("SchroniskaTurystyczne.Models.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Description = "Schroniska znajdujace się na paśmie górskim Tatr",
+                            Name = "Tatry"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Description = "Schroniska znajdujace się na paśmaie górskim Bieszczad",
+                            Name = "Bieszczady"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Description = "Schroniska znajdujace się na paśmaie górskim Beskidu Żywieckiego",
+                            Name = "Beskid Żywiecki"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Description = "Schroniska znajdujace się na paśmie górskim Beskidu Śląskiego",
+                            Name = "Beskid Śląski"
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Description = "Schroniska znajdujace się na paśmie górskim Karkonoszy",
+                            Name = "Karkonosze"
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Description = "Schroniska znajdujace się na regionach innych niż pasma górskie",
+                            Name = "Inne"
+                        });
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Facility", b =>
@@ -341,9 +408,8 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Date")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("IdReceiver")
                         .IsRequired()
@@ -352,6 +418,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<string>("IdSender")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -377,6 +446,10 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("PhotoData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("ThumbnailData")
                         .IsRequired()
                         .HasColumnType("varbinary(max)");
 
@@ -443,7 +516,7 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdShelter")
+                    b.Property<int?>("IdShelter")
                         .HasColumnType("int");
 
                     b.Property<string>("IdUser")
@@ -491,19 +564,19 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c1daeb1c-7f04-40d2-b14b-cb0a72739399",
+                            Id = "3ec6cfbc-146d-4d7b-a5ad-be39b135c889",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "9f0782bc-19b2-40ee-866f-aa5065a63661",
+                            Id = "44d4b6e3-3c49-46b9-91ce-aef04a26683a",
                             Name = "Guest",
                             NormalizedName = "Guest"
                         },
                         new
                         {
-                            Id = "8a00cf69-3628-4c7b-8edb-bc634ef77591",
+                            Id = "3dc12321-0691-4bf5-9e21-4ecca8ca65a9",
                             Name = "Exhibitor",
                             NormalizedName = "Exhibitor"
                         });
@@ -536,7 +609,7 @@ namespace SchroniskaTurystyczne.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("PricePerNight")
                         .HasColumnType("float");
@@ -546,10 +619,6 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasIndex("IdShelter");
 
                     b.HasIndex("IdType");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
 
                     b.ToTable("Rooms");
                 });
@@ -568,9 +637,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Path")
+                    b.Property<byte[]>("PhotoData")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("varbinary(max)");
+
+                    b.Property<byte[]>("ThumbnailData")
+                        .IsRequired()
+                        .HasColumnType("varbinary(max)");
 
                     b.HasKey("Id");
 
@@ -602,17 +675,20 @@ namespace SchroniskaTurystyczne.Migrations
                         new
                         {
                             Id = 1,
-                            Name = "Public"
+                            Description = "Pokój rezerwowany wspólnie z innymi gośćmi",
+                            Name = "Pokój publiczny"
                         },
                         new
                         {
                             Id = 2,
-                            Name = "Private"
+                            Description = "Pokój rezerwowany na własność",
+                            Name = "Pokój prywatny"
                         },
                         new
                         {
                             Id = 3,
-                            Name = "Camping"
+                            Description = "Wspólne miejsce dla gości na zewnątrz",
+                            Name = "Pole namiotowe"
                         });
                 });
 
@@ -647,14 +723,23 @@ namespace SchroniskaTurystyczne.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("AmountOfReviews")
+                        .HasColumnType("int");
+
                     b.Property<string>("City")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("ConfirmedShelter")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Country")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("IdCategory")
+                        .HasColumnType("int");
 
                     b.Property<string>("IdExhibitor")
                         .IsRequired()
@@ -686,7 +771,10 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("IdExhibitor");
+                    b.HasIndex("IdCategory");
+
+                    b.HasIndex("IdExhibitor")
+                        .IsUnique();
 
                     b.ToTable("Shelters");
                 });
@@ -752,8 +840,8 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "aaa74e14-afcc-4f08-ac88-81503fa53a1b",
-                            RoleId = "c1daeb1c-7f04-40d2-b14b-cb0a72739399"
+                            UserId = "b7384669-b8c4-477e-a97d-3e0f35d2f87f",
+                            RoleId = "3ec6cfbc-146d-4d7b-a5ad-be39b135c889"
                         });
                 });
 
@@ -831,7 +919,15 @@ namespace SchroniskaTurystyczne.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
+                        .WithMany("Bookings")
+                        .HasForeignKey("IdShelter")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.Navigation("Guest");
+
+                    b.Navigation("Shelter");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.BookingRoom", b =>
@@ -845,7 +941,7 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.Room", "Room")
                         .WithMany("BookingRooms")
                         .HasForeignKey("IdRoom")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Booking");
@@ -858,13 +954,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Receiver")
                         .WithMany("ReceivedMessages")
                         .HasForeignKey("IdReceiver")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("IdSender")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -909,13 +1005,12 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
                         .WithMany("Reviews")
                         .HasForeignKey("IdShelter")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("IdUser")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Shelter");
@@ -934,7 +1029,7 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.RoomType", "RoomType")
                         .WithMany("Rooms")
                         .HasForeignKey("IdType")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("RoomType");
@@ -966,11 +1061,19 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Shelter", b =>
                 {
-                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Exhibitor")
+                    b.HasOne("SchroniskaTurystyczne.Models.Category", "Category")
                         .WithMany("Shelters")
-                        .HasForeignKey("IdExhibitor")
+                        .HasForeignKey("IdCategory")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Exhibitor")
+                        .WithOne("Shelter")
+                        .HasForeignKey("SchroniskaTurystyczne.Models.Shelter", "IdExhibitor")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Category");
 
                     b.Navigation("Exhibitor");
                 });
@@ -1021,7 +1124,7 @@ namespace SchroniskaTurystyczne.Migrations
 
                     b.Navigation("SentMessages");
 
-                    b.Navigation("Shelters");
+                    b.Navigation("Shelter");
 
                     b.Navigation("UserRoles");
                 });
@@ -1029,6 +1132,11 @@ namespace SchroniskaTurystyczne.Migrations
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Booking", b =>
                 {
                     b.Navigation("BookingRooms");
+                });
+
+            modelBuilder.Entity("SchroniskaTurystyczne.Models.Category", b =>
+                {
+                    b.Navigation("Shelters");
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Role", b =>
@@ -1057,6 +1165,8 @@ namespace SchroniskaTurystyczne.Migrations
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Shelter", b =>
                 {
+                    b.Navigation("Bookings");
+
                     b.Navigation("Photos");
 
                     b.Navigation("Points");

@@ -10,6 +10,7 @@ namespace SchroniskaTurystyczne.Models
         public string? Name { get; set; }
         [Required]
         public byte[] PhotoData { get; set; }
+        public byte[] ThumbnailData { get; set; }
 
         public virtual Shelter Shelter { get; set; }
     }

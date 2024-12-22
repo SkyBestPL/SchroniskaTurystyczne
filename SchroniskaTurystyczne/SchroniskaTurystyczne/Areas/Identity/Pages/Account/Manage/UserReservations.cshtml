@@ -5,20 +5,18 @@
 <h3>Moje rezerwacje</h3>
 
 <!-- Sekcja aktualnych rezerwacji -->
-<h4>Aktualne rezerwacje</h4>
-<div class="reservations-container">
+<h4 class="section-header current">Aktualne rezerwacje</h4>
+<div>
     @if (Model.CurrentBookings.Any())
     {
         @foreach (var booking in Model.CurrentBookings)
         {
-            <div class="reservations-card mb-4">
+            <div class="reservations-card">
                 <div class="card-header">
-                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                    Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
-
                 <div class="card-body">
-                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
-                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <p><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy") <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
                     <h6>Pokoje:</h6>
@@ -30,22 +28,19 @@
                     </ul>
 
                     <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
-                    <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
-                    <p><strong>Status rezerwacji:</strong> @(booking.Verified ? "Potwierdzone" : "Niepotwierdzone")</p>
+                    <p><strong>Status płatności:</strong> <span class="@(booking.Paid ? "confirmed" : "unconfirmed")">@((booking.Paid ? "Opłacona" : "Nieopłacona"))</span></p>
+                    <p><strong>Status rezerwacji:</strong> <span class="@(booking.Verified ? "confirmed" : "unconfirmed")">@((booking.Verified ? "Potwierdzona przez właściciela" : "Niepotwierdzona"))</span></p>
                 </div>
-
                 <div class="card-footer text-end">
-                    <button type="button" class="btn btn-primary" onclick="location.href='@Url.Page("/Booking/Details", new { id = booking.Id })'">Szczegóły</button>
-
+                    <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Message", new { shelterId = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">Napisz do właściciela</button>
                     @if (!booking.Verified)
                     {
-                        <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
-                        <button type="button" class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
+                        <button class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
+                        <button class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
                     }
-
                     @if (!booking.Paid)
                     {
-                        <button type="button" class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
+                        <button class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
                     }
                 </div>
             </div>
@@ -58,20 +53,19 @@
 </div>
 
 <!-- Sekcja zakończonych rezerwacji -->
-<h4>Zakończone rezerwacje</h4>
-<div class="reservations-container">
+<h4 class="section-header past">Zakończone rezerwacje</h4>
+<div>
     @if (Model.PastBookings.Any())
     {
         @foreach (var booking in Model.PastBookings)
         {
-            <div class="reservations-card mb-4">
+            <div class="reservations-card">
                 <div class="card-header">
-                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                    Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
-
                 <div class="card-body">
-                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
-                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <span><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</span>
+                    <p><strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
                     <h6>Pokoje:</h6>
@@ -95,20 +89,19 @@
 </div>
 
 <!-- Sekcja odrzuconych rezerwacji -->
-<h4>Odrzucone rezerwacje</h4>
-<div class="reservations-container">
+<h4 class="section-header rejected">Odrzucone rezerwacje</h4>
+<div>
     @if (Model.RejectedBookings.Any())
     {
         @foreach (var booking in Model.RejectedBookings)
         {
-            <div class="reservations-card mb-4">
+            <div class="reservations-card">
                 <div class="card-header">
-                    <h5>Schronisko: @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</h5>
+                    Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
-
                 <div class="card-body">
-                    <p><strong>Data zameldowania:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</p>
-                    <p><strong>Data wymeldowania:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <span><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</span>
+                    <p><strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
                     <h6>Pokoje:</h6>

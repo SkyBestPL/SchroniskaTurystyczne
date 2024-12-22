@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using SchroniskaTurystyczne.Controllers;
 using SchroniskaTurystyczne.Data;
 using SchroniskaTurystyczne.Models;
 
@@ -15,6 +16,8 @@ builder.Services.AddDefaultIdentity<AppUser>(options => options.SignIn.RequireCo
         .AddRoles<Role>()
         .AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddScoped<MessageController>();
 
 builder.Services.AddAuthorization(options =>
 {

@@ -80,6 +80,7 @@ namespace SchroniskaTurystyczne.Controllers
                 })
                 .ToListAsync();
 
+            Debug.WriteLine("koniec");
             return RedirectToAction("Index", "Shelters", model);
         }
 

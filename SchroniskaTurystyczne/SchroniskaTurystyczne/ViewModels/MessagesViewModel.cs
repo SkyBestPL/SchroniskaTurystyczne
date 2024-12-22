@@ -43,6 +43,7 @@ namespace SchroniskaTurystyczne.ViewModels
 
         // Czy jest to nowa konwersacja
         public bool IsNewConversation { get; set; }
+        public int UnreadMessagesCount { get; set; }
     }
 
     public class MessageInfoViewModel
@@ -55,6 +56,8 @@ namespace SchroniskaTurystyczne.ViewModels
 
         // Data i godzina wysłania wiadomości
         public DateTime SentAt { get; set; }
+
+        public bool IsRead { get; set; }
 
         // Czy wiadomość została wysłana przez obecnego użytkownika
         public bool IsSentByCurrentUser { get; set; }

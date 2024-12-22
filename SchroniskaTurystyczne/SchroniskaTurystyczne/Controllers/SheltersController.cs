@@ -219,7 +219,7 @@ namespace SchroniskaTurystyczne.Controllers
                         {
                             Name = photoFile.FileName,
                             PhotoData = memoryStream.ToArray(),
-                            ThumbnailData = ResizeImage(memoryStream.ToArray())
+                            ThumbnailData = ResizeImage(memoryStream.ToArray(), 200)
                         });
                     }
                 }
@@ -244,7 +244,8 @@ namespace SchroniskaTurystyczne.Controllers
                         shelter.Photos.Add(new Photo
                         {
                             Name = photoFile.FileName,
-                            PhotoData = memoryStream.ToArray()
+                            PhotoData = memoryStream.ToArray(),
+                            ThumbnailData = ResizeImage(memoryStream.ToArray(), 500)
                         });
                     }
                     else
@@ -264,30 +265,34 @@ namespace SchroniskaTurystyczne.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private byte[] ResizeImage(byte[] originalImage, int width = 80, int height = 80)
+        private byte[] ResizeImage(byte[] originalImage, int width)
         {
             using (var ms = new MemoryStream(originalImage))
             using (var originalBitmap = Image.FromStream(ms))
-            using (var resizedBitmap = new Bitmap(width, height))
             {
-                using (var graphics = Graphics.FromImage(resizedBitmap))
-                {
-                    graphics.CompositingQuality = CompositingQuality.HighSpeed;
-                    graphics.InterpolationMode = InterpolationMode.Low;
-                    graphics.CompositingMode = CompositingMode.SourceCopy;
+                int height = (int)(originalBitmap.Height * (width / (double)originalBitmap.Width));
 
-                    graphics.DrawImage(
-                        originalBitmap,
-                        0, 0,
-                        width,
-                        height
-                    );
-                }
-
-                using (var outputMs = new MemoryStream())
+                using (var resizedBitmap = new Bitmap(width, height))
                 {
-                    resizedBitmap.Save(outputMs, ImageFormat.Jpeg);
-                    return outputMs.ToArray();
+                    using (var graphics = Graphics.FromImage(resizedBitmap))
+                    {
+                        graphics.CompositingQuality = CompositingQuality.HighSpeed;
+                        graphics.InterpolationMode = InterpolationMode.Low;
+                        graphics.CompositingMode = CompositingMode.SourceCopy;
+
+                        graphics.DrawImage(
+                            originalBitmap,
+                            0, 0,
+                            width,
+                            height
+                        );
+                    }
+
+                    using (var outputMs = new MemoryStream())
+                    {
+                        resizedBitmap.Save(outputMs, ImageFormat.Jpeg);
+                        return outputMs.ToArray();
+                    }
                 }
             }
         }
@@ -336,19 +341,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             return errorMessages;
         }
-
-        // GET: Shelters
-        /*public async Task<IActionResult> Index()
-        {
-            var shelters = await _context.Shelters
-                .Include(s => s.Rooms)
-                    .ThenInclude(r => r.Facilities)
-                .Include(s => s.Photos)
-                .Include(s => s.Exhibitor)
-                .Include(s => s.Tags)
-                .ToListAsync();
-            return View(shelters);
-        }*/
 
         public IActionResult Index(ShelterSearchViewModel searchModel)
         {
@@ -422,7 +414,7 @@ namespace SchroniskaTurystyczne.Controllers
                     Name = t.Name
                 }),
                 MainPhotoBase64 = s.Photos != null && s.Photos.Any()
-                    ? Convert.ToBase64String(s.Photos.First().PhotoData)
+                    ? Convert.ToBase64String(s.Photos.First().ThumbnailData)
                     : null
             }).ToList();
 
@@ -908,6 +900,8 @@ namespace SchroniskaTurystyczne.Controllers
             // Znajdź schronisko użytkownika
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
+                .Include(s => s.Category)
+                .Include(s => s.Tags)
                 .FirstOrDefaultAsync(s => s.IdExhibitor == user.Id);
 
             if (shelter == null)

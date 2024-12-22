@@ -11,17 +11,26 @@
                     @foreach (var conversation in Model.Conversations)
                     {
                         <li class="list-group-item d-flex justify-content-between align-items-center
-                        @(Model.CurrentConversation?.OtherUserId == conversation.OtherUserId ? "active" : "")"
+                        @(Model.CurrentConversation?.OtherUserId == conversation.OtherUserId ? "active" : "")
+                        @(conversation.UnreadMessagesCount > 0 ? "unread-conversation" : "")"
                             data-user-id="@conversation.OtherUserId"
                             data-shelter-id="@(conversation.RelatedShelter?.Id)">
                             <div>
                                 @if (conversation.RelatedShelter != null)
                                 {
                                     <strong>@conversation.RelatedShelter.Name</strong>
+                                    @if (conversation.UnreadMessagesCount > 0)
+                                    {
+                                        <span class="badge badge-primary badge-pill"><i class="bi bi-circle-fill" style="color: darkcyan"></i></span>
+                                    }
                                 }
                                 else
                                 {
                                     <strong>@conversation.OtherUserName</strong>
+                                    @if (conversation.UnreadMessagesCount > 0)
+                                    {
+                                        <span class="badge badge-primary badge-pill"><i class="bi bi-circle-fill" style="color: darkcyan"></i></span>
+                                    }
                                 }
                                 <small class="d-block text-muted">
                                     @conversation.Messages.LastOrDefault()?.Contents
@@ -64,7 +73,7 @@
                             <div class="input-group">
                                 <input asp-for="NewMessageContent" class="form-control" placeholder="Napisz wiadomość..." />
                                 <div class="input-group-append">
-                                    <button type="submit" class="btn btn-primary">Wyślij</button>
+                                    <button type="submit" class="darkcyan-button" style="padding:10px 15px;">Wyślij</button>
                                 </div>
                             </div>
                         </form>
@@ -91,6 +100,12 @@
         }
         scrollToBottom();
 
+        function markMessagesAsRead(otherUserId) {
+            fetch(`/Message/MarkMessagesAsRead?otherUserId=${otherUserId}`, {
+                method: 'POST'
+            });
+        }
+
         var conversationItems = document.querySelectorAll('.conversations-list .list-group-item');
         conversationItems.forEach(function (item) {
             item.addEventListener('click', function () {
@@ -102,8 +117,10 @@
 
                 if (shelterId) {
                     window.location.href = `/Message/Index?shelterId=${shelterId}`;
+                    markMessagesAsRead(this.getAttribute('data-shelter-id'));
                 } else if (userId) {
                     window.location.href = `/Message/Index?userId=${userId}`;
+                    markMessagesAsRead(userId);
                 }
             });
         });

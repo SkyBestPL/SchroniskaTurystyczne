@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SchroniskaTurystyczne.Migrations
 {
     /// <inheritdoc />
-    public partial class mig1 : Migration
+    public partial class mig : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -34,6 +34,7 @@ namespace SchroniskaTurystyczne.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IdShelter = table.Column<int>(type: "int", nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -52,6 +53,20 @@ namespace SchroniskaTurystyczne.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -202,35 +217,6 @@ namespace SchroniskaTurystyczne.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Bookings",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IdGuest = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    NumberOfPeople = table.Column<int>(type: "int", nullable: false),
-                    CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Bill = table.Column<double>(type: "float", nullable: false),
-                    Paid = table.Column<bool>(type: "bit", nullable: false),
-                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Verified = table.Column<bool>(type: "bit", nullable: false),
-                    Valid = table.Column<bool>(type: "bit", nullable: false),
-                    Ended = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Bookings", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Bookings_AspNetUsers_IdGuest",
-                        column: x => x.IdGuest,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Messages",
                 columns: table => new
                 {
@@ -238,8 +224,9 @@ namespace SchroniskaTurystyczne.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdSender = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     IdReceiver = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Date = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Contents = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Date = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Contents = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IsRead = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -248,14 +235,12 @@ namespace SchroniskaTurystyczne.Migrations
                         name: "FK_Messages_AspNetUsers_IdReceiver",
                         column: x => x.IdReceiver,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Messages_AspNetUsers_IdSender",
                         column: x => x.IdSender,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -285,9 +270,12 @@ namespace SchroniskaTurystyczne.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdExhibitor = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    IdCategory = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Rating = table.Column<double>(type: "float", nullable: true),
+                    AmountOfReviews = table.Column<int>(type: "int", nullable: false),
+                    ConfirmedShelter = table.Column<bool>(type: "bit", nullable: false),
                     Country = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Street = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -305,6 +293,47 @@ namespace SchroniskaTurystyczne.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Shelters_Categories_IdCategory",
+                        column: x => x.IdCategory,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Bookings",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IdShelter = table.Column<int>(type: "int", nullable: false),
+                    IdGuest = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    NumberOfPeople = table.Column<int>(type: "int", nullable: false),
+                    CheckInDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CheckOutDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    BookingDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Bill = table.Column<double>(type: "float", nullable: false),
+                    Paid = table.Column<bool>(type: "bit", nullable: false),
+                    PaymentDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    Verified = table.Column<bool>(type: "bit", nullable: false),
+                    Valid = table.Column<bool>(type: "bit", nullable: false),
+                    Ended = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Bookings", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Bookings_AspNetUsers_IdGuest",
+                        column: x => x.IdGuest,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Bookings_Shelters_IdShelter",
+                        column: x => x.IdShelter,
+                        principalTable: "Shelters",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -315,7 +344,8 @@ namespace SchroniskaTurystyczne.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdShelter = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhotoData = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
+                    PhotoData = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    ThumbnailData = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -334,7 +364,7 @@ namespace SchroniskaTurystyczne.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    IdShelter = table.Column<int>(type: "int", nullable: false),
+                    IdShelter = table.Column<int>(type: "int", nullable: true),
                     IdUser = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Date = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Rating = table.Column<int>(type: "int", nullable: false),
@@ -347,8 +377,7 @@ namespace SchroniskaTurystyczne.Migrations
                         name: "FK_Reviews_AspNetUsers_IdUser",
                         column: x => x.IdUser,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Reviews_Shelters_IdShelter",
                         column: x => x.IdShelter,
@@ -365,7 +394,7 @@ namespace SchroniskaTurystyczne.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdShelter = table.Column<int>(type: "int", nullable: false),
                     IdType = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PricePerNight = table.Column<double>(type: "float", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
@@ -380,7 +409,7 @@ namespace SchroniskaTurystyczne.Migrations
                         column: x => x.IdType,
                         principalTable: "RoomTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Rooms_Shelters_IdShelter",
                         column: x => x.IdShelter,
@@ -434,8 +463,7 @@ namespace SchroniskaTurystyczne.Migrations
                         name: "FK_BookingRooms_Rooms_IdRoom",
                         column: x => x.IdRoom,
                         principalTable: "Rooms",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -505,7 +533,8 @@ namespace SchroniskaTurystyczne.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     IdRoom = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    ThumbnailData = table.Column<byte[]>(type: "varbinary(max)", nullable: false),
+                    PhotoData = table.Column<byte[]>(type: "varbinary(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -523,15 +552,28 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "8a00cf69-3628-4c7b-8edb-bc634ef77591", null, "Exhibitor", "Exhibitor" },
-                    { "9f0782bc-19b2-40ee-866f-aa5065a63661", null, "Guest", "Guest" },
-                    { "c1daeb1c-7f04-40d2-b14b-cb0a72739399", null, "Admin", "Admin" }
+                    { "3dc12321-0691-4bf5-9e21-4ecca8ca65a9", null, "Exhibitor", "Exhibitor" },
+                    { "3ec6cfbc-146d-4d7b-a5ad-be39b135c889", null, "Admin", "Admin" },
+                    { "44d4b6e3-3c49-46b9-91ce-aef04a26683a", null, "Guest", "Guest" }
                 });
 
             migrationBuilder.InsertData(
                 table: "AspNetUsers",
-                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
-                values: new object[] { "aaa74e14-afcc-4f08-ac88-81503fa53a1b", 0, "7c4dde4f-197c-4eec-af03-8ab9bb5251f6", "admin@admin.com", true, "Admin", "Admin", false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "34055e65-664a-462c-966e-a8f7945a3f21", false, "admin@admin.com" });
+                columns: new[] { "Id", "AccessFailedCount", "ConcurrencyStamp", "Email", "EmailConfirmed", "FirstName", "IdShelter", "LastName", "LockoutEnabled", "LockoutEnd", "NormalizedEmail", "NormalizedUserName", "PasswordHash", "PhoneNumber", "PhoneNumberConfirmed", "SecurityStamp", "TwoFactorEnabled", "UserName" },
+                values: new object[] { "b7384669-b8c4-477e-a97d-3e0f35d2f87f", 0, "b63c8f67-5138-4868-990d-f7651f7fbb45", "admin@admin.com", true, "Admin", null, "Admin", false, null, "ADMIN@ADMIN.COM", "ADMIN@ADMIN.COM", "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", null, false, "b6d13393-f877-4f00-94b0-41f76d97158b", false, "admin@admin.com" });
+
+            migrationBuilder.InsertData(
+                table: "Categories",
+                columns: new[] { "Id", "Description", "Name" },
+                values: new object[,]
+                {
+                    { 1, "Schroniska znajdujace się na paśmie górskim Tatr", "Tatry" },
+                    { 2, "Schroniska znajdujace się na paśmaie górskim Bieszczad", "Bieszczady" },
+                    { 3, "Schroniska znajdujace się na paśmaie górskim Beskidu Żywieckiego", "Beskid Żywiecki" },
+                    { 4, "Schroniska znajdujace się na paśmie górskim Beskidu Śląskiego", "Beskid Śląski" },
+                    { 5, "Schroniska znajdujace się na paśmie górskim Karkonoszy", "Karkonosze" },
+                    { 6, "Schroniska znajdujace się na regionach innych niż pasma górskie", "Inne" }
+                });
 
             migrationBuilder.InsertData(
                 table: "Facilities",
@@ -548,9 +590,9 @@ namespace SchroniskaTurystyczne.Migrations
                 columns: new[] { "Id", "Description", "Name" },
                 values: new object[,]
                 {
-                    { 1, null, "Public" },
-                    { 2, null, "Private" },
-                    { 3, null, "Camping" }
+                    { 1, "Pokój rezerwowany wspólnie z innymi gośćmi", "Pokój publiczny" },
+                    { 2, "Pokój rezerwowany na własność", "Pokój prywatny" },
+                    { 3, "Wspólne miejsce dla gości na zewnątrz", "Pole namiotowe" }
                 });
 
             migrationBuilder.InsertData(
@@ -568,7 +610,7 @@ namespace SchroniskaTurystyczne.Migrations
             migrationBuilder.InsertData(
                 table: "AspNetUserRoles",
                 columns: new[] { "RoleId", "UserId" },
-                values: new object[] { "c1daeb1c-7f04-40d2-b14b-cb0a72739399", "aaa74e14-afcc-4f08-ac88-81503fa53a1b" });
+                values: new object[] { "3ec6cfbc-146d-4d7b-a5ad-be39b135c889", "b7384669-b8c4-477e-a97d-3e0f35d2f87f" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
@@ -618,6 +660,11 @@ namespace SchroniskaTurystyczne.Migrations
                 name: "IX_Bookings_IdGuest",
                 table: "Bookings",
                 column: "IdGuest");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Bookings_IdShelter",
+                table: "Bookings",
+                column: "IdShelter");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Messages_IdReceiver",
@@ -680,21 +727,20 @@ namespace SchroniskaTurystyczne.Migrations
                 column: "IdType");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Rooms_Name",
-                table: "Rooms",
-                column: "Name",
-                unique: true,
-                filter: "[Name] IS NOT NULL");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_SavedRoutes_IdGuest",
                 table: "SavedRoutes",
                 column: "IdGuest");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Shelters_IdCategory",
+                table: "Shelters",
+                column: "IdCategory");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shelters_IdExhibitor",
                 table: "Shelters",
-                column: "IdExhibitor");
+                column: "IdExhibitor",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ShelterTag_IdTag",
@@ -770,6 +816,9 @@ namespace SchroniskaTurystyczne.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
         }
     }
 }

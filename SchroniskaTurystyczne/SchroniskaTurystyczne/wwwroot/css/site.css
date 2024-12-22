@@ -383,14 +383,14 @@ body {
     overflow: hidden;
 }
 
-.room-section h3 {
-    background-color: darkcyan;
-    color: white;
-    padding: 15px;
-    margin: 0;
-    text-align: center;
-    font-size: 1.2em;
-}
+    .room-section h3 {
+        background-color: #006b6b;
+        color: white;
+        padding: 15px;
+        margin: 0;
+        text-align: center;
+        font-size: 1.2em;
+    }
 
 .room-container {
     background-color: #f8f9fa;
@@ -399,6 +399,7 @@ body {
     gap: 20px;
     max-width: 1200px;
     margin: 0 auto;
+    place-items: center;
 }
 
 .room-card {
@@ -414,7 +415,7 @@ body {
 }
 
 .room-card h4 {
-    color: #20c997;
+    color: darkcyan;
     margin-bottom: 10px;
     font-size: 1.2em;
 }
@@ -741,8 +742,161 @@ body {
 
 .reservations-card {
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-header {
+    background-color: #f7f7f7;
+    padding: 10px 15px;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-bottom: 1px solid #ddd;
+}
+
+.card-body {
     padding: 15px;
+    font-size: 0.95rem;
+}
+
+.card-footer {
+    padding: 10px 15px;
+    background-color: #f7f7f7;
+    border-top: 1px solid #ddd;
+}
+
+.confirmed {
+    padding: 5px 10px;
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 12px;
+    color: #155724;
+    font-size: 0.85rem;
+}
+
+.unconfirmed {
+    padding: 5px 10px;
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 12px;
+    color: #721c24;
+    font-size: 0.85rem;
+}
+
+.btn {
+    margin-left: 5px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    border-radius: 5px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border: none;
+    color: #fff;
+}
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+        color: #fff;
+    }
+
+.btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    color: #fff;
+}
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+        color: #fff;
+    }
+
+.btn-danger {
+    background-color: #dc3545;
+    border: none;
+    color: #fff;
+}
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        color: #fff;
+    }
+
+.section-header {
+    font-size: 1.5rem;
+    padding: 10px;
+    border-radius: 5px;
+    color: black;
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: 10px;
+}
+
+/* Aktualne rezerwacje */
+.current {
+    background-color: #d4edda; /* Zielony */
+}
+
+/* Zakoñczone rezerwacje */
+.past {
+    background-color: #cce5ff; /* Niebieski */
+}
+
+.rejected {
+    background-color: #f8d7da; /* Czerwony */
+}
+
+.section-header.current {
+    box-shadow: 0 4px 6px rgba(0, 128, 0, 0.1);
+}
+
+.section-header.past {
+    box-shadow: 0 4px 6px rgba(0, 0, 255, 0.1);
+}
+
+.section-header.rejected {
+    box-shadow: 0 4px 6px rgba(255, 0, 0, 0.1);
+}
+
+/*------------------Message/Index-------------------*/
+
+.conversations-list .list-group-item.active {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: black;
+    border-color: darkcyan;
+    border-width: medium;
+    border-radius: 10px;
+}
+
+.message-list {
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+.message {
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+    .message.sent {
+        background-color: #99caca;
+        text-align: right;
+    }
+
+    .message.received {
+        background-color: #f0f0f0;
+        text-align: left;
+    }
+
+.unread-conversation {
+    background-color: #C0FFEA;
+    font-weight: bold;
 }
 
 /*----------------------------------------------------------------Areas/Identity.../Manage/UserShelters------------------------------------------------------*/
@@ -774,8 +928,9 @@ body {
 
 /* Ogólny motyw kalendarza */
 .fc {
-    background-color: darkcyan !important;
+    background-color: #006b6b !important;
     color: white !important;
+    text-decoration: none !important;
 }
 
 /* Dni */
@@ -787,13 +942,13 @@ body {
 }
 
     /* Dodatkowe czyszczenie stylów linków */
-    .fc-day-number a {
+    .fc a {
         color: white !important;
         text-decoration: none !important;
     }
 
-        .fc-day-number a:hover,
-        .fc-day-number a:focus {
+        .fc a:hover,
+        .fc a:focus {
             color: white !important;
             text-decoration: none !important;
             outline: none !important;
@@ -801,7 +956,7 @@ body {
 
     /* Dni dzisiejsze */
     .fc-day-number.fc-today {
-        background-color: #20c997 !important;
+        background-color: #07f7b0 !important;
         color: white !important;
     }
 
@@ -893,31 +1048,3 @@ fc-toolbar-title {
         height: 15px !important;
     }
 }
-
-/*------------------Message/Index-------------------*/
-
-.conversations-list .list-group-item.active {
-    background-color: #f8f9fa;
-    font-weight: bold;
-}
-
-.message-list {
-    max-height: 500px;
-    overflow-y: auto;
-}
-
-.message {
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: 5px;
-}
-
-    .message.sent {
-        background-color: #e6f2ff;
-        text-align: right;
-    }
-
-    .message.received {
-        background-color: #f0f0f0;
-        text-align: left;
-    }

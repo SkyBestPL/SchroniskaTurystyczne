@@ -26,10 +26,7 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
-                    .ThenInclude(r => r.RoomPhotos.Take(1))
-                .Include(s => s.Rooms)
                     .ThenInclude(r => r.Facilities)
-                .Include(s => s.Photos)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (shelter == null)
@@ -73,31 +70,68 @@ namespace SchroniskaTurystyczne.Controllers
                         Name = r.RoomType.Name,
                         Description = r.RoomType.Description
                     } : null,
-                    RoomPhotos = r.RoomPhotos?.Select(p => new RoomPhotoBookingViewModel
-                    {
-                        Id = p.Id,
-                        IdRoom = p.IdRoom,
-                        Name = p.Name,
-                        //PhotoData = p.PhotoData != null ? p.PhotoData : null,
-                        ThumbnailData = p.ThumbnailData != null ? p.ThumbnailData : null
-                    }).ToList(),
                     Facilities = r.Facilities?.Select(f => new FacilityBookingViewModel
                     {
                         Id = f.Id,
                         Name = f.Name
                     }).ToList()
                 })
-                .ToList() ?? new List<RoomBookingViewModel>(),
-                Photos = shelter.Photos?.Select(p => new PhotoBookingViewModel
-                {
-                    Id = p.Id,
-                    IdShelter = p.IdShelter,
-                    Name = p.Name,
-                    PhotoData = p.PhotoData
-                }).ToList()
+                .ToList() ?? new List<RoomBookingViewModel>()
             };
 
             return View(shelterViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetRoomThumbnail(int roomId)
+        {
+            var photo = await _context.RoomPhotos
+                .Where(p => p.IdRoom == roomId)
+                .Select(p => p.ThumbnailData)
+                .FirstOrDefaultAsync();
+
+            if (photo == null)
+            {
+                return NotFound();
+            }
+
+            return File(photo, "image/jpeg");
+        }
+
+        [HttpGet]
+        public IActionResult GetRoomPhotos(int roomId)
+        {
+            var roomPhotos = _context.RoomPhotos
+                .Where(rp => rp.IdRoom == roomId)
+                .Select(rp => new
+                {
+                    rp.Id,
+                    rp.PhotoData
+                })
+                .ToList();
+
+            if (!roomPhotos.Any())
+            {
+                return NotFound("Brak zdjęć dla wybranego pokoju.");
+            }
+
+            return Json(roomPhotos);
+        }
+
+        [HttpGet]
+        public IActionResult GetPhotos(int shelterId)
+        {
+            var photos = _context.Photos
+                .Where(p => p.IdShelter == shelterId)
+                .Select(p => Convert.ToBase64String(p.PhotoData))
+                .ToList();
+
+            if (photos == null)
+            {
+                return NotFound();
+            }
+
+            return Json(photos);
         }
 
         public IActionResult GetRoomBookings(int roomId)

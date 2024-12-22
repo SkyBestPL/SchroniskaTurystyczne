@@ -1,4 +1,5 @@
-﻿@model SchroniskaTurystyczne.ViewModels.ShelterSearchViewModel
+﻿@using System.Diagnostics
+@model SchroniskaTurystyczne.ViewModels.ShelterSearchViewModel
 
 @{
     ViewData["Title"] = "Dostępne Schroniska";
@@ -17,11 +18,13 @@
                 <input asp-for="Street" class="form-control" placeholder="Ulica" />
             </div>
 
-            <!-- Ukryte pola dla filtrów -->
             @if (Model.SelectedTagIds != null)
             {
                 @foreach (var tagId in Model.SelectedTagIds)
                 {
+                    {
+                        Debug.WriteLine($"Processing tagId: {tagId}");
+                    }
                     <input type="hidden" name="SelectedTagIds" value="@tagId" />
                 }
             }
@@ -30,6 +33,9 @@
             {
                 @foreach (var roomTypeId in Model.SelectedRoomTypeIds)
                 {
+                    {
+                        Debug.WriteLine($"Processing tagId: {roomTypeId}");
+                    }
                     <input type="hidden" name="SelectedRoomTypeIds" value="@roomTypeId" />
                 }
             }
@@ -49,7 +55,6 @@
     </form>
 </div>
 
-<!-- Filter Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -62,6 +67,9 @@
                     <h6>Tagi schronisk</h6>
                     @foreach (var tag in Model.AvailableTags)
                     {
+                        {
+                            Debug.WriteLine($"Processing tag: {tag.Id} - {tag.Name}");
+                        }
                         <div class="form-check">
                             <input class="form-check-input tag-filter" type="checkbox"
                                    value="@tag.Id"
@@ -76,6 +84,9 @@
                     <h6 class="mt-3">Typy pokoi</h6>
                     @foreach (var roomType in Model.AvailableRoomTypes)
                     {
+                        {
+                            Debug.WriteLine($"Processing type: {roomType.Id} - {roomType.Name}");
+                        }
                         <div class="form-check">
                             <input class="form-check-input room-type-filter" type="checkbox"
                                    value="@roomType.Id"
@@ -96,11 +107,12 @@
     </div>
 </div>
 
-
-<!-- Shelter list  -->
 <div class="shelter-list">
     @foreach (var shelter in Model.Shelters)
     {
+        {
+            Debug.WriteLine($"Przetwarzanie {shelter.Name}");
+        }
         <div class="shelter-container">
             <div class="shelter-info">
                 <h3 style="color:black"><strong>@shelter.Name</strong></h3>
@@ -128,6 +140,9 @@
                 {
                     @foreach(var tag in shelter.Tags)
                     {
+                        {
+                            Debug.WriteLine($"For {shelter.Name} Processing tag: {tag.Id} - {tag.Name}");
+                        }
                         <p class="tag-item">@tag.Name</p>
                     }
                 }
@@ -136,7 +151,10 @@
             <div class="shelter-photo">
                 @if (!string.IsNullOrEmpty(shelter.MainPhotoBase64))
                 {
-                    <img src="data:image;base64,@shelter.MainPhotoBase64" alt="Zdjęcie schroniska" />
+                    {
+                        Debug.WriteLine("zdj");
+                    }
+                    <img loading="lazy" src="data:image;base64,@shelter.MainPhotoBase64" alt="Zdjęcie schroniska" />
                 }
             </div>
 
@@ -146,74 +164,12 @@
                 <a style="background-color:gold; color: black" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@shelter.Id">Recenzje</a>
             </div>
         </div>
+        {
+            Debug.WriteLine($"Koniec przetwarzania {shelter.Name}");
+        }
     }
 </div>
-
-<script>
-
-    const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
-
-    let activeMap = null;
-    let activeMapDiv = null;
-    let activeMapShelterId = null;
-
-    function openMap(lat, lon, shelterId) {
-
-        if (activeMapDiv && activeMapShelterId === shelterId) {
-            activeMapDiv.style.display = 'none';
-            activeMap.remove();
-            activeMap = null;
-            activeMapDiv = null;
-            return;
-        }
-        else if (activeMapDiv)
-        {
-            activeMapDiv.style.display = 'none';
-            activeMap.remove();
-            activeMap = null;
-            activeMapDiv = null;
-        }
-
-        activeMapShelterId = shelterId;
-
-        const mapDiv = document.getElementById('map-' + shelterId);
-
-        mapDiv.style.display = 'block';
-
-        const map = L.map('map-' + shelterId).setView([lat, lon], 16);
-
-        L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
-            minZoom: 0,
-            maxZoom: 19,
-            attribution: '<a href="https://api.mapy.cz/copyright" target="_blank">&copy; Seznam.cz a.s. a další</a>',
-        }).addTo(map);
-
-        L.marker([lat, lon]).addTo(map);
-
-        const LogoControl = L.Control.extend({
-            options: {
-                position: 'bottomleft',
-            },
-
-            onAdd: function (map) {
-                const container = L.DomUtil.create('div');
-                const link = L.DomUtil.create('a', '', container);
-
-                link.setAttribute('href', 'http://mapy.cz/');
-                link.setAttribute('target', '_blank');
-                link.innerHTML = '<img src="https://api.mapy.cz/img/api/logo.svg" />';
-                L.DomEvent.disableClickPropagation(link);
-
-                return container;
-            },
-        });
-
-        new LogoControl().addTo(map);
-
-        activeMap = map;
-        activeMapDiv = mapDiv;
-    };
-</script>
+    
 
 @if (TempData["ErrorMessage"] != null)
 {
@@ -238,38 +194,37 @@
         document.addEventListener("DOMContentLoaded", function () {
             var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
             errorModal.show();
+            console.log('error');
         });
     </script>
 }
 
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            $('#applyFilters').on('click', function () {
-                // Usuwamy istniejące ukryte pola filtrów
-                $('#mainSearchForm input[name="SelectedTagIds"]').remove();
-                $('#mainSearchForm input[name="SelectedRoomTypeIds"]').remove();
 
-                // Dodajemy zaznaczone tagi
-                $('.tag-filter:checked').each(function () {
-                    $('#mainSearchForm').append(
-                        `<input type="hidden" name="SelectedTagIds" value="${$(this).val()}" />`
-                    );
-                });
+<script>
+    $(document).ready(function () {
+        console.log('start');
+        $('#applyFilters').on('click', function () {
 
-                // Dodajemy zaznaczone typy pokoi
-                $('.room-type-filter:checked').each(function () {
-                    $('#mainSearchForm').append(
-                        `<input type="hidden" name="SelectedRoomTypeIds" value="${$(this).val()}" />`
-                    );
-                });
+            $('#mainSearchForm input[name="SelectedTagIds"]').remove();
+            $('#mainSearchForm input[name="SelectedRoomTypeIds"]').remove();
 
-                // Zamykamy modal
-                $('#filterModal').modal('hide');
-
-                // Automatycznie wysyłamy formularz
-                $('#mainSearchForm').submit();
+            $('.tag-filter:checked').each(function () {
+                $('#mainSearchForm').append(
+                    `<input type="hidden" name="SelectedTagIds" value="${$(this).val()}" />`
+                );
             });
+
+            $('.room-type-filter:checked').each(function () {
+                $('#mainSearchForm').append(
+                    `<input type="hidden" name="SelectedRoomTypeIds" value="${$(this).val()}" />`
+                );
+            });
+
+            $('#filterModal').modal('hide');
+
+            $('#mainSearchForm').submit();
+            console.log('klik');
         });
-    </script>
-}
+        console.log('redi');
+    });
+</script>

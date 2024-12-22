@@ -143,6 +143,34 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
+            viewModel.Conversations = viewModel.Conversations
+                .OrderByDescending(c => c.Messages.LastOrDefault()?.SentAt)
+                .ToList();
+
+            foreach (var conversation in viewModel.Conversations)
+            {
+                conversation.UnreadMessagesCount = messages
+                    .Count(m => m.IdSender == conversation.OtherUserId &&
+                                m.IdReceiver == currentUser.Id &&
+                                !m.IsRead);
+            }
+
+            if (viewModel.CurrentConversation != null)
+            {
+                var unreadMessages = await _context.Messages
+                    .Where(m => m.IdSender == viewModel.CurrentConversation.OtherUserId &&
+                                m.IdReceiver == currentUser.Id &&
+                                !m.IsRead)
+                    .ToListAsync();
+
+                foreach (var message in unreadMessages)
+                {
+                    message.IsRead = true;
+                }
+
+                await _context.SaveChangesAsync();
+            }
+
             return View(viewModel);
         }
 
@@ -208,7 +236,8 @@ namespace SchroniskaTurystyczne.Controllers
                 IdSender = currentUser.Id,
                 IdReceiver = model.Receiver.Id,
                 Contents = model.NewMessageContent,
-                Date = DateTime.UtcNow
+                Date = DateTime.UtcNow,
+                IsRead = false
             };
 
             _context.Messages.Add(newMessage);
@@ -222,6 +251,42 @@ namespace SchroniskaTurystyczne.Controllers
             {
                 return RedirectToAction(nameof(Index), new { userId = model.Receiver.Id });
             }
+        }
+
+        public async Task<IActionResult> MarkMessagesAsRead(string otherUserId)
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return Challenge();
+            }
+
+            var unreadMessages = await _context.Messages
+                .Where(m => m.IdSender == otherUserId &&
+                            m.IdReceiver == currentUser.Id &&
+                            !m.IsRead)
+                .ToListAsync();
+
+            foreach (var message in unreadMessages)
+            {
+                message.IsRead = true;
+            }
+
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+        public async Task<bool> HasUnreadMessages()
+        {
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+            {
+                return false;
+            }
+
+            return await _context.Messages
+                .AnyAsync(m => m.IdReceiver == currentUser.Id && !m.IsRead);
         }
     }
 }
