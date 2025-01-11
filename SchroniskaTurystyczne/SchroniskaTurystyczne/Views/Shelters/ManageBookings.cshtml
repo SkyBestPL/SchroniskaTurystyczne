@@ -85,6 +85,12 @@
                                         }
                                     </ul>
                                 </div>
+                                <div class="col-md-4 text-end">
+                                    <form asp-action="CompleteBooking" method="post" class="d-inline">
+                                        <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                        <button type="submit" class="btn btn-primary" onclick="return confirm('Czy na pewno chcesz zakończyć tę rezerwację?')">Zakończ</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -125,12 +131,6 @@
                                         }
                                     </ul>
                                 </div>
-                            </div>
-                            <div class="col-md-4 text-end">
-                                <form asp-action="CompleteBooking" method="post">
-                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
-                                    <button type="submit" class="btn btn-primary" onclick="return confirm('Czy na pewno chcesz usunąć tę rezerwację?')">Zakończ</button>
-                                </form>
                             </div>
                         </div>
                     </div>

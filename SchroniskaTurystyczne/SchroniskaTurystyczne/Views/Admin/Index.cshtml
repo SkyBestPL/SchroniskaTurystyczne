@@ -1,0 +1,353 @@
+﻿@model SchroniskaTurystyczne.ViewModels.AdminPanelViewModel
+
+<div class="tab-container">
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab('users')">Użytkownicy</button>
+        <button class="tab-button" onclick="openTab('shelters')">Schroniska</button>
+        <button class="tab-button" onclick="openTab('tags')">Tagi</button>
+        <button class="tab-button" onclick="openTab('facilities')">Udogodnienia</button>
+    </div>
+
+    <!-- Użytkownicy -->
+    <div id="users" class="tab-content active">
+        <input type="text" class="search-box" id="userSearch" placeholder="Szukaj użytkownika..."
+               oninput="filterUsers()">
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Imię</th>
+                    <th>Nazwisko</th>
+                    <th>Email</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody">
+                @foreach (var user in Model.Users)
+                {
+                    <tr>
+                        <td>@user.FirstName</td>
+                        <td>@user.LastName</td>
+                        <td>@user.Email</td>
+                        <td>
+                            <button class="action-button delete-button"
+                                    onclick="deleteUser('@user.Id')">
+                                Usuń
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Schroniska -->
+    <div id="shelters" class="tab-content">
+        <input type="text" class="search-box" id="shelterSearch" placeholder="Szukaj schroniska..."
+               oninput="filterShelters()">
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Właściciel</th>
+                    <th>Status</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody id="sheltersTableBody">
+                @foreach (var shelter in Model.Shelters)
+                {
+                    <tr>
+                        <td>@shelter.Name</td>
+                        <td>@shelter.OwnerName</td>
+                        <td>@(shelter.ConfirmedShelter ? "Potwierdzone" : "Niepotwierdzone")</td>
+                        <td>
+                            <button class="action-button delete-button"
+                                    onclick="deleteShelter(@shelter.Id)">
+                                Usuń
+                            </button>
+                            @if (!shelter.ConfirmedShelter)
+                            {
+                                <button class="action-button confirm-button"
+                                        onclick="confirmShelter(@shelter.Id)">
+                                    Potwierdź
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Tagi -->
+    <div id="tags" class="tab-content">
+        <div class="add-form">
+            <input type="text" id="newTagName" placeholder="Nazwa tagu">
+            <button class="action-button confirm-button" onclick="addTag()">Dodaj tag</button>
+        </div>
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody id="tagsTableBody">
+                @foreach (var tag in Model.Tags)
+                {
+                    <tr>
+                        <td>@tag.Name</td>
+                        <td>
+                            <button class="action-button delete-button"
+                                    onclick="deleteTag(@tag.Id)">
+                                Usuń
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Udogodnienia -->
+    <div id="facilities" class="tab-content">
+        <div class="add-form">
+            <input type="text" id="newFacilityName" placeholder="Nazwa udogodnienia">
+            <button class="action-button confirm-button" onclick="addFacility()">Dodaj udogodnienie</button>
+        </div>
+        <table class="table-admin">
+            <thead>
+                <tr>
+                    <th>Nazwa</th>
+                    <th>Akcje</th>
+                </tr>
+            </thead>
+            <tbody id="facilitiesTableBody">
+                @foreach (var facility in Model.Facilities)
+                {
+                    <tr>
+                        <td>@facility.Name</td>
+                        <td>
+                            <button class="action-button delete-button"
+                                    onclick="deleteFacility(@facility.Id)">
+                                Usuń
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    function openTab(tabName) {
+        const tabs = document.getElementsByClassName('tab-content');
+        for (let tab of tabs) {
+            tab.classList.remove('active');
+        }
+        const buttons = document.getElementsByClassName('tab-button');
+        for (let button of buttons) {
+            button.classList.remove('active');
+        }
+
+        document.getElementById(tabName).classList.add('active');
+        event.currentTarget.classList.add('active');
+    }
+
+    async function deleteUser(userId) {
+        if (!confirm('Czy na pewno chcesz usunąć tego użytkownika? Razem z nim usunięte zostaną wszystkie jego recenzje, rezerwacje, wiadomości oraz zapisane trasy.')) return;
+
+        try {
+            const response = await fetch(`/Admin/DeleteUser/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas usuwania użytkownika');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas usuwania użytkownika');
+        }
+    }
+
+    async function deleteShelter(shelterId) {
+        if (!confirm('Czy na pewno chcesz usunąć to schronisko? Razem z nim usunięte zostaną wszystkie związane z nim rezerwacje oraz recenzje.')) return;
+
+        try {
+            const response = await fetch(`/Admin/DeleteShelter/${shelterId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas usuwania schroniska');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas usuwania schroniska');
+        }
+    }
+
+    async function confirmShelter(shelterId) {
+        try {
+            const response = await fetch(`/Admin/ConfirmShelter/${shelterId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas potwierdzania schroniska');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas potwierdzania schroniska');
+        }
+    }
+
+    async function addTag() {
+        const name = document.getElementById('newTagName').value;
+        if (!name) {
+            alert('Wprowadź nazwę tagu');
+            return;
+        }
+
+        try {
+            const response = await fetch('/Admin/AddTag', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: name })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas dodawania tagu');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas dodawania tagu');
+        }
+    }
+
+    async function deleteTag(tagId) {
+        if (!confirm('Czy na pewno chcesz usunąć ten tag? Tag zniknie z każdego schroniska które go wykorzystuje.')) return;
+
+        try {
+            const response = await fetch(`/Admin/DeleteTag/${tagId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas usuwania tagu');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas usuwania tagu');
+        }
+    }
+
+    async function addFacility() {
+        const name = document.getElementById('newFacilityName').value;
+        if (!name) {
+            alert('Wprowadź nazwę udogodnienia');
+            return;
+        }
+
+        try {
+            const response = await fetch('/Admin/AddFacility', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name: name })
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas dodawania udogodnienia');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas dodawania udogodnienia');
+        }
+    }
+
+    async function deleteFacility(facilityId) {
+        if (!confirm('Czy na pewno chcesz usunąć to udogodnienie? Udogodnienie zniknie z każdego pokoju który je wykorzystuje.')) return;
+
+        try {
+            const response = await fetch(`/Admin/DeleteFacility/${facilityId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas usuwania udogodnienia');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas usuwania udogodnienia');
+        }
+    }
+
+    function filterUsers() {
+        const searchText = document.getElementById('userSearch').value.toLowerCase();
+        const rows = document.getElementById('usersTableBody').getElementsByTagName('tr');
+
+        for (let row of rows) {
+            const firstName = row.cells[0].textContent.toLowerCase();
+            const lastName = row.cells[1].textContent.toLowerCase();
+            const email = row.cells[2].textContent.toLowerCase();
+
+            if (firstName.includes(searchText) || lastName.includes(searchText) ||
+                email.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+
+    function filterShelters() {
+        const searchText = document.getElementById('shelterSearch').value.toLowerCase();
+        const rows = document.getElementById('sheltersTableBody').getElementsByTagName('tr');
+
+        for (let row of rows) {
+            const name = row.cells[0].textContent.toLowerCase();
+            const owner = row.cells[1].textContent.toLowerCase();
+
+            if (name.includes(searchText) || owner.includes(searchText)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        }
+    }
+</script>

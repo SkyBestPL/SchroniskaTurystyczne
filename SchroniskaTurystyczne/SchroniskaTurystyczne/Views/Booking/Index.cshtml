@@ -5,11 +5,60 @@
 }
 
 <div class="booking-shelter-info">
-    <h1>@Model.Name</h1>
-    <div id="shelter-photos" class="booking-shelter-photos">
-        <!--<p>Ładowanie zdjęć...</p>-->
+    <h1 style="color: darkcyan">@Model.Name</h1>
+    <a class="dark-darkcyan-button btn" style="padding: 3px 3px 3px 3px" asp-action="MapView" asp-controller="Shelters" asp-route-id="@Model.Id">Pokaż na mapie</a>
+    <a class="aquamarine-button btn" style="padding: 3px 3px 3px 3px" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@Model.Id">Recenzje</a>
+    <div class="gallery-container">
+        <button class="gallery-nav-button prev" id="prevButton" aria-label="Poprzednie zdjęcie">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="booking-shelter-photos-wrapper">
+            <div id="shelter-photos" class="booking-shelter-photos">
+                <p>Brak zdjęć</p>
+            </div>
+        </div>
+        <button class="gallery-nav-button next" id="nextButton" aria-label="Następne zdjęcie">
+            <i class="bi bi-chevron-right"></i>
+        </button>
     </div>
-    <a style="background-color:aquamarine; color: black" asp-action="Index" asp-controller="Message" asp-route-shelterId="@Model.Id">Napisz do właściciela</a>
+    <div class="shelter-rating">
+        @if (Model.Rating != null)
+        {
+            <span class="star full">&#9733;</span>
+            <p> <strong style="color:black">@Model.Rating</strong>/10</p> <p style="font-size: 15px; margin: 10px 0 0 5px">(@Model.AmountOfReviews)</p>
+        }
+        else
+        {
+            <span class="star empty">&#9733;</span>
+            <p style="color:gray; margin-top: 5px; margin-bottom: 5px;"><strong> Brak ocen</strong></p>
+        }
+    </div>
+    <span style="margin-bottom: 5px" class="shelter-description">
+        <strong>Opis:</strong> @Model.Description
+    </span>
+    <span style="margin-bottom: 10px" class="shelter-description">
+        <strong>Lokalizacja:</strong> @Model.Country, @Model.City, 
+        @if (@Model.Street != null)
+            @Model.Street 
+        @if (@Model.StreetNumber != null)
+            @Model.StreetNumber, 
+        @if (@Model.ZipCode != null)
+            @Model.ZipCode
+    </span>
+    @if (Model.Tags != null && Model.Tags.Any())
+    {
+        @foreach (var tag in Model.Tags)
+        {
+            <p class="tag-item">@tag.Name</p>
+        }
+    }
+    @if (!User.IsInRole("Exhibitor"))
+    {
+        <p style="margin: 5px 0px 5px; font-size: 13px;">Masz jeszcze jakieś pytania?</p>
+        <a class="gold-button btn" asp-action="Index" asp-controller="Message" asp-route-shelterId="@Model.Id">
+            <i class="bi bi-envelope-fill"></i> Napisz do właściciela
+        </a>
+    }
 </div>
 
 <div class="date-reservation">
@@ -56,7 +105,10 @@
                             </label>
                         </div>
                         <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
-                            <img data-src="@Url.Action("GetRoomThumbnail", "Booking", new { roomId = room.Id })" alt="Zdjęcie pokoju" class="lazy-load" />
+                            @if (room.RoomPhotos != null)
+                            {
+                                <img data-src="@Url.Action("GetRoomThumbnail", "Booking", new { roomId = room.Id })" alt="Brak zdjęcia" class="lazy-load" />
+                            }
                         </div>
                     </div>
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
@@ -398,6 +450,11 @@
     document.addEventListener("DOMContentLoaded", function () {
         const shelterId = @Model.Id;
         const photosContainer = document.getElementById("shelter-photos");
+        const prevButton = document.getElementById('prevButton');
+        const nextButton = document.getElementById('nextButton');
+        let currentTranslate = 0;
+        let currentIndex = 0;
+        let photoElements = [];
 
         fetch(`/Booking/GetPhotos?shelterId=${shelterId}`)
             .then(response => response.json())
@@ -411,6 +468,19 @@
                         img.classList.add("booking-shelter-photo");
                         photosContainer.appendChild(img);
                     });
+
+                    // Poczekaj na załadowanie wszystkich obrazów
+                    const images = photosContainer.querySelectorAll('img');
+                    Promise.all(Array.from(images).map(img => {
+                        if (img.complete) return Promise.resolve();
+                        return new Promise(resolve => {
+                            img.onload = resolve;
+                            img.onerror = resolve;
+                        });
+                    })).then(() => {
+                        photoElements = Array.from(images);
+                        updateNavigationVisibility();
+                    });
                 } else {
                     photosContainer.innerHTML = "<p>Brak zdjęć.</p>";
                 }
@@ -419,6 +489,48 @@
                 console.error("Błąd podczas ładowania zdjęć:", error);
                 photosContainer.innerHTML = "<p>Nie udało się załadować zdjęć.</p>";
             });
+
+        function updateNavigationVisibility() {
+            prevButton.classList.toggle('visible', currentIndex > 0);
+            nextButton.classList.toggle('visible', currentIndex < photoElements.length - 1);
+        }
+
+        function scrollToNext() {
+            if (currentIndex < photoElements.length - 1) {
+                currentIndex++;
+                const nextPhoto = photoElements[currentIndex];
+                const containerWidth = photosContainer.parentElement.offsetWidth;
+                const photoOffset = nextPhoto.offsetLeft;
+                currentTranslate = -photoOffset + 16;
+                photosContainer.style.transform = `translateX(${currentTranslate}px)`;
+                updateNavigationVisibility();
+            }
+        }
+
+        function scrollToPrev() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                const prevPhoto = photoElements[currentIndex];
+                const photoOffset = prevPhoto.offsetLeft;
+                currentTranslate = -photoOffset + 16;
+                photosContainer.style.transform = `translateX(${currentTranslate}px)`;
+                updateNavigationVisibility();
+            }
+        }
+
+        prevButton.addEventListener('click', scrollToPrev);
+        nextButton.addEventListener('click', scrollToNext);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowLeft') {
+                scrollToPrev();
+            } else if (e.key === 'ArrowRight') {
+                scrollToNext();
+            }
+        });
+
+        // Aktualizacja przy zmianie rozmiaru okna
+        window.addEventListener('resize', updateNavigationVisibility);
     });
 
     document.addEventListener('DOMContentLoaded', () => {

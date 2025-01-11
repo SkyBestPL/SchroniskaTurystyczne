@@ -1,0 +1,97 @@
+﻿@model SchroniskaTurystyczne.ViewModels.UserProfileViewModel
+
+<div class="container my-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h2>@Model.FirstName @Model.LastName</h2>
+            <hr />
+        </div>
+    </div>
+
+    @if (Model.CurrentBookings?.Any() == true)
+    {
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <h3>Aktualne rezerwacje w Twoim schronisku</h3>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Data zameldowania</th>
+                                <th>Data wymeldowania</th>
+                                <th>Liczba osób</th>
+                                <th>Status płatności</th>
+                                <th>Status weryfikacji</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var booking in Model.CurrentBookings)
+                            {
+                                <tr>
+                                    <td>@booking.CheckInDate.ToShortDateString()</td>
+                                    <td>@booking.CheckOutDate.ToShortDateString()</td>
+                                    <td>@booking.NumberOfPeople</td>
+                                    <td>@(booking.Paid ? "Opłacone" : "Nieopłacone")</td>
+                                    <td>@(booking.Verified ? "Zweryfikowane" : "Niezweryfikowane")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Recenzje użytkownika</h3>
+            @if (!Model.Reviews.Any())
+            {
+                <p>Użytkownik nie dodał jeszcze żadnych recenzji.</p>
+            }
+            else
+            {
+                foreach (var review in Model.Reviews)
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a asp-controller="Shelter" asp-action="Details" asp-route-id="@review.Shelter.Id">
+                                    @review.Shelter.Name
+                                </a>
+                            </h5>
+                            <h6 class="card-subtitle mb-2 text-muted">
+                                Ocena: @review.Rating/5 | @review.Date
+                            </h6>
+                            <p class="card-text">@review.Contents</p>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+
+        <div class="col-md-6">
+            <h3>Odwiedzone schroniska</h3>
+            @if (!Model.VisitedShelters.Any())
+            {
+                <p>Użytkownik nie odwiedził jeszcze żadnych schronisk.</p>
+            }
+            else
+            {
+                <div class="list-group">
+                    @foreach (var shelter in Model.VisitedShelters)
+                    {
+                        <a href="@Url.Action("Details", "Shelter", new { id = shelter.Id })"
+                           class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">@shelter.Name</h5>
+                                <small>@shelter.VisitDate.ToShortDateString()</small>
+                            </div>
+                            <p class="mb-1">@shelter.Location</p>
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>

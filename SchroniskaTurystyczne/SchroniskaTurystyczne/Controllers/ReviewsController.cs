@@ -20,28 +20,40 @@ namespace SchroniskaTurystyczne.Controllers
 
         public IActionResult ShelterReviews(int shelterId)
         {
-            var user = _userManager.GetUserAsync(User).Result;
-
             // Pobierz schronisko z recenzjami
             var shelter = _context.Shelters
                 .Include(s => s.Reviews)
                 .ThenInclude(r => r.User)
                 .FirstOrDefault(s => s.Id == shelterId);
 
-            // Sprawdź, czy użytkownik miał kiedyś booking w tym schronisku
-            var hasBooking = _context.Bookings.Any(b =>
-                b.IdShelter == shelterId &&
-                b.IdGuest == user.Id);
+            if (shelter == null)
+            {
+                return NotFound("Schronisko nie zostało znalezione.");
+            }
 
-            // Sprawdź czy użytkownik już dodał recenzję
-            var existingReview = shelter.Reviews?.FirstOrDefault(r => r.IdUser == user.Id);
+            // Sprawdź, czy użytkownik jest zalogowany
+            var user = _userManager.GetUserAsync(User).Result;
+            bool hasBooking = false;
+            Review? existingReview = null;
+
+            if (user != null)
+            {
+                // Sprawdź, czy użytkownik miał kiedyś booking w tym schronisku
+                hasBooking = _context.Bookings.Any(b =>
+                    b.IdShelter == shelterId &&
+                    b.IdGuest == user.Id &&
+                    b.Ended == true);
+
+                // Sprawdź czy użytkownik już dodał recenzję
+                existingReview = shelter.Reviews?.FirstOrDefault(r => r.IdUser == user.Id);
+            }
 
             var viewModel = new ReviewsViewModel
             {
                 ShelterId = shelterId,
                 ShelterName = shelter.Name,
                 Reviews = shelter.Reviews?.ToList() ?? new List<Review>(),
-                CanAddReview = hasBooking && existingReview == null,
+                CanAddReview = user != null && hasBooking && existingReview == null,
                 ExistingUserReview = existingReview
             };
 
@@ -51,6 +63,21 @@ namespace SchroniskaTurystyczne.Controllers
         [HttpPost]
         public IActionResult AddReview(ReviewViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Wystąpił błąd przy zapisie recenzji.";
+                return RedirectToAction("ShelterReviews", new { shelterId = model.ShelterId });
+            }
+
+            if (model.Contents != null)
+            {
+                if (model.Contents.Length > 1000)
+                {
+                    TempData["ErrorMessage"] = "Recenzja jest za długa.";
+                    return RedirectToAction("ShelterReviews", new { shelterId = model.ShelterId });
+                }
+            }
+
             var user = _userManager.GetUserAsync(User).Result;
 
             // Ponownie sprawdź uprawnienia do dodania recenzji
@@ -74,7 +101,7 @@ namespace SchroniskaTurystyczne.Controllers
                 IdUser = user.Id,
                 Rating = model.Rating,
                 Contents = model.Contents,
-                Date = DateTime.Now.ToString("yyyy-MM-dd")
+                Date = DateTime.Now.ToString("dd.MM.yyyy")
             };
 
             _context.Reviews.Add(review);
@@ -99,6 +126,21 @@ namespace SchroniskaTurystyczne.Controllers
         [HttpPost]
         public IActionResult EditReview(ReviewViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                TempData["ErrorMessage"] = "Wystąpił błąd przy zapisie recenzji.";
+                return RedirectToAction("ShelterReviews", new { shelterId = model.ShelterId });
+            }
+
+            if(model.Contents != null)
+            {
+                if (model.Contents.Length > 1000)
+                {
+                    TempData["ErrorMessage"] = "Recenzja jest za długa.";
+                    return RedirectToAction("ShelterReviews", new { shelterId = model.ShelterId });
+                }
+            }
+
             var user = _userManager.GetUserAsync(User).Result;
 
             // Pobierz recenzję
@@ -113,7 +155,7 @@ namespace SchroniskaTurystyczne.Controllers
             // Zaktualizuj dane recenzji
             review.Rating = model.Rating;
             review.Contents = model.Contents;
-            review.Date = DateTime.Now.ToString("dd.mm.yyyy");
+            review.Date = DateTime.Now.ToString("dd.MM.yyyy");
 
             // Przelicz ocenę schroniska
             var shelter = _context.Shelters.Find(review.IdShelter);
@@ -131,6 +173,36 @@ namespace SchroniskaTurystyczne.Controllers
 
             var totalRating = reviews.Sum(r => r.Rating);
             return (double)totalRating / reviews.Count;
+        }
+
+        [HttpGet]
+        public IActionResult DeleteReview(int reviewId, int shelterId)
+        {
+            var user = _userManager.GetUserAsync(User).Result;
+
+            // Pobierz recenzję użytkownika
+            var review = _context.Reviews.FirstOrDefault(r =>
+                r.Id == reviewId && r.IdUser == user.Id);
+
+            if (review == null)
+            {
+                return Forbid();
+            }
+
+            // Usuń recenzję
+            _context.Reviews.Remove(review);
+
+            // Zaktualizuj ocenę schroniska
+            var shelter = _context.Shelters.Find(shelterId);
+            if (shelter != null)
+            {
+                shelter.AmountOfReviews--;
+                shelter.Rating = RecalculateShelterRating(shelter);
+            }
+
+            _context.SaveChanges();
+
+            return RedirectToAction("ShelterReviews", new { shelterId = shelterId });
         }
     }
 }

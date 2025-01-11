@@ -35,7 +35,6 @@
                     <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Message", new { shelterId = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">Napisz do właściciela</button>
                     @if (!booking.Verified)
                     {
-                        <button class="btn btn-secondary" onclick="location.href='@Url.Action("Edit", "Booking", new { id = booking.Id })'">Edytuj rezerwację</button>
                         <button class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
                     }
                     @if (!booking.Paid)

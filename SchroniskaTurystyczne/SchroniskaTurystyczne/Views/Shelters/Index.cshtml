@@ -11,20 +11,11 @@
             <div class="col">
                 <input asp-for="SearchTerm" class="form-control" placeholder="Wpisz nazwę lub miasto..." />
             </div>
-            <div class="col">
-                <input asp-for="City" class="form-control" placeholder="Miasto" />
-            </div>
-            <div class="col">
-                <input asp-for="Street" class="form-control" placeholder="Ulica" />
-            </div>
 
             @if (Model.SelectedTagIds != null)
             {
                 @foreach (var tagId in Model.SelectedTagIds)
                 {
-                    {
-                        Debug.WriteLine($"Processing tagId: {tagId}");
-                    }
                     <input type="hidden" name="SelectedTagIds" value="@tagId" />
                 }
             }
@@ -33,9 +24,6 @@
             {
                 @foreach (var roomTypeId in Model.SelectedRoomTypeIds)
                 {
-                    {
-                        Debug.WriteLine($"Processing tagId: {roomTypeId}");
-                    }
                     <input type="hidden" name="SelectedRoomTypeIds" value="@roomTypeId" />
                 }
             }
@@ -67,9 +55,6 @@
                     <h6>Tagi schronisk</h6>
                     @foreach (var tag in Model.AvailableTags)
                     {
-                        {
-                            Debug.WriteLine($"Processing tag: {tag.Id} - {tag.Name}");
-                        }
                         <div class="form-check">
                             <input class="form-check-input tag-filter" type="checkbox"
                                    value="@tag.Id"
@@ -84,9 +69,6 @@
                     <h6 class="mt-3">Typy pokoi</h6>
                     @foreach (var roomType in Model.AvailableRoomTypes)
                     {
-                        {
-                            Debug.WriteLine($"Processing type: {roomType.Id} - {roomType.Name}");
-                        }
                         <div class="form-check">
                             <input class="form-check-input room-type-filter" type="checkbox"
                                    value="@roomType.Id"
@@ -110,14 +92,10 @@
 <div class="shelter-list">
     @foreach (var shelter in Model.Shelters)
     {
-        {
-            Debug.WriteLine($"Przetwarzanie {shelter.Name}");
-        }
         <div class="shelter-container">
             <div class="shelter-info">
                 <h3 style="color:black"><strong>@shelter.Name</strong></h3>
                 <div class="shelter-rating">
-
                     @if (shelter.Rating != null)
                     {
                         <span class="star full">&#9733;</span>
@@ -129,20 +107,16 @@
                         <p><strong> Brak ocen</strong></p>
                     }
                 </div>
-                <p class="shelter-description">
+                <p style="margin-bottom: 5px" class="shelter-description">
                     <strong>Opis:</strong> @shelter.Description
                 </p>
                 <p class="shelter-description">
                     <strong>Lokalizacja:</strong> @shelter.Country, @shelter.City
                 </p>
-
                 @if (shelter.Tags != null && shelter.Tags.Any())
                 {
                     @foreach(var tag in shelter.Tags)
                     {
-                        {
-                            Debug.WriteLine($"For {shelter.Name} Processing tag: {tag.Id} - {tag.Name}");
-                        }
                         <p class="tag-item">@tag.Name</p>
                     }
                 }
@@ -151,22 +125,16 @@
             <div class="shelter-photo">
                 @if (!string.IsNullOrEmpty(shelter.MainPhotoBase64))
                 {
-                    {
-                        Debug.WriteLine("zdj");
-                    }
                     <img loading="lazy" src="data:image;base64,@shelter.MainPhotoBase64" alt="Zdjęcie schroniska" />
                 }
             </div>
 
             <div class="shelter-actions">
-                <a style="background-color:darkcyan" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
-                <a style="background-color:aquamarine; color: black" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Szczegóły</a>
-                <a style="background-color:gold; color: black" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@shelter.Id">Recenzje</a>
+                <a class="dark-darkcyan-button btn" asp-action="MapView" asp-controller="Shelters" asp-route-id="@shelter.Id">Pokaż na mapie</a>
+                <a class="darkcyan-button btn" asp-action="Booking" asp-controller="Shelters" asp-route-id="@shelter.Id">Szczegóły</a>
+                <a class="aquamarine-button btn" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@shelter.Id">Recenzje</a>
             </div>
         </div>
-        {
-            Debug.WriteLine($"Koniec przetwarzania {shelter.Name}");
-        }
     }
 </div>
     

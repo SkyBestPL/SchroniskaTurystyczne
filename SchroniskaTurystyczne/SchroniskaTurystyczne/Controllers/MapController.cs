@@ -108,8 +108,11 @@ namespace SchroniskaTurystyczne.Controllers
                     street = shelter.Street,
                     locationLon = shelter.LocationLon,
                     locationLat = shelter.LocationLat,
-                    category = shelter.Category.Name, // Fetch category name
-                    tags = string.Join(", ", shelter.Tags.Select(tag => tag.Name)) // Fetch tag names as a comma-separated string
+                    category = shelter.Category.Name,
+                    thumbnail = shelter.Photos
+                        .Select(photo => Convert.ToBase64String(photo.ThumbnailData))
+                        .FirstOrDefault(),
+                    tags = string.Join(", ", shelter.Tags.Select(tag => tag.Name))
                 })
                 .ToList();
 

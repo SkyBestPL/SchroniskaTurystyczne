@@ -97,17 +97,17 @@ namespace SchroniskaTurystyczne.Data
                 .HasOne(r => r.Shelter)
                 .WithMany(s => s.Reviews)
                 .HasForeignKey(r => r.IdShelter)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.NoAction);
 
             modelBuilder.Entity<Review>()
                 .HasOne(r => r.User)
                 .WithMany(u => u.Reviews)
                 .HasForeignKey(r => r.IdUser)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Review>()
                 .Property(r => r.Contents)
-                .HasMaxLength(500);
+                .HasMaxLength(1000);
 
             modelBuilder.Entity<Room>()
                 .HasOne(r => r.Shelter)
@@ -155,7 +155,7 @@ namespace SchroniskaTurystyczne.Data
                 .HasOne(m => m.Sender)
                 .WithMany(u => u.SentMessages)
                 .HasForeignKey(m => m.IdSender)
-                .OnDelete(DeleteBehavior.NoAction);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Message>()
                 .HasOne(m => m.Receiver)
@@ -168,6 +168,12 @@ namespace SchroniskaTurystyczne.Data
                 .WithMany(c => c.Shelters)
                 .HasForeignKey(s => s.IdCategory)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Shelter>()
+                .HasOne(s => s.Exhibitor)
+                .WithOne(u => u.Shelter)
+                .HasForeignKey<Shelter>(s => s.IdExhibitor)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Role>(b =>
             {
@@ -234,21 +240,21 @@ namespace SchroniskaTurystyczne.Data
             var roomPublic = new RoomType()
             {
                 Id = 1,
-                Name = "Pokój publiczny",
+                Name = "Publiczny",
                 Description = "Pokój rezerwowany wspólnie z innymi gośćmi"
             };
 
             var roomPrivate = new RoomType()
             {
                 Id = 2,
-                Name = "Pokój prywatny",
+                Name = "Prywatny",
                 Description = "Pokój rezerwowany na własność"
             };
 
             var roomCamping = new RoomType()
             {
                 Id = 3,
-                Name = "Pole namiotowe",
+                Name = "Pole",
                 Description = "Wspólne miejsce dla gości na zewnątrz"
             };
 

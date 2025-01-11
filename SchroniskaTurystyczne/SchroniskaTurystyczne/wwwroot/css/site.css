@@ -95,57 +95,76 @@ body {
 }
 
 .darkcyan-button {
-    padding: 5px 10px;
-    background-color: darkcyan;
-    color: white;
+    padding: 8px 10px;
+    background-color: darkcyan !important;
+    color: white !important;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
     .darkcyan-button:hover {
-        background-color: #499e9d;
+        background-color: #499e9d !important;
     }
 
 .darkcyan-button-wide {
     padding: 5px 15px;
-    background-color: darkcyan;
-    color: white;
+    background-color: darkcyan !important;
+    color: white !important;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
     .darkcyan-button:hover {
-        background-color: #499e9d;
+        background-color: #499e9d !important;
+    }
+
+.gold-button {
+    padding: 5px 10px;
+    background-color: gold !important;
+    color: black !important;
+    border: thick;
+    border-color: black;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+    .gold-button:hover {
+        background-color: #fcf39a !important;
     }
 
 .aquamarine-button {
     padding: 5px 10px;
-    background-color: aquamarine;
-    color: black;
+    background-color: aquamarine !important;
+    color: black !important;
     border: thick;
     border-color: black;
     border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
     .aquamarine-button:hover {
-        background-color: #b0ffe2;
+        background-color: #b0ffe2 !important;
     }
 
 .dark-darkcyan-button {
     padding: 5px 10px;
-    background-color: #004d4d;
-    color: white;
+    background-color: #004d4d !important;
+    color: white !important;
     border: thick;
     border-color: black;
     border-radius: 5px;
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
     .dark-darkcyan-button:hover {
-        background-color: #016363;
+        background-color: #016363 !important;
     }
 
 .custom-footer {
@@ -269,29 +288,20 @@ body {
 .booking-shelter-info {
     text-align: left;
     margin-bottom: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    gap: 20px;
+    align-items: start;
+    padding: 30px;
 }
 
 .booking-shelter-info h1 {
     font-size: 2em;
     color: #333;
     margin-bottom: 10px;
-}
-
-.booking-shelter-photos {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 20px;
-}
-
-.booking-shelter-photo {
-    max-width: 100%;
-    width: 400px;
-    height: 300px;
-    object-fit: cover;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 #modalOverlay {
@@ -402,18 +412,6 @@ body {
     place-items: center;
 }
 
-.room-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: left;
-}
-
-.room-card:hover {
-    /*transform: translateY(-3px);*/
-    box-shadow: 10px 10px 10px 5px rgba(0, 0, 0, 0.15);
-}
-
 .room-card h4 {
     color: darkcyan;
     margin-bottom: 10px;
@@ -426,13 +424,14 @@ body {
 
 .room-card {
     display: flex;
-    max-width: 385px;
+    width: 380px;
     flex-direction: column;
     background-color: #f8f9fa;
     border-radius: 12px;
     padding: 15px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 4px 8px rgba(0, 0, 0, 0.2);
     margin-bottom: 20px;
+    margin-top: 10px;
 }
 
     .room-card .calendar {
@@ -447,7 +446,7 @@ body {
     }
 
 .room-card input[type="number"] {
-    width: 80px;
+    width: 50px;
     padding: 5px;
     border: 1px solid #ced4da;
     border-radius: 4px;
@@ -455,12 +454,6 @@ body {
     text-align: center;
     appearance: textfield;
 }
-
-    .room-card input[type="number"]::-webkit-inner-spin-button,
-    .room-card input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
 
 .room-card label {
     color: #495057;
@@ -626,8 +619,79 @@ body {
 
 .room-info {
     flex: 1;
+    margin-right: 15px;
     text-align: left;
 }
+
+.gallery-container {
+    position: relative;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.booking-shelter-photos-wrapper {
+    width: 100%;
+    overflow: hidden;
+}
+
+.booking-shelter-photos {
+    display: flex;
+    gap: 16px;
+    padding: 16px 0px 16px 0px;
+    transform: translateX(0);
+    transition: transform 0.3s ease-in-out;
+}
+
+.booking-shelter-photo {
+    max-height: 450px;
+    width: auto;
+    flex: 0 0 auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.gallery-nav-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: darkcyan;
+    color: white;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 2;
+    opacity: 0;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+}
+
+    .gallery-nav-button.visible {
+        opacity: 1;
+    }
+
+    .gallery-nav-button:hover {
+        background: #499e9d;
+    }
+
+    .gallery-nav-button.prev {
+        left: 16px;
+    }
+
+    .gallery-nav-button.next {
+        right: 16px;
+    }
+
+.gallery-container:hover .gallery-nav-button {
+    opacity: 1;
+}
+
 /* ---------------------------------------------Map/MapView--------------------------------------------*/
 .map-container {
     display: flex;
@@ -649,9 +713,13 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
+    height: 100%;
+    overflow-y: auto;
+    box-sizing: border-box;
 }
 
 .sidebar button {
+    height: 50px;
     padding: 10px;
     font-size: 16px;
     cursor: pointer;
@@ -697,40 +765,118 @@ body {
 /*-----------------------------------------------------------------Reviews/ShelterReviews------------------------------------------------------------------------*/
 
 .review-container {
-    border: 2px solid aquamarine;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    background-color: #f9f9f9;
+    border: 2px solid #4dd0e1;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .user-review {
-    background-color: #ffffe0;
+    background-color: #fffdec;
+    border: 2px solid #ffd54f;
 }
 
 .review-author {
     font-weight: bold;
-    margin-bottom: 5px;
+    font-size: 1.1rem;
+    color: #00838f;
+    margin-bottom: 8px;
 }
 
 .review-rating {
-    font-size: 16px;
-    margin-bottom: 10px;
+    font-size: 1.2rem;
+    margin-bottom: 12px;
 }
 
+    .review-rating strong {
+        font-size: 1.4rem;
+        color: #006064;
+    }
+
 .review-contents {
-    margin-bottom: 10px;
+    margin: 15px 0;
+    line-height: 1.6;
 }
 
 .review-date {
-    font-size: 12px;
-    color: gray;
+    font-size: 0.9rem;
+    color: #757575;
+    font-style: italic;
 }
 
-.btn-warning {
-    background-color: #ffc107;
-    color: black;
+.form-group-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    margin-bottom: 20px;
 }
+
+.rating-group {
+    flex: 0 0 auto;
+}
+
+.form-group {
+    margin-bottom: 10px;
+}
+
+input[type="number"][name="Rating"] {
+    width: 60px;
+    height: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    border: 2px solid #4dd0e1;
+    border-radius: 8px;
+    padding: 5px;
+    color: #006064;
+}
+
+textarea[name="Contents"] {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 2px solid #4dd0e1;
+    border-radius: 8px;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+}
+
+.content-group {
+    flex: 1;
+}
+
+.form-buttons {
+    clear: both;
+    margin-top: -15px;
+    padding: 5px;
+}
+
+.review-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+    .review-buttons .btn,
+    .review-buttons button {
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+    }
+
+    .review-buttons .btn-danger {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+    }
+
+        .review-buttons .btn-danger:hover {
+            background-color: #bb2d3b;
+        }
 
 /*----------------------------------------------------------------Areas/Identity.../Manage/UserReservations------------------------------------------------------*/
 
@@ -783,14 +929,6 @@ body {
     border-radius: 12px;
     color: #721c24;
     font-size: 0.85rem;
-}
-
-.btn {
-    margin-left: 5px;
-    padding: 8px 15px;
-    font-size: 0.9rem;
-    border-radius: 5px;
-    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .btn-primary {
@@ -897,6 +1035,64 @@ body {
 .unread-conversation {
     background-color: #C0FFEA;
     font-weight: bold;
+}
+
+/*-------------------------------------------------------------Admin/Index---------------------------------------------------------------*/
+
+.tab-container {
+    width: 100%;
+    padding: 20px;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ddd;
+}
+
+    .tab-content.active {
+        display: block;
+    }
+
+.search-box {
+    margin-bottom: 20px;
+    padding: 8px;
+    width: 200px;
+}
+
+.table-admin {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.action-button {
+    padding: 5px 10px;
+    margin: 0 5px;
+    border: none;
+    cursor: pointer;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.confirm-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.add-form {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
 }
 
 /*----------------------------------------------------------------Areas/Identity.../Manage/UserShelters------------------------------------------------------*/

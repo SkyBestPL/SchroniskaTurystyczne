@@ -15,55 +15,34 @@
 
         <!-- Zakładki -->
         <div class="tabs">
-            <button onclick="showSection('searchSection')" class="tab-button active">Szukanie noclegu</button>
-            <button onclick="showSection('planSection')" class="tab-button">Planowanie trasy</button>
+            <button onclick="showSection('searchSection')" class="tab-button active">Wyszukiwanie</button>
+            <button onclick="showSection('planSection')" class="tab-button">Planowanie</button>
             <button onclick="showSection('savedRoutesSection')" class="tab-button">Moje trasy</button>
         </div>
 
-        <!-- Sekcja Szukanie noclegu -->
+        <!-- Sekcja Wyszukiwanie -->
         <div id="searchSection" class="tab-content active p-3 rounded bg-light shadow">
             <h4 class="mb-3 text-darkcyan">Szukaj noclegu</h4>
             <input type="text" id="searchInput" placeholder="Wpisz miejscowość" class="form-control mb-3" />
-            <!--<select id="searchType" class="form-control mb-3">
-                <option value="regional">Wybierz Tagi</option>
-                <option value="regional.country">Kraj</option>
-                <option value="regional.region">Region</option>
-                <option value="regional.street">Ulica</option>
-                <option value="regional.address" selected>Adres</option>
-            </select>
-            <select id="searchType" class="form-control mb-3">
-                <option value="regional">Wybierz typ pokoju</option>
-                <option value="regional.country">Kraj</option>
-                <option value="regional.region">Region</option>
-                <option value="regional.street">Ulica</option>
-                <option value="regional.address" selected>Adres</option>
-            </select>-->
             <div class="d-flex gap-2">
                 <button class="dark-darkcyan-button" onclick="searchLocation()">Szukaj</button>
-                <!--<button class="btn btn-secondary" onclick="fitToAllMarkers()">Wyświetl wszystkie schroniska</button>-->
             </div>
         </div>
 
-        <div id="searchSection2" class="tab-content active p-3 rounded bg-light shadow">
+        <div style="margin-bottom: 50px" id="searchSection2" class="tab-content active p-3 rounded bg-light shadow">
             <span>Kliknij na schronisko, zeby wyświetlić proponowane trasy.</span>
         </div>
 
-        <!-- Sekcja Planowanie trasy -->
-        <div id="planSection" class="tab-content p-3 rounded bg-light shadow mt-4">
+        <!-- Sekcja Planowanie -->
+        <div style="margin-bottom: 50px" id="planSection" class="tab-content p-3 rounded bg-light shadow mt-4">
             <h4 class="mb-3 text-darkcyan">Planowanie Trasy</h4>
             <div class="d-flex gap-2 mb-3">
-                <!--<button onclick="toggleRouteCreation()" class="btn darkcyan-button">
-                    <span id="routeCreationToggleText">Włącz tryb tworzenia trasy</span>
-                </button>-->
                 <button class="btn btn-secondary" onclick="clearRoute()">Wyczyść Trasę</button>
             </div>
-            <!--<div id="travelTimeDisplay" class="mt-2 text-darkcyan"></div>
-            <select id="travelMode" class="form-control mb-3">
-                <option value="foot_fast">Pieszo</option>
-                <option value="bicycle">Rowerem</option>
-            </select>-->
 
             <div id="routePointsList" class="route-points-list"></div>
+
+            <p id="route-duration" style="font-size: 16px; color: #333; margin-bottom: 20px;">Czas trwania trasy: -- minut</p>
 
             <form id="routeForm" asp-controller="Map" asp-action="Create" method="post" class="mt-3">
                 <div class="form-group mb-3">
@@ -76,11 +55,9 @@
         </div>
 
         <!-- Sekcja Moje trasy -->
-        <div id="savedRoutesSection" class="tab-content p-3 rounded bg-light shadow mt-4">
+        <div style="margin-bottom: 50px" id="savedRoutesSection" class="tab-content p-3 rounded bg-light shadow mt-4">
             <h4 class="mb-3 text-darkcyan">Twoje Zapisane Trasy</h4>
-            <div id="userRoutesList" class="mb-3">
-                <!-- W tym miejscu pojawią się zapisane trasy użytkownika -->
-            </div>
+            <div id="userRoutesList" class="mb-3"></div>
         </div>
     </div>
 </div>
@@ -157,10 +134,15 @@
 
     function loadUserRoutes() {
         const userRoutesList = document.getElementById('userRoutesList');
-        userRoutesList.innerHTML = ''; // Clear existing list
+        userRoutesList.innerHTML = '';
 
-        // Parse routes from ViewBag
-        const userRoutes = JSON.parse('@Html.Raw(ViewBag.UserRoutes)');
+        const rawUserRoutes = '@Html.Raw(ViewBag.UserRoutes)';
+        if (!rawUserRoutes || rawUserRoutes === 'null' || rawUserRoutes.trim() === '') {
+            userRoutesList.innerHTML = '<p>Nie masz jeszcze zapisanych tras lub nie jesteś zalogowany.</p>';
+            return;
+        }
+
+        const userRoutes = JSON.parse(rawUserRoutes);
 
         if (userRoutes.length === 0) {
             userRoutesList.innerHTML = '<p>Nie masz jeszcze zapisanych tras.</p>';
@@ -179,13 +161,11 @@
 
             const actionButtons = document.createElement('div');
 
-            // Button to show route on map
             const showRouteBtn = document.createElement('button');
             showRouteBtn.textContent = 'Pokaż na mapie';
             showRouteBtn.classList.add('btn', 'btn-sm', 'darkcyan-button', 'me-2');
             showRouteBtn.onclick = () => showRouteOnMap(route.Id);
 
-            // Button to delete route (you'll need to implement this server-side)
             const deleteRouteBtn = document.createElement('button');
             deleteRouteBtn.textContent = 'Usuń';
             deleteRouteBtn.classList.add('btn', 'btn-sm', 'btn-danger');
@@ -199,7 +179,6 @@
 
             routeElement.appendChild(routeHeader);
 
-            // Route details
             const routeDetails = document.createElement('div');
             routeDetails.classList.add('card-body');
 
@@ -210,7 +189,6 @@
     }
 
     function showRouteOnMap(routeId) {
-        // Pobierz trasę po ID
         fetch(`/Map/GetRouteDetails/${routeId}`)
             .then(response => response.json())
             .then(route => {
@@ -225,7 +203,6 @@
                     }
                 });
 
-                // Przełącz na sekcję tras
                 document.querySelector('button[onclick="showSection(\'planSection\')"]').click();
             })
             .catch(error => {
@@ -244,7 +221,6 @@
         })
             .then(response => {
                 if (response.ok) {
-                    // Reload routes
                     loadUserRoutes();
                 } else {
                     alert('Nie udało się usunąć trasy');
@@ -256,7 +232,6 @@
             });
     }
 
-    // Call this when the page loads
     document.addEventListener('DOMContentLoaded', loadUserRoutes);
 
     map.on('click', function (e) {
@@ -266,7 +241,6 @@
 
     map.on('contextmenu', function (e) {
         if (isCreatingRoute) {
-            // Sprawdź, czy kliknięto w tło mapy, a nie w marker
             const clickedOnMarker = shelterMarkers.some(({ marker }) =>
                 marker.getElement().contains(e.originalEvent.target)
             );
@@ -278,13 +252,11 @@
     });
 
     function showContextMenu(lngLat, point) {
-        // Usuń istniejące menu, jeśli istnieje
         const existingMenu = document.getElementById('contextMenu');
         if (existingMenu) {
             existingMenu.remove();
         }
 
-        // Tworzymy nowe menu
         const menu = document.createElement('div');
         menu.id = 'contextMenu';
         menu.style.position = 'absolute';
@@ -297,7 +269,6 @@
         menu.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
         menu.style.zIndex = 9999;
 
-        // Opcje menu
         menu.innerHTML = `
                 <button onclick="addPointToRoute('start', ${lngLat.lng}, ${lngLat.lat})">Punkt początkowy</button><br/>
                 <button onclick="addPointToRoute('end', ${lngLat.lng}, ${lngLat.lat})">Punkt końcowy</button><br/>
@@ -306,7 +277,6 @@
 
         document.body.appendChild(menu);
 
-        // Zamknij menu po kliknięciu w dowolne miejsce
         document.addEventListener('click', closeContextMenu, { once: true });
     }
 
@@ -324,14 +294,14 @@
         const newPoint = [lng, lat];
 
         if (type === 'start') {
-            routePoints.unshift(newPoint); // Dodaj na początek
+            routePoints.unshift(newPoint);
         } else if (type === 'end') {
-            routePoints.push(newPoint); // Dodaj na koniec
+            routePoints.push(newPoint);
         } else if (type === 'waypoint') {
             if (routePoints.length > 1) {
-                routePoints.splice(routePoints.length - 1, 0, newPoint); // Dodaj przed ostatnim punktem
+                routePoints.splice(routePoints.length - 1, 0, newPoint);
             } else {
-                routePoints.push(newPoint); // Jeśli są tylko dwa punkty, dodaj na koniec
+                routePoints.push(newPoint);
             }
         }
 
@@ -341,14 +311,12 @@
     }
 
     function updateMarkers() {
-        // Usuń wszystkie istniejące markery
         markers.forEach(marker => marker.remove());
         markers = [];
 
-        const blueMarkers = shelterMarkers.filter(sm => sm.isRouteMarker); // Znajdź niebieskie markery
+        const blueMarkers = shelterMarkers.filter(sm => sm.isRouteMarker);
         blueMarkers.forEach(blueMarker => blueMarker.marker.remove());
 
-        // Dodaj nowe markery w odpowiedniej kolejności
         routePoints.forEach((point, index) => {
             const marker = new maplibregl.Marker({ draggable: true })
                 .setLngLat(point)
@@ -356,16 +324,14 @@
 
             const markerWithId = {
                 instance: marker,
-                shelterId: null, // Domyślnie null, dopóki nie jest przypisany do schroniska
+                shelterId: null,
             };
 
-            // Obsługa kliknięcia na marker
             marker.getElement().addEventListener('contextmenu', (e) => {
 
                 showRemovePointDialog(index, marker);
             });
 
-            // Obsługa przesuwania markera
             marker.on('dragend', function () {
                 const newCoords = marker.getLngLat();
                 routePoints[index] = [newCoords.lng, newCoords.lat];
@@ -386,10 +352,8 @@
     }
 
     function showRemovePointDialog(index, marker) {
-        // Usuń istniejące dialogi
         closeContextMenu();
 
-        // Stwórz dialog
         const dialog = document.createElement('div');
         dialog.id = 'removePointDialog';
         dialog.style.position = 'absolute';
@@ -400,14 +364,12 @@
         dialog.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
         dialog.style.zIndex = 9999;
 
-        // Ustaw pozycję dialogu
         const mapCanvas = map.getCanvasContainer();
         const markerPosition = marker.getLngLat();
         const point = map.project(markerPosition);
         dialog.style.top = `${point.y}px`;
         dialog.style.left = `${point.x}px`;
 
-        // Dodaj przycisk usuwania
         dialog.innerHTML = `
                 <p>Czy usunąć punkt?</p>
                 <button onclick="removeRoutePoint(${index})">Usuń</button>
@@ -416,17 +378,14 @@
 
         document.body.appendChild(dialog);
 
-        // Zamknij dialog po kliknięciu w dowolne miejsce
         document.addEventListener('click', closeContextMenu, { once: true });
     }
 
     function removeRoutePoint(index) {
         closeContextMenu();
 
-        // Usuń punkt z listy
         routePoints.splice(index, 1);
 
-        // Zaktualizuj markery i trasę
         updateMarkers();
         if (routePoints.length > 1) {
             calculateRoute(routePoints);
@@ -436,7 +395,7 @@
             if (source) {
                 source.setData({
                     type: "LineString",
-                    coordinates: [], // Resetuj dane na puste
+                    coordinates: [],
                 });
             }
         }
@@ -445,11 +404,9 @@
     }
 
     function showShelterContextMenu(shelter, point) {
-        // Usuń istniejące menu, jeśli istnieje
         const existingMenu = document.getElementById('shelterContextMenu');
         if (existingMenu) existingMenu.remove();
 
-        // Stwórz menu
         const menu = document.createElement('div');
         menu.id = 'shelterContextMenu';
         menu.style.position = 'absolute';
@@ -462,7 +419,6 @@
         menu.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
         menu.style.zIndex = 9999;
 
-        // Opcje menu
         menu.innerHTML = `
             <p>Dodaj schronisko jako:</p>
             <button onclick="addShelterToRoute(${shelter.id}, 'start')">Punkt startowy</button><br/>
@@ -472,7 +428,6 @@
 
         document.body.appendChild(menu);
 
-        // Zamknij menu po kliknięciu w dowolne miejsce
         document.addEventListener('click', closeShelterContextMenu, { once: true });
     }
 
@@ -492,7 +447,6 @@
         const shelterCoords = [parseFloat(shelter.locationLon), parseFloat(shelter.locationLat)];
         const newPoint = shelterCoords;
 
-        // Dodanie punktu do odpowiedniego miejsca w trasie
         if (type === 'start') {
             routePoints.unshift(newPoint);
         } else if (type === 'end') {
@@ -505,32 +459,29 @@
             }
         }
 
-        // Aktualizacja markerów, trasy i inputu
         updateMarkers();
         calculateRoute(routePoints);
         updateRoutePointsInput(routePoints);
 
-        // Usuń oryginalny marker schroniska
         const originalMarker = originalShelterMarkers[shelterId];
         if (originalMarker) {
             originalMarker.remove();
         }
 
-        // Dodaj nowy niebieski marker
         const blueMarker = new maplibregl.Marker({ color: 'blue'})
             .setLngLat(shelterCoords)
             .setPopup(new maplibregl.Popup({ offset: 25 })
                 .setHTML(`
                     <h3 style="margin-top: 0;">${shelter.name}</h3>
+                    <img src="data:image/jpeg;base64,${shelter.thumbnail}" alt="Zdjęcie schroniska" style="max-width: 100%; border-radius: 4px; margin: 10px 0;">
                     <p style="margin: 5px 0;">Ocena: ${shelter.rating}</p>
-                        <p style="margin: 5px 0;">Tagi: ${shelter.tags}</p>
+                    <p style="margin: 5px 0;">Tagi: ${shelter.tags}</p>
                     <a href="/Booking/Index/${shelter.id}"
                        style="display: inline-block; padding: 8px 12px; background-color: blue; color: white; text-decoration: none; border-radius: 4px; text-align: center;">
                         Szczegóły
                     </a>`))
             .addTo(map);
 
-        // Dodaj obsługę prawego kliknięcia dla niebieskiego markera
         blueMarker.getElement().addEventListener('contextmenu', (e) => {
             e.preventDefault();
             if (isCreatingRoute) {
@@ -538,7 +489,6 @@
             }
         });
 
-        // Dodaj niebieski marker do zarządzania
         shelterMarkers.push({
             id: shelterId,
             marker: blueMarker,
@@ -547,23 +497,10 @@
         });
     }
 
-    function changeShelterMarkerColor(shelterId, color) {
-        const shelter = shelters.find(s => s.id === shelterId);
-        if (shelter) {
-            const shelterCoords = [parseFloat(shelter.locationLon), parseFloat(shelter.locationLat)];
-            const shelterMarker = new maplibregl.Marker({ color: color })
-                .setLngLat(shelterCoords)
-                .addTo(map);
-            // Możemy zapamiętać marker w dodatkowej strukturze danych, jeśli będzie potrzeba.
-        }
-    }
-
     function showRemoveShelterFromRouteMenu(shelter, point) {
-        // Usuń istniejące menu, jeśli istnieje
         const existingMenu = document.getElementById('shelterContextMenu');
         if (existingMenu) existingMenu.remove();
 
-        // Stwórz menu
         const menu = document.createElement('div');
         menu.id = 'shelterContextMenu';
         menu.style.position = 'absolute';
@@ -576,7 +513,6 @@
         menu.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
         menu.style.zIndex = 9999;
 
-        // Opcje menu
         menu.innerHTML = `
             <p>Czy chcesz usunąć schronisko z trasy?</p>
             <button onclick="removeShelterFromRoute(${shelter.id})">Usuń</button>
@@ -585,14 +521,12 @@
 
         document.body.appendChild(menu);
 
-        // Zamknij menu po kliknięciu w dowolne miejsce
         document.addEventListener('click', closeShelterContextMenu, { once: true });
     }
 
     function removeShelterFromRoute(shelterId) {
         closeShelterContextMenu();
 
-        // Znajdź index punktu schroniska w trasie
         const shelterRouteIndex = routePoints.findIndex(point => {
             const shelter = shelters.find(s =>
                 parseFloat(s.locationLon) === point[0] &&
@@ -601,12 +535,10 @@
             return shelter && shelter.id === shelterId;
         });
 
-        // Usuń punkt z trasy
         if (shelterRouteIndex !== -1) {
             routePoints.splice(shelterRouteIndex, 1);
         }
 
-        // Znajdź i usuń niebieski marker
         const shelterMarkerIndex = shelterMarkers.findIndex(sm =>
             sm.isRouteMarker && sm.originalShelterId === shelterId
         );
@@ -617,13 +549,11 @@
             shelterMarkers.splice(shelterMarkerIndex, 1);
         }
 
-        // Przywróć oryginalny marker schroniska
         const originalMarker = originalShelterMarkers[shelterId];
         if (originalMarker) {
             originalMarker.addTo(map);
         }
 
-        // Aktualizacja trasy
         updateMarkers();
         if (routePoints.length > 1) {
             calculateRoute(routePoints);
@@ -640,6 +570,7 @@
                 .setPopup(new maplibregl.Popup({ offset: 25 })
                     .setHTML(`
                         <h3 style="margin-top: 0;">${shelter.name}</h3>
+                        <img src="data:image/jpeg;base64,${shelter.thumbnail}" alt="Zdjęcie schroniska" style="max-width: 100%; border-radius: 4px; margin: 10px 0;">
                         <p style="margin: 5px 0;">Ocena: ${shelter.rating}</p>
                         <p style="margin: 5px 0;">Tagi: ${shelter.tags}</p>
                         <a href="/Booking/Index/${shelter.id}"
@@ -648,7 +579,6 @@
                         </a>`))
                 .addTo(map);
 
-            // Dodaj obsługę prawego kliknięcia tylko, gdy tryb tworzenia trasy jest włączony
             marker.getElement().addEventListener('contextmenu', (e) => {
                 e.preventDefault();
                 if (isCreatingRoute) {
@@ -656,35 +586,31 @@
                 }
             });
 
-            // Dodaj obsługę lewego kliknięcia
             marker.getElement().addEventListener('click', (e) => {
                 loadShelterRoutes(shelter);
             });
 
-            // Przechowaj oryginalny marker w słowniku
             originalShelterMarkers[shelter.id] = marker;
             shelterMarkers.push({ id: shelter.id, marker });
         });
     }
 
     function loadShelterRoutes(shelter) {
-        // Switch to search section
         document.querySelector('button[onclick="showSection(\'searchSection\')"]').click();
 
-        // Create a container for shelter details and routes
         const searchSection2 = document.getElementById('searchSection2');
         searchSection2.innerHTML = `
             <h4 class="mb-3 text-darkcyan">Schronisko: ${shelter.name}</h4>
+            <img src="data:image/jpeg;base64,${shelter.thumbnail}" alt="Zdjęcie schroniska" style="max-width: 100%; border-radius: 4px; margin: 10px 0;">
             <div class="shelter-details">
-                <p>Ocena: ${shelter.rating}</p>
-                <a href="/Booking/Index/${shelter.id}" class="btn btn-primary mb-3">Szczegóły rezerwacji</a>
+            <p>Ocena: ${shelter.rating}</p>
+            <a href="/Booking/Index/${shelter.id}" class="btn darkcyan-button">Szczegóły rezerwacji</a>
             </div>
             <div id="shelterRoutesList">
                 <h5>Trasy stworzone przez schronisko</h5>
                 <div id="shelterRoutesContainer"></div>
             </div>
         `;
-        // Fetch routes for this shelter
         fetchShelterRoutes(shelter.id);
     }
 
@@ -717,7 +643,6 @@
             });
     }
 
-    // Funkcja przełączająca tryb tworzenia trasy
     function toggleRouteCreation() {
         isCreatingRoute = !isCreatingRoute;
         const toggleText = document.getElementById('routeCreationToggleText');
@@ -731,7 +656,6 @@
         }
     }
 
-    // Dodaj marker dla punktu trasy
     function addRouteMarker(coords, index) {
         const marker = new maplibregl.Marker({ draggable: true })
             .setLngLat(coords)
@@ -751,20 +675,17 @@
         });
     }
 
-    // Funkcja, aby dopasować mapę do wszystkich markerów
     function fitToAllMarkers() {
         const bounds = new maplibregl.LngLatBounds();
         shelters.forEach(shelter => bounds.extend([parseFloat(shelter.locationLon), parseFloat(shelter.locationLat)]));
         map.fitBounds(bounds, { padding: 20 });
     }
 
-    // Funkcja aktualizująca input dla punktów trasy
     function updateRoutePointsInput(points) {
         const routePointsDiv = document.getElementById('routePoints');
         routePointsDiv.innerHTML = '';
 
         const pointsArray = points.map((point, index) => {
-            // Sprawdź, czy punkt jest przypisany do schroniska
             const shelterMarker = shelterMarkers.find(sm =>
                 sm.isRouteMarker &&
                 sm.marker.getLngLat().lng === point[0] &&
@@ -775,7 +696,7 @@
                 LocationLat: point[1],
                 LocationLon: point[0],
                 Number: index + 1,
-                IdShelter: shelterMarker ? shelterMarker.id : null // Przypisz ID schroniska, jeśli istnieje
+                IdShelter: shelterMarker ? shelterMarker.id : null
             };
         });
 
@@ -797,46 +718,48 @@
 
     function renderRoutePointsList() {
         const routePointsList = document.getElementById('routePointsList');
-        routePointsList.innerHTML = ''; // Clear existing list
+        routePointsList.innerHTML = '';
 
         routePoints.forEach((point, index) => {
-            // Find if this point corresponds to a shelter
             const shelterMarker = shelterMarkers.find(sm =>
                 sm.isRouteMarker &&
                 sm.marker.getLngLat().lng === point[0] &&
                 sm.marker.getLngLat().lat === point[1]
             );
 
-            // Create list item
             const listItem = document.createElement('div');
             listItem.classList.add('route-point-item', 'mb-2', 'p-2', 'border', 'rounded', 'position-relative');
 
-            // Determine point display text
             let pointText;
             if (shelterMarker) {
-                // If it's a shelter point
+
                 const shelter = shelters.find(s => s.id === shelterMarker.originalShelterId);
                 pointText = `${index + 1}. ${shelter.name} (${point[0].toFixed(4)}, ${point[1].toFixed(4)})`;
 
-                // Add special remove button for shelter points
                 const removeButton = document.createElement('button');
                 removeButton.innerHTML = '✖';
                 removeButton.classList.add('btn', 'btn-sm', 'btn-danger', 'position-absolute', 'top-0', 'end-0', 'm-1');
+                removeButton.style.padding = '2px 2px';
+                removeButton.style.fontSize = '15px';
+                removeButton.style.height = '32px';
+                removeButton.style.width = '32px';
                 removeButton.onclick = () => removeShelterFromRoute(shelter.id);
                 listItem.appendChild(removeButton);
             } else {
-                // If it's a non-shelter point
+
                 pointText = `${index + 1}. (${point[0].toFixed(4)}, ${point[1].toFixed(4)})`;
 
-                // Add remove button for non-shelter points
                 const removeButton = document.createElement('button');
                 removeButton.innerHTML = '✖';
                 removeButton.classList.add('btn', 'btn-sm', 'btn-danger', 'position-absolute', 'top-0', 'end-0', 'm-1');
+                removeButton.style.padding = '2px 2px';
+                removeButton.style.fontSize = '15px';
+                removeButton.style.height = '32px';
+                removeButton.style.width = '32px';
                 removeButton.onclick = () => removeRoutePoint(index);
                 listItem.appendChild(removeButton);
             }
 
-            // Create text element
             const textElement = document.createElement('span');
             textElement.textContent = pointText;
             listItem.appendChild(textElement);
@@ -845,7 +768,6 @@
         });
     }
 
-    // Obliczanie i rysowanie trasy
     async function calculateRoute(points) {
         try {
             const url = new URL('https://api.mapy.cz/v1/routing/route');
@@ -873,6 +795,22 @@
 
             const bounds = bbox(json.geometry.geometry.coordinates);
             map.fitBounds(bounds, { padding: 40 });
+
+            if (json.duration) {
+                const durationInSeconds = json.duration;
+                const hours = Math.floor(durationInSeconds / 3600);
+                const minutes = Math.ceil((durationInSeconds % 3600) / 60);
+
+                let formattedDuration = '';
+                if (hours > 0) {
+                    formattedDuration += `${hours} h `;
+                }
+                formattedDuration += `${minutes} min`;
+
+                document.getElementById('route-duration').innerText = `Czas przejścia: ${formattedDuration}`;
+            } else {
+                document.getElementById('route-duration').innerText = `Czas przejścia: brak danych`;
+            }
         } catch (error) {
             console.log('Błąd podczas wyznaczania trasy:', error);
         }
@@ -889,9 +827,7 @@
         return [[minLng, minLat], [maxLng, maxLat]];
     }
 
-    // Czyszczenie trasy
     function clearRoute() {
-        // Przywróć oryginalne markery schronisk, które były dodane do trasy
         shelterMarkers
             .filter(sm => sm.isRouteMarker)
             .forEach(sm => {
@@ -906,11 +842,10 @@
         if (source) {
             source.setData({
                 type: "LineString",
-                coordinates: [], // Resetuj dane na puste
+                coordinates: [],
             });
         }
 
-        // Resetuj tablice i stan
         routePoints = [];
         markers.forEach(marker => marker.remove());
         markers = [];
@@ -933,14 +868,12 @@
             const data = await response.json();
 
             if (data.items && data.items.length > 0) {
-                // Take the first result (typically the most relevant)
                 const firstResult = data.items[0];
                 const location = [
-                    firstResult.position.lon,  // Note: lon comes first in MapLibre
+                    firstResult.position.lon,
                     firstResult.position.lat
                 ];
 
-                // Center and zoom to the location
                 map.setCenter(location);
                 map.setZoom(13);
             } else {
@@ -953,15 +886,12 @@
     }
 
     function showSection(sectionId) {
-        // Ukryj wszystkie sekcje
         const tabContents = document.querySelectorAll('.tab-content');
         tabContents.forEach(tab => tab.classList.remove('active'));
 
-        // Usuń klasę aktywną ze wszystkich przycisków zakładek
         const tabButtons = document.querySelectorAll('.tab-button');
         tabButtons.forEach(button => button.classList.remove('active'));
 
-        // Pokaż wybraną sekcję i ustaw aktywny przycisk
         document.getElementById(sectionId).classList.add('active');
 
         if (sectionId == 'searchSection') 
@@ -969,7 +899,6 @@
             document.getElementById('searchSection2').classList.add('active');
         }
 
-        // Dodaj klasę active do klikniętego przycisku
         event.target.classList.add('active');
     }
 

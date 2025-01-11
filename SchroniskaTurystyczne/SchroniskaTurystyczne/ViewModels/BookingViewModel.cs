@@ -17,7 +17,7 @@
         public string? ZipCode { get; set; }
         public string LocationLon { get; set; }
         public string LocationLat { get; set; }
-
+        public IEnumerable<TagBookingViewModel>? Tags { get; set; }
         public List<RoomBookingViewModel>? Rooms { get; set; }
         public List<PhotoBookingViewModel>? Photos { get; set; }
     }
@@ -72,6 +72,12 @@
     }
 
     public class FacilityBookingViewModel
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
+
+    public class TagBookingViewModel
     {
         public int Id { get; set; }
         public string Name { get; set; }

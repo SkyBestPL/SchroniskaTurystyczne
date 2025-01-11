@@ -25,6 +25,7 @@ namespace SchroniskaTurystyczne.Controllers
         public async Task<IActionResult> Index(int id)
         {
             var shelter = await _context.Shelters
+                .Include(s => s.Tags)
                 .Include(s => s.Rooms)
                     .ThenInclude(r => r.Facilities)
                 .FirstOrDefaultAsync(s => s.Id == id);
@@ -51,6 +52,11 @@ namespace SchroniskaTurystyczne.Controllers
                 ZipCode = shelter.ZipCode,
                 LocationLon = shelter.LocationLon,
                 LocationLat = shelter.LocationLat,
+                Tags = shelter.Tags.Select(t => new TagBookingViewModel
+                {
+                    Id = t.Id,
+                    Name = t.Name
+                }).ToList(),
                 Rooms = shelter.Rooms?
                 .Where(r => r.IsActive)
                 .Select(r => new RoomBookingViewModel
