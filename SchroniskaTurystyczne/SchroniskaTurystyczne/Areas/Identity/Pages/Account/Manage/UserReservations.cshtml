@@ -11,11 +11,12 @@
     {
         @foreach (var booking in Model.CurrentBookings)
         {
-            <div class="reservations-card">
+            <div style="margin-bottom: 15px" class="reservations-card">
                 <div class="card-header">
                     Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
                 <div class="card-body">
+                    <h5>Id rezerwacji: #@booking.Id</h5>
                     <p><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy") <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
@@ -35,11 +36,15 @@
                     <button class="btn btn-primary" onclick="location.href='@Url.Action("Index", "Message", new { shelterId = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">Napisz do właściciela</button>
                     @if (!booking.Verified)
                     {
-                        <button class="btn btn-danger" onclick="location.href='@Url.Page("/Booking/Cancel", new { id = booking.Id })'">Anuluj rezerwację</button>
+                        <form method="post" action="@Url.Action("Cancel", "Booking", new { id = booking.Id })" style="display:inline">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('Czy na pewno chcesz anulować tę rezerwację?')">Anuluj rezerwację</button>
+                        </form>
                     }
                     @if (!booking.Paid)
                     {
-                        <button class="btn btn-secondary" onclick="location.href='@Url.Page("/Booking/Pay", new { id = booking.Id })'">Opłać rezerwację</button>
+                        <form method="post" action="@Url.Action("Pay", "Booking", new { id = booking.Id })" style="display:inline">
+                            <button type="submit" class="btn btn-secondary">Opłać rezerwację</button>
+                        </form>
                     }
                 </div>
             </div>
@@ -58,13 +63,13 @@
     {
         @foreach (var booking in Model.PastBookings)
         {
-            <div class="reservations-card">
+            <div style="margin-bottom: 15px" class="reservations-card">
                 <div class="card-header">
                     Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
                 <div class="card-body">
-                    <span><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</span>
-                    <p><strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <h5>Id rezerwacji: #@booking.Id</h5>
+                    <p><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy") <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
                     <h6>Pokoje:</h6>
@@ -76,7 +81,7 @@
                     </ul>
 
                     <p><strong>Opłata:</strong> @booking.Bill.ToString("C")</p>
-                    <p><strong>Status płatności:</strong> @(booking.Paid ? "Opłacone" : "Nieopłacone")</p>
+                    <p><strong>Status płatności:</strong> <span class="@(booking.Paid ? "confirmed" : "unconfirmed")">@((booking.Paid ? "Opłacona" : "Nieopłacona"))</span></p>
                 </div>
             </div>
         }
@@ -94,13 +99,13 @@
     {
         @foreach (var booking in Model.RejectedBookings)
         {
-            <div class="reservations-card">
+            <div style="margin-bottom: 15px" class="reservations-card">
                 <div class="card-header">
                     Schronisko: <span style="color: darkcyan; cursor: pointer" onclick="location.href='@Url.Action("Index", "Booking", new { id = @booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Id })'">@booking.BookingRooms.FirstOrDefault()?.Room?.Shelter?.Name</span>
                 </div>
                 <div class="card-body">
-                    <span><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy")</span>
-                    <p><strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
+                    <h5>Id rezerwacji: #@booking.Id</h5>
+                    <p><strong>Zameldowanie:</strong> @booking.CheckInDate.ToString("dd.MM.yyyy") <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToString("dd.MM.yyyy")</p>
                     <p><strong>Ilość osób:</strong> @booking.NumberOfPeople</p>
 
                     <h6>Pokoje:</h6>

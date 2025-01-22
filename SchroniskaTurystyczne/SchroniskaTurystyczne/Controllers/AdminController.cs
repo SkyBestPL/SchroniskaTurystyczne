@@ -22,20 +22,33 @@ namespace SchroniskaTurystyczne.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Pobierz użytkowników (opcjonalnie z filtrowaniem, np. bez administratorów)
+            var currentUserId = _userManager.GetUserId(User);
+
+            var roleTranslations = new Dictionary<string, string>
+            {
+                { "Exhibitor", "Właściciel" },
+                { "Guest", "Gość" },
+                { "Admin", "Admin" }
+            };
+
             var users = await _userManager.Users
+                .Where(user => user.Id != currentUserId)
                 .Select(user => new UserAdminViewModel
                 {
                     Id = user.Id,
                     FirstName = user.FirstName,
                     LastName = user.LastName,
-                    Email = user.Email
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    Role = roleTranslations.GetValueOrDefault(
+                        user.UserRoles.Select(ur => ur.Role.Name).FirstOrDefault(),
+                        "-"
+                    )
                 })
                 .ToListAsync();
 
-            // Pobierz schroniska
             var shelters = await _context.Shelters
-                .Include(s => s.Exhibitor) // Ładuj dane właściciela
+                .Include(s => s.Exhibitor)
                 .Select(shelter => new ShelterAdminViewModel
                 {
                     Id = shelter.Id,
@@ -45,7 +58,6 @@ namespace SchroniskaTurystyczne.Controllers
                 })
                 .ToListAsync();
 
-            // Pobierz tagi/udogodnienia
             var tags = await _context.Tags
                 .Select(tag => new TagAdminViewModel
                 {
@@ -62,7 +74,6 @@ namespace SchroniskaTurystyczne.Controllers
                 })
                 .ToListAsync();
 
-            // Przygotuj ViewModel
             var viewModel = new AdminPanelViewModel
             {
                 Users = users,
@@ -139,6 +150,20 @@ namespace SchroniskaTurystyczne.Controllers
             }
 
             shelter.ConfirmedShelter = true;
+            await _context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UnconfirmShelter(int id)
+        {
+            var shelter = await _context.Shelters.FindAsync(id);
+            if (shelter == null)
+            {
+                return NotFound();
+            }
+
+            shelter.ConfirmedShelter = false;
             await _context.SaveChangesAsync();
             return Ok();
         }

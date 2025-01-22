@@ -35,6 +35,7 @@ namespace SchroniskaTurystyczne.ViewModels
         public string LocationLon { get; set; }
         public string LocationLat { get; set; }
         public int AmountOfReviews { get; set; }
+        public bool? Confirmed { get; set; }
         public IEnumerable<TagViewModel> Tags { get; set; }
         public string? MainPhotoBase64 { get; set; }
     }

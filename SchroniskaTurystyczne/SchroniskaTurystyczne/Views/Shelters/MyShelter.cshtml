@@ -1,62 +1,133 @@
 ﻿@model SchroniskaTurystyczne.ViewModels.MyShelterViewModel
 
-<h1>Moje Schronisko</h1>
-
-@if (!Model.HasShelter)
-{
-    <div class="text-center">
-        <h3>Jeszcze nie dodano schroniska.</h3>
-        <a asp-action="Create" class="btn darkcyan-button">Dodaj swoje schronisko</a>
-    </div>
-}
-else
-{
-    <div class="card">
-        <div class="card-header">
-            <h2>@Model.Shelter.Name</h2>
-            <p>@Model.Shelter.City, @Model.Shelter.Street @Model.Shelter.StreetNumber</p>
+<div class="container-fluid p-4">
+    @if (!Model.HasShelter)
+    {
+        <div class="text-center py-5">
+            <h3 class="mb-4">Jeszcze nie dodano schroniska.</h3>
+            <a asp-action="Create" class="btn btn-lg px-4 py-2" style="background-color: darkcyan; color: white;">
+                Dodaj swoje schronisko
+            </a>
         </div>
-        <div class="card-body">
-            <p><strong>Ocena:</strong> @(Model.Shelter.Rating?.ToString("0.0") ?? "Brak oceny")</p>
-            <p><strong>Kategoria:</strong> @Model.Shelter.Category?.Name</p>
-            <p><strong>Tagi:</strong> @string.Join(", ", Model.Shelter.Tags?.Select(t => t.Name) ?? new List<string>())</p>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div style="background-color:#004d4d" class="card-header text-white">
+                        <h2 class="h4 mb-1">@Model.Shelter.Name</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <strong>Adres:</strong>
+                                <span class="ms-2">@Model.Shelter.Country, @Model.Shelter.City, @Model.Shelter.Street @Model.Shelter.StreetNumber, @Model.Shelter.ZipCode</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-star text-warning me-2"></i>
+                                <strong>Ocena:</strong>
+                                <span class="ms-2">@(Model.Shelter.Rating?.ToString("0.0") ?? "Brak oceny")</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                <strong>Kategoria:</strong>
+                                <span class="ms-2">@Model.Shelter.Category?.Name</span>
+                            </div>
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-tag text-primary me-2"></i>
+                                <strong>Opis:</strong>
+                                <span class="ms-2">@Model.Shelter.Description</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-tags text-primary me-2"></i>
+                                <strong>Tagi:</strong>
+                                <span class="ms-2">@string.Join(", ", Model.Shelter.Tags?.Select(t => t.Name) ?? new List<string>())</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm h-100">
+                    <div style="background-color:dimgrey" class="card-header text-white">
+                        <h3 class="h4 mb-0">Statystyki rezerwacji</h3>
+                    </div>
+                    <div class="card-body">
+                        <div style="align-items: center" class="row g-3">
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <div style="font-size: 40px; font-weight: bold" class="h2 text-warning">@Model.BookingStatistics["Pending"]</div>
+                                    <div>Oczekujące</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <div style="font-size: 40px; font-weight: bold" class="h2 text-success">@Model.BookingStatistics["Approved"]</div>
+                                    <div>Zatwierdzone</div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="text-center p-3 bg-light rounded">
+                                    <div style="font-size: 40px; font-weight: bold" class="h2 text-info">@Model.BookingStatistics["Ended"]</div>
+                                    <div>Zakończone</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <h3 class="mt-4">Statystyki rezerwacji</h3>
-    <ul class="list-group mb-4">
-        <li class="list-group-item">Zatwierdzone rezerwacje: @Model.BookingStatistics["Approved"]</li>
-        <li class="list-group-item">Oczekujące rezerwacje: @Model.BookingStatistics["Pending"]</li>
-        <li class="list-group-item">Zakończone rezerwacje: @Model.BookingStatistics["Ended"]</li>
-    </ul>
+        <div class="card shadow-sm mt-4">
+            <div style="background-color: darkcyan" class="card-header text-white d-flex justify-content-between align-items-center">
+                <h3 class="h4 mb-0">Pokoje</h3>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nazwa</th>
+                                <th>Cena za noc</th>
+                                <th>Pojemność</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var room in Model.Rooms)
+                            {
+                                <tr>
+                                    <td><strong>@room.Name</strong></td>
+                                    <td>@room.PricePerNight.ToString("C")</td>
+                                    <td>
+                                        <span>@room.Capacity</span>
+                                    </td>
+                                    <td>
+                                        @if (room.IsActive)
+                                        {
+                                            <span class="badge bg-success">Aktywny</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Niekatywny</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-    <h3>Pokoje</h3>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nazwa</th>
-                <th>Opis</th>
-                <th>Cena za noc</th>
-                <th>Pojemność</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var room in Model.Rooms)
-            {
-                <tr>
-                    <td>@room.Name</td>
-                    <td>@room.Description</td>
-                    <td>@room.PricePerNight.ToString("C")</td>
-                    <td>@room.Capacity</td>
-                    <td>@(room.IsActive ? "Aktywny" : "Zablokowany")</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <div class="mt-4">
-        <a asp-action="Edit" asp-route-id="@Model.Shelter.Id" class="btn btn-warning">Edytuj Schronisko</a>
-        <a asp-action="ManageBookings" asp-route-id="@Model.Shelter.Id" class="btn btn-success">Zarządzaj rezerwacjami</a>
-    </div>
-}
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <a asp-action="Edit" asp-route-id="@Model.Shelter.Id" class="btn dark-darkcyan-button">Edytuj Schronisko</a>
+            <a asp-action="ManageBookings" asp-route-id="@Model.Shelter.Id" class="dimgray-button btn">Zarządzaj rezerwacjami</a>
+            <a class="darkcyan-button btn" asp-action="Booking" asp-controller="Shelters" asp-route-id="@Model.Shelter.Id">Szczegóły</a>
+            <a class="aquamarine-button btn" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@Model.Shelter.Id">Recenzje</a>
+        </div>
+    }
+</div>

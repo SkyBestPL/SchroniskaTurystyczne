@@ -2,8 +2,15 @@
 
 <div class="container-fluid">
     <div class="row">
-        <!-- Conversations List -->
         <div class="col-md-3 conversations-list">
+            @if (!User.IsInRole("Admin"))
+            {
+                <div class="mb-3">
+                    <a href="@Url.Action("GetAdminContact", "Message")" class="btn btn-primary w-100" style="background-color: darkcyan; border-color: darkcyan;">
+                        <i class="bi bi-headset"></i> Kontakt z administracją
+                    </a>
+                </div>
+            }
             @if (Model.Conversations != null)
             {
                 <h3>Rozmowy</h3>
@@ -16,24 +23,20 @@
                             data-user-id="@conversation.OtherUserId"
                             data-shelter-id="@(conversation.RelatedShelter?.Id)">
                             <div>
-                                @if (conversation.RelatedShelter != null)
+                                @if (conversation.RelatedShelter != null && !User.IsInRole("ShelterOwner"))
                                 {
                                     <strong>@conversation.RelatedShelter.Name</strong>
-                                    @if (conversation.UnreadMessagesCount > 0)
-                                    {
-                                        <span class="badge badge-primary badge-pill"><i class="bi bi-circle-fill" style="color: darkcyan"></i></span>
-                                    }
                                 }
                                 else
                                 {
                                     <strong>@conversation.OtherUserName</strong>
-                                    @if (conversation.UnreadMessagesCount > 0)
-                                    {
-                                        <span class="badge badge-primary badge-pill"><i class="bi bi-circle-fill" style="color: darkcyan"></i></span>
-                                    }
                                 }
-                                <small class="d-block text-muted">
-                                    @conversation.Messages.LastOrDefault()?.Contents
+                                @if (conversation.UnreadMessagesCount > 0)
+                                {
+                                    <span class="badge badge-primary badge-pill"><i class="bi bi-circle-fill" style="color: darkcyan"></i></span>
+                                }
+                                <small class="d-block text-muted message-preview">
+                                    @(conversation.Messages.LastOrDefault()?.Contents ?? "")
                                 </small>
                             </div>
                         </li>
@@ -42,19 +45,22 @@
             }
         </div>
 
-        <!-- Message Window -->
         <div class="col-md-9 message-window">
             @if (Model.CurrentConversation != null)
             {
                 <div class="card">
                     <div class="card-header">
-                        @if (Model.CurrentConversation.RelatedShelter != null)
+                        @if (Model.CurrentConversation.IsAdmin)
                         {
-                            <h4>@Model.CurrentConversation.RelatedShelter.Name</h4>
+                            <h4>@Model.CurrentConversation.OtherUserName <span style="color: red; font-size: 20px">Admin <i class="bi bi-check-lg"></i></span></h4>
+                        }
+                        else if (Model.CurrentConversation.IsExhibitor)
+                        {
+                            <h4>@Model.CurrentConversation.OtherUserName <a href="@Url.Action("Index", "Booking", new { id = Model.CurrentConversation.OtherUserId })" style="color: darkcyan; text-decoration: none; font-size: 20px">Szczegóły <i class="bi bi-house-fill"></i></a></h4>
                         }
                         else
                         {
-                            <h4>@Model.CurrentConversation.OtherUserName</h4>
+                            <h4>@Model.CurrentConversation.OtherUserName <a href="@Url.Action("Index", "User", new { id = Model.CurrentConversation.OtherUserId })" style="color: darkcyan; text-decoration: none; font-size: 20px">Profil <i class="bi bi-person-circle"></i></a></h4>
                         }
                     </div>
                     <div class="card-body message-list">
@@ -62,7 +68,7 @@
                         {
                             <div class="message @(message.IsSentByCurrentUser ? "sent" : "received")">
                                 <p>@message.Contents</p>
-                                <small>@message.SentAt.ToString("yyyy-MM-dd HH:mm")</small>
+                                <small>@message.SentAt.ToString("dd.MM.yyyy HH:mm")</small>
                             </div>
                         }
                     </div>

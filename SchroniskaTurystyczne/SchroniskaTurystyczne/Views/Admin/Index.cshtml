@@ -10,7 +10,7 @@
 
     <!-- Użytkownicy -->
     <div id="users" class="tab-content active">
-        <input type="text" class="search-box" id="userSearch" placeholder="Szukaj użytkownika..."
+        <input type="text" class="search-box add-form" id="userSearch" placeholder="Szukaj użytkownika..."
                oninput="filterUsers()">
         <table class="table-admin">
             <thead>
@@ -18,7 +18,9 @@
                     <th>Imię</th>
                     <th>Nazwisko</th>
                     <th>Email</th>
-                    <th>Akcje</th>
+                    <th>Numer telefonu</th>
+                    <th>Rola</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="usersTableBody">
@@ -28,11 +30,11 @@
                         <td>@user.FirstName</td>
                         <td>@user.LastName</td>
                         <td>@user.Email</td>
+                        <td>@user.PhoneNumber</td>
+                        <td>@user.Role</td>
                         <td>
-                            <button class="action-button delete-button"
-                                    onclick="deleteUser('@user.Id')">
-                                Usuń
-                            </button>
+                            <button class="short-height-button darkcyan-button" onclick="window.location.href='@Url.Action("Index", "User", new { id = user.Id })'">Szczegóły</button>
+                            <button class="short-height-button red-button" onclick="deleteUser('@user.Id')">Usuń</button>
                         </td>
                     </tr>
                 }
@@ -42,7 +44,7 @@
 
     <!-- Schroniska -->
     <div id="shelters" class="tab-content">
-        <input type="text" class="search-box" id="shelterSearch" placeholder="Szukaj schroniska..."
+        <input type="text" class="search-box add-form" id="shelterSearch" placeholder="Szukaj schroniska..."
                oninput="filterShelters()">
         <table class="table-admin">
             <thead>
@@ -50,7 +52,7 @@
                     <th>Nazwa</th>
                     <th>Właściciel</th>
                     <th>Status</th>
-                    <th>Akcje</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="sheltersTableBody">
@@ -61,17 +63,25 @@
                         <td>@shelter.OwnerName</td>
                         <td>@(shelter.ConfirmedShelter ? "Potwierdzone" : "Niepotwierdzone")</td>
                         <td>
-                            <button class="action-button delete-button"
+                            <button class="short-height-button darkcyan-button" onclick="window.location.href='@Url.Action("Index", "Booking", new { id = shelter.Id })'">Szczegóły</button>
+                            @if (!shelter.ConfirmedShelter)
+                            {
+                                <button class="aquamarine-button short-height-button"
+                                        onclick="confirmShelter(@shelter.Id)">
+                                    Potwierdź schronisko
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="short-height-button dimgray-button"
+                                        onclick="unconfirmShelter(@shelter.Id)">
+                                    Anuluj potwierdzenie
+                                </button>
+                            }
+                            <button class="short-height-button red-button"
                                     onclick="deleteShelter(@shelter.Id)">
                                 Usuń
                             </button>
-                            @if (!shelter.ConfirmedShelter)
-                            {
-                                <button class="action-button confirm-button"
-                                        onclick="confirmShelter(@shelter.Id)">
-                                    Potwierdź
-                                </button>
-                            }
                         </td>
                     </tr>
                 }
@@ -83,13 +93,13 @@
     <div id="tags" class="tab-content">
         <div class="add-form">
             <input type="text" id="newTagName" placeholder="Nazwa tagu">
-            <button class="action-button confirm-button" onclick="addTag()">Dodaj tag</button>
+            <button class="short-height-button dark-darkcyan-button" onclick="addTag()">Dodaj tag</button>
         </div>
         <table class="table-admin">
             <thead>
                 <tr>
                     <th>Nazwa</th>
-                    <th>Akcje</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="tagsTableBody">
@@ -98,7 +108,7 @@
                     <tr>
                         <td>@tag.Name</td>
                         <td>
-                            <button class="action-button delete-button"
+                            <button class="short-height-button red-button"
                                     onclick="deleteTag(@tag.Id)">
                                 Usuń
                             </button>
@@ -113,13 +123,13 @@
     <div id="facilities" class="tab-content">
         <div class="add-form">
             <input type="text" id="newFacilityName" placeholder="Nazwa udogodnienia">
-            <button class="action-button confirm-button" onclick="addFacility()">Dodaj udogodnienie</button>
+            <button class="short-height-button dark-darkcyan-button" onclick="addFacility()">Dodaj udogodnienie</button>
         </div>
         <table class="table-admin">
             <thead>
                 <tr>
                     <th>Nazwa</th>
-                    <th>Akcje</th>
+                    <th></th>
                 </tr>
             </thead>
             <tbody id="facilitiesTableBody">
@@ -128,7 +138,7 @@
                     <tr>
                         <td>@facility.Name</td>
                         <td>
-                            <button class="action-button delete-button"
+                            <button class="short-height-button red-button"
                                     onclick="deleteFacility(@facility.Id)">
                                 Usuń
                             </button>
@@ -216,6 +226,26 @@
         } catch (error) {
             console.error('Error:', error);
             alert('Wystąpił błąd podczas potwierdzania schroniska');
+        }
+    }
+
+    async function unconfirmShelter(shelterId) {
+        try {
+            const response = await fetch(`/Admin/UnconfirmShelter/${shelterId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (response.ok) {
+                location.reload();
+            } else {
+                alert('Wystąpił błąd podczas uanulowania potwierdzenia schroniska');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Wystąpił błąd podczas anulowania potwierdzenia schroniska');
         }
     }
 

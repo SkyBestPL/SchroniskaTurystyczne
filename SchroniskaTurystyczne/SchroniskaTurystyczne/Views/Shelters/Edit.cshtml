@@ -191,24 +191,68 @@
 
  <script>
     const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
-    var lat = document.getElementById('shelter-lat').value;
-    var lon = document.getElementById('shelter-lon').value;
 
-    const map = L.map('map').setView([lat, lon], 12);
-    L.tileLayer(`https://api.mapy.cz/v1/maptiles/basic/256/{z}/{x}/{y}?apikey=${API_KEY}&lang=pl`, {
-        minZoom: 0,
-        maxZoom: 19,
-        attribution: '<a href="https://api.mapy.cz/copyright" target="_blank">&copy; Seznam.cz a.s. a další</a>',
-    }).addTo(map);
+    // Pobieranie istniejących współrzędnych schroniska z pola formularza lub ustawienie domyślnych
+    let lat = parseFloat(document.getElementById('shelter-lat').value) || 52.06936257159014;
+    let lon = parseFloat(document.getElementById('shelter-lon').value) || 19.48022053933678;
 
-    let marker = L.marker([lat, lon]).addTo(map);
+    // Inicjalizacja mapy
+    const map = new maplibregl.Map({
+        container: 'map', // ID kontenera HTML
+        center: [lon, lat], // Początkowe współrzędne środka mapy
+        zoom: 6, // Początkowy poziom przybliżenia
+        style: {
+            version: 8,
+            sources: {
+                'basic-tiles': {
+                    type: 'raster',
+                    url: `https://api.mapy.cz/v1/maptiles/basic/tiles.json?apikey=${API_KEY}`,
+                    tileSize: 256,
+                },
+            },
+            layers: [
+                {
+                    id: 'tiles',
+                    type: 'raster',
+                    source: 'basic-tiles',
+                },
+            ],
+        },
+    });
+
+    // Dodanie kontrolki z logo Mapy.cz
+    class LogoControl {
+        onAdd(map) {
+            this._map = map;
+            this._container = document.createElement('div');
+            this._container.className = 'maplibregl-ctrl';
+            this._container.innerHTML = '<a href="http://mapy.cz/" target="_blank"><img width="100px" src="https://api.mapy.cz/img/api/logo.svg" alt="Mapy.cz logo"></a>';
+            return this._container;
+        }
+
+        onRemove() {
+            this._container.parentNode.removeChild(this._container);
+            this._map = undefined;
+        }
+    }
+
+    map.addControl(new LogoControl(), 'bottom-left');
+
+    // Dodanie znacznika (markera) na mapę
+    let marker = new maplibregl.Marker({ color: 'darkcyan' })
+        .setLngLat([lon, lat])
+        .addTo(map);
+
+    // Przypisanie współrzędnych do ukrytych pól formularza
     document.getElementById('Latitude').value = lat;
     document.getElementById('Longitude').value = lon;
 
+    // Obsługa kliknięcia na mapie - przenoszenie markera i aktualizacja współrzędnych
     map.on('click', function (e) {
-        marker.setLatLng(e.latlng);
-        document.getElementById('Latitude').value = e.latlng.lat;
-        document.getElementById('Longitude').value = e.latlng.lng;
+        const coords = e.lngLat; // Pobranie współrzędnych kliknięcia
+        marker.setLngLat([coords.lng, coords.lat]); // Przeniesienie markera
+        document.getElementById('Latitude').value = coords.lat; // Aktualizacja pola Latitude
+        document.getElementById('Longitude').value = coords.lng; // Aktualizacja pola Longitude
     });
 
     function addRoom() {

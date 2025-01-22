@@ -65,6 +65,7 @@ namespace SchroniskaTurystyczne.Controllers
                     Rating = s.Rating,
                     City = s.City,
                     Country = s.Country,
+                    Confirmed = s.ConfirmedShelter,
                     Tags = s.Tags.Select(t => new TagViewModel { Id = t.Id, Name = t.Name }).ToList(),
                     MainPhotoBase64 = s.Photos.FirstOrDefault() != null ? Convert.ToBase64String(s.Photos.FirstOrDefault().PhotoData) : null
                 })

@@ -11,11 +11,25 @@ namespace SchroniskaTurystyczne.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly UserManager<AppUser> _userManager;
+        private readonly RoleManager<Role> _roleManager;
 
-        public MessageController(ApplicationDbContext context, UserManager<AppUser> userManager)
+        public MessageController(ApplicationDbContext context, UserManager<AppUser> userManager, RoleManager<Role> roleManager)
         {
             _context = context;
             _userManager = userManager;
+            _roleManager = roleManager;
+        }
+
+        public async Task<bool> IsUserAdmin(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+                return false;
+
+            var roles = await _userManager.GetRolesAsync(user);
+
+            return roles.Contains("Admin");
         }
 
         public async Task<IActionResult> Index(int? shelterId, string? userId)
@@ -26,7 +40,6 @@ namespace SchroniskaTurystyczne.Controllers
                 return Challenge();
             }
 
-            // Sprawdzamy, czy aktualny użytkownik jest właścicielem schroniska
             var currentUserShelter = await _context.Shelters
                 .FirstOrDefaultAsync(s => s.IdExhibitor == currentUser.Id);
 
@@ -34,13 +47,12 @@ namespace SchroniskaTurystyczne.Controllers
             {
                 CurrentUserId = currentUser.Id,
                 CurrentUserName = currentUserShelter != null
-                    ? currentUserShelter.Name  // Nazwa schroniska, jeśli użytkownik jest właścicielem
+                    ? currentUserShelter.Name 
                     : $"{currentUser.FirstName} {currentUser.LastName}",
                 Conversations = new List<ConversationViewModel>(),
                 InitialShelterId = shelterId
             };
 
-            // Ładowanie wiadomości z eager loadingiem
             var messages = await _context.Messages
                 .Where(m => m.IdSender == currentUser.Id || m.IdReceiver == currentUser.Id)
                 .OrderBy(m => m.Date)
@@ -51,6 +63,8 @@ namespace SchroniskaTurystyczne.Controllers
                 var shelter = await _context.Shelters
                     .FirstOrDefaultAsync(s => s.Id == shelterId.Value);
 
+                bool isAdmin = await IsUserAdmin(userId);
+
                 if (shelter != null)
                 {
                     var shelterOwner = await _context.Users.FindAsync(shelter.IdExhibitor);
@@ -58,7 +72,7 @@ namespace SchroniskaTurystyczne.Controllers
                     viewModel.Receiver = new ReceiverViewModel
                     {
                         Id = shelter.IdExhibitor,
-                        DisplayName = shelter.Name  // Nazwa schroniska jako nazwa odbiorcy
+                        DisplayName = shelter.Name
                     };
 
                     var shelterMessages = messages
@@ -73,7 +87,9 @@ namespace SchroniskaTurystyczne.Controllers
                             Name = shelter.Name
                         },
                         OtherUserId = shelter.IdExhibitor,
-                        OtherUserName = shelter.Name,  // Nazwa schroniska zamiast imienia i nazwiska
+                        OtherUserName = shelter.Name,
+                        IsExhibitor = true,
+                        IsAdmin = isAdmin,
                         IsNewConversation = !shelterMessages.Any(),
                         Messages = shelterMessages.Select(m => new MessageInfoViewModel
                         {
@@ -86,10 +102,11 @@ namespace SchroniskaTurystyczne.Controllers
             }
             else if (!string.IsNullOrEmpty(userId))
             {
-                // Logika dla zwykłego użytkownika
                 var otherUser = await _context.Users.FindAsync(userId);
                 var relatedShelter = await _context.Shelters
                     .FirstOrDefaultAsync(s => s.IdExhibitor == currentUser.Id);
+
+                bool isAdmin = await IsUserAdmin(userId);
 
                 if (otherUser != null)
                 {
@@ -113,6 +130,8 @@ namespace SchroniskaTurystyczne.Controllers
                         OtherUserId = otherUser.Id,
                         OtherUserName = otherUser.FirstName + " " + otherUser.LastName,
                         IsNewConversation = !userMessages.Any(),
+                        IsExhibitor = false,
+                        IsAdmin = isAdmin,
                         Messages = userMessages.Select(m => new MessageInfoViewModel
                         {
                             Contents = m.Contents,
@@ -123,7 +142,6 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
-            // Ładowanie wszystkich konwersacji
             var conversationUserIds = messages
             .Select(m => m.IdSender == currentUser.Id ? m.IdReceiver : m.IdSender)
             .Distinct()
@@ -199,9 +217,7 @@ namespace SchroniskaTurystyczne.Controllers
             return new ConversationViewModel
             {
                 OtherUserId = otherUser.Id,
-                OtherUserName = relatedShelter != null
-                    ? relatedShelter.Name  // Nazwa schroniska, jeśli istnieje
-                    : $"{otherUser.FirstName} {otherUser.LastName}",
+                OtherUserName = relatedShelter != null ? relatedShelter.Name : $"{otherUser.FirstName} {otherUser.LastName}",
                 RelatedShelter = relatedShelter != null ? new ShelterInfoViewModel
                 {
                     Id = relatedShelter.Id,
@@ -262,10 +278,7 @@ namespace SchroniskaTurystyczne.Controllers
             }
 
             var unreadMessages = await _context.Messages
-                .Where(m => m.IdSender == otherUserId &&
-                            m.IdReceiver == currentUser.Id &&
-                            !m.IsRead)
-                .ToListAsync();
+                .Where(m => m.IdSender == otherUserId && m.IdReceiver == currentUser.Id && !m.IsRead).ToListAsync();
 
             foreach (var message in unreadMessages)
             {
@@ -287,6 +300,23 @@ namespace SchroniskaTurystyczne.Controllers
 
             return await _context.Messages
                 .AnyAsync(m => m.IdReceiver == currentUser.Id && !m.IsRead);
+        }
+
+        public async Task<IActionResult> GetAdminContact()
+        {
+            var adminRole = await _roleManager.FindByNameAsync("Admin");
+            if (adminRole == null)
+                return NotFound("Nie znaleziono roli administratora.");
+
+            var adminUser = await _userManager.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.UserRoles.Any(ur => ur.Role.Name == "Admin"));
+
+            if (adminUser == null)
+                return NotFound("Nie znaleziono administratora.");
+
+            return RedirectToAction("Index", new { userId = adminUser.Id });
         }
     }
 }

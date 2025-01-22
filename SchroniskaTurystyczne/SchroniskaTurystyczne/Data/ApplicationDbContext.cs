@@ -196,9 +196,9 @@ namespace SchroniskaTurystyczne.Data
 
         private void Seed(ModelBuilder builder)
         {
-            var userAdmin = new AppUser() //konto głównego admina
+            var userAdmin = new AppUser() //konto admina
             {
-                FirstName = "Admin",
+                FirstName = "Schroniarz",
                 LastName =  "Admin",
                 Email = "admin@admin.com",
                 NormalizedEmail = "ADMIN@ADMIN.COM",
@@ -368,6 +368,97 @@ namespace SchroniskaTurystyczne.Data
             builder.Entity<Category>().HasData(beskidSlaskiCategory);
             builder.Entity<Category>().HasData(karkonoszeCategory);
             builder.Entity<Category>().HasData(otherCategory);
+
+            //------------------------------------------------------------------Dane testowego schroniska
+            var exhibitorUser = new AppUser()
+            {
+                FirstName = "Jan",
+                LastName = "Kowalski",
+                Email = "jan.kowalski@example.com",
+                NormalizedEmail = "JAN.KOWALSKI@EXAMPLE.COM",
+                UserName = "jan.kowalski@example.com",
+                NormalizedUserName = "JAN.KOWALSKI@EXAMPLE.COM",
+                PasswordHash = "1234",
+                EmailConfirmed = true
+            };
+            builder.Entity<AppUser>().HasData(exhibitorUser);
+
+            var exhibitorUserRole = new UserRole()
+            {
+                RoleId = exhibitorRole.Id,
+                UserId = exhibitorUser.Id
+            };
+            builder.Entity<UserRole>().HasData(exhibitorUserRole);
+
+            var shelter = new Shelter()
+            {
+                Id = 1,
+                IdExhibitor = exhibitorUser.Id,
+                IdCategory = 1,
+                Name = "Schronisko Pod Tatrami",
+                Description = "Malownicze schronisko położone w sercu Tatr.",
+                ConfirmedShelter = true,
+                Country = "Polska",
+                City = "Zakopane",
+                Street = "Tatrzańska",
+                StreetNumber = "12",
+                ZipCode = "34-500",
+                LocationLon = "19.9383",
+                LocationLat = "49.2965"
+            };
+            builder.Entity<Shelter>().HasData(shelter);
+
+            var shelterTags = new List<object>
+            {
+                new { IdShelter = shelter.Id, IdTag = 1 },
+                new { IdShelter = shelter.Id, IdTag = 3 },
+                new { IdShelter = shelter.Id, IdTag = 5 }
+            };
+            builder.Entity("ShelterTag").HasData(shelterTags);
+
+            var room1 = new Room()
+            {
+                Id = 1,
+                IdShelter = shelter.Id,
+                IdType = 1,
+                Name = "Pokój wspólny",
+                PricePerNight = 50,
+                Capacity = 6,
+                IsActive = true
+            };
+
+            var room2 = new Room()
+            {
+                Id = 2,
+                IdShelter = shelter.Id,
+                IdType = 2,
+                Name = "Pokój prywatny",
+                PricePerNight = 150,
+                Capacity = 2,
+                IsActive = true
+            };
+
+            var room3 = new Room()
+            {
+                Id = 3,
+                IdShelter = shelter.Id,
+                IdType = 3,
+                Name = "Pole namiotowe",
+                PricePerNight = 20,
+                Capacity = 10,
+                IsActive = true
+            };
+            builder.Entity<Room>().HasData(room1, room2, room3);
+
+            var roomFacilities = new List<object>
+            {
+                new { IdRoom = room1.Id, IdFacility = 1 },
+                new { IdRoom = room1.Id, IdFacility = 2 },
+                new { IdRoom = room2.Id, IdFacility = 2 },
+                new { IdRoom = room2.Id, IdFacility = 3 },
+                new { IdRoom = room3.Id, IdFacility = 1 }
+            };
+            builder.Entity("RoomFacility").HasData(roomFacilities);
         }
     }
 }

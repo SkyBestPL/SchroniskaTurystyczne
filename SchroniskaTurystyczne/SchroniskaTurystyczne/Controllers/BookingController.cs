@@ -405,5 +405,55 @@ namespace SchroniskaTurystyczne.Controllers
 
             return totalPrice;
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Pay(int id)
+        {
+            var booking = await _context.Bookings.FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null || booking.Paid)
+            {
+                return NotFound("Rezerwacja nie istnieje lub została już opłacona.");
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (booking.IdGuest != currentUserId)
+            {
+                return Forbid();
+            }
+
+            booking.Paid = true;
+            booking.PaymentDate = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+
+            return Redirect("/Identity/Account/Manage/UserReservations");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var booking = await _context.Bookings
+                .Include(b => b.BookingRooms)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound("Rezerwacja nie istnieje.");
+            }
+
+            var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (booking.IdGuest != currentUserId)
+            {
+                return Forbid();
+            }
+
+            _context.BookingRooms.RemoveRange(booking.BookingRooms);
+            _context.Bookings.Remove(booking);
+
+            await _context.SaveChangesAsync();
+
+            return Redirect("/Identity/Account/Manage/UserReservations");
+        }
     }
 }

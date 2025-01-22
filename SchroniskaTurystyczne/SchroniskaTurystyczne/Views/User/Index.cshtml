@@ -3,7 +3,28 @@
 <div class="container my-4">
     <div class="row">
         <div class="col-md-12">
-            <h2>@Model.FirstName @Model.LastName</h2>
+            <div class="d-flex align-items-center gap-3 mb-3">
+                <h2 class="mb-0">@Model.FirstName @Model.LastName <span style="font-size:20px">(@Model.Email)</span></h2>
+                @if (User.Identity.IsAuthenticated && User.Identity.Name != Model.Email)
+                {
+                    <a href="@Url.Action("Index", "Message", new { userId = Model.Id })"
+                       class="btn btn-primary d-inline-flex align-items-center"
+                       style="background-color: darkcyan; border-color: darkcyan;">
+                        <i class="bi bi-chat-dots me-2"></i> Wyślij wiadomość
+                    </a>
+                }
+            </div>
+
+            @if (Model.ShelterName != null && Model.IdShelter != null)
+            {
+                <h5>
+                    Właściciel schroniska
+                    <a href="@Url.Action("Index", "Booking", new { id = Model.IdShelter })"
+                       style="color: darkcyan; text-decoration: none; font-weight: bold">
+                        @Model.ShelterName
+                    </a>
+                </h5>
+            }
             <hr />
         </div>
     </div>
@@ -20,6 +41,7 @@
                                 <th>Data zameldowania</th>
                                 <th>Data wymeldowania</th>
                                 <th>Liczba osób</th>
+                                <th>Do zapłaty</th>
                                 <th>Status płatności</th>
                                 <th>Status weryfikacji</th>
                             </tr>
@@ -31,6 +53,7 @@
                                     <td>@booking.CheckInDate.ToShortDateString()</td>
                                     <td>@booking.CheckOutDate.ToShortDateString()</td>
                                     <td>@booking.NumberOfPeople</td>
+                                    <td>@booking.Bill zł</td>
                                     <td>@(booking.Paid ? "Opłacone" : "Nieopłacone")</td>
                                     <td>@(booking.Verified ? "Zweryfikowane" : "Niezweryfikowane")</td>
                                 </tr>
@@ -56,12 +79,12 @@
                     <div class="card mb-3">
                         <div class="card-body">
                             <h5 class="card-title">
-                                <a asp-controller="Shelter" asp-action="Details" asp-route-id="@review.Shelter.Id">
+                                <a style="text-decoration: none; color: darkcyan" asp-controller="Booking" asp-action="Index" asp-route-id="@review.Shelter.Id">
                                     @review.Shelter.Name
                                 </a>
                             </h5>
                             <h6 class="card-subtitle mb-2 text-muted">
-                                Ocena: @review.Rating/5 | @review.Date
+                                Ocena: @review.Rating/10 | @review.Date
                             </h6>
                             <p class="card-text">@review.Contents</p>
                         </div>
@@ -71,7 +94,7 @@
         </div>
 
         <div class="col-md-6">
-            <h3>Odwiedzone schroniska</h3>
+            <h3>Historia odwiedzonych schronisk</h3>
             @if (!Model.VisitedShelters.Any())
             {
                 <p>Użytkownik nie odwiedził jeszcze żadnych schronisk.</p>
@@ -84,7 +107,7 @@
                         <a href="@Url.Action("Details", "Shelter", new { id = shelter.Id })"
                            class="list-group-item list-group-item-action">
                             <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1">@shelter.Name</h5>
+                                <h5 style="text-decoration: none; color: darkcyan" class="mb-1">@shelter.Name</h5>
                                 <small>@shelter.VisitDate.ToShortDateString()</small>
                             </div>
                             <p class="mb-1">@shelter.Location</p>

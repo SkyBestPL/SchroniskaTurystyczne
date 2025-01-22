@@ -256,10 +256,15 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
-            user.IdShelter = shelter.Id;
+            _context.Add(shelter);
+            await _context.SaveChangesAsync();
+
+            var generatedShelterId = shelter.Id;
+
+            user.IdShelter = generatedShelterId;
             user.Shelter = shelter;
 
-            _context.Add(shelter);
+            _context.Update(user);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Index));
@@ -449,6 +454,7 @@ namespace SchroniskaTurystyczne.Controllers
                 Id = s.Id,
                 Name = s.Name,
                 Description = s.Description,
+                Confirmed = s.ConfirmedShelter,
                 Rating = s.Rating,
                 Country = s.Country,
                 City = s.City,
@@ -837,9 +843,11 @@ namespace SchroniskaTurystyczne.Controllers
             {
                 BookingId = b.Id,
                 GuestName = $"{b.Guest.FirstName} {b.Guest.LastName}",
+                IdUser = b.IdGuest,
                 CheckInDate = b.CheckInDate,
                 CheckOutDate = b.CheckOutDate,
                 TotalPrice = b.Bill,
+                Paid = b.Paid,
                 Rooms = b.BookingRooms.Select(br => new RoomBookingDetail
                 {
                     RoomName = br.Room.Name ?? $"Pokój {br.Room.Id}",
@@ -905,8 +913,6 @@ namespace SchroniskaTurystyczne.Controllers
             booking.Valid = false;
             booking.Ended = false;
 
-            //_context.BookingRooms.RemoveRange(booking.BookingRooms);
-            //_context.Bookings.Remove(booking);
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(ManageBookings), new { id = shelter.Id });
@@ -923,7 +929,6 @@ namespace SchroniskaTurystyczne.Controllers
             if (booking == null)
                 return NotFound();
 
-            // Sprawdzenie uprawnień
             var shelter = await _context.Rooms
                 .Where(r => r.Id == booking.BookingRooms.First().IdRoom)
                 .Select(r => r.Shelter)
@@ -935,6 +940,19 @@ namespace SchroniskaTurystyczne.Controllers
 
             booking.Ended = true;
 
+            foreach (var bookingRoom in booking.BookingRooms)
+            {
+                var hasActiveBookings = await _context.Bookings
+                    .Include(b => b.BookingRooms)
+                    .Where(b => b.Verified && b.Valid && !b.Ended && b.BookingRooms.Any(br => br.IdRoom == bookingRoom.Room.Id))
+                    .AnyAsync();
+
+                if (!hasActiveBookings)
+                {
+                    bookingRoom.Room.HasConfirmedBooking = false;
+                }
+            }
+
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(ManageBookings), new { id = shelter.Id });
@@ -944,7 +962,6 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var user = await _userManager.GetUserAsync(User);
 
-            // Znajdź schronisko użytkownika
             var shelter = await _context.Shelters
                 .Include(s => s.Rooms)
                 .Include(s => s.Category)
@@ -959,7 +976,6 @@ namespace SchroniskaTurystyczne.Controllers
                 });
             }
 
-            // Statystyki rezerwacji
             var approvedBookings = await _context.Bookings
                 .Where(b => b.IdShelter == shelter.Id && b.Verified && !b.Ended && b.Valid)
                 .CountAsync();
@@ -978,11 +994,11 @@ namespace SchroniskaTurystyczne.Controllers
                 Shelter = shelter,
                 Rooms = shelter.Rooms.ToList(),
                 BookingStatistics = new Dictionary<string, int>
-            {
-                { "Approved", approvedBookings },
-                { "Pending", pendingBookings },
-                { "Ended", endedBookings }
-            }
+                {
+                    { "Approved", approvedBookings },
+                    { "Pending", pendingBookings },
+                    { "Ended", endedBookings }
+                }
             });
         }
     }

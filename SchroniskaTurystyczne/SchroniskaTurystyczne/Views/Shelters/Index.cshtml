@@ -5,41 +5,47 @@
     ViewData["Title"] = "Dostępne Schroniska";
 }
 
-<div class="search-bar">
+<div class="search-bar py-3">
     <form asp-action="Index" asp-controller="Shelters" method="get" id="mainSearchForm">
-        <div class="row">
-            <div class="col">
-                <input asp-for="SearchTerm" class="form-control" placeholder="Wpisz nazwę lub miasto..." />
+        <div class="row align-items-center g-2">
+            <div class="col-12 col-md-6">
+                <div class="input-group">
+                    <input asp-for="SearchTerm" class="form-control" placeholder="Wpisz nazwę lub miasto..." />
+                    <select asp-for="SelectedCategoryId"
+                            class="form-select"
+                            style="max-width: 200px;"
+                            asp-items="@(new SelectList(Model.AvailableCategories, "Id", "Name"))">
+                        <option value="">Wszystkie schroniska</option>
+                    </select>
+                </div>
             </div>
 
-            @if (Model.SelectedTagIds != null)
-            {
-                @foreach (var tagId in Model.SelectedTagIds)
-                {
-                    <input type="hidden" name="SelectedTagIds" value="@tagId" />
-                }
-            }
-
-            @if (Model.SelectedRoomTypeIds != null)
-            {
-                @foreach (var roomTypeId in Model.SelectedRoomTypeIds)
-                {
-                    <input type="hidden" name="SelectedRoomTypeIds" value="@roomTypeId" />
-                }
-            }
-
-            <div class="col">
-                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
-                    Filtruj
-                </button>
-                <button type="submit" class="btn btn-primary">Szukaj</button>
+            <div class="col-12 col-md-auto">
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#filterModal">
+                        <i class="bi bi-funnel"></i>Filtruj
+                    </button>
+                    <button type="submit" class="btn darkcyan-button">
+                        <i class="bi bi-search"></i> Szukaj
+                    </button>
+                </div>
             </div>
         </div>
-        <div class="col">
-            <select asp-for="SelectedCategoryId" class="form-select" asp-items="@(new SelectList(Model.AvailableCategories, "Id", "Name"))">
-                <option value="">Wszystkie schroniska</option>
-            </select>
-        </div>
+
+        @if (Model.SelectedTagIds != null)
+        {
+            @foreach (var tagId in Model.SelectedTagIds)
+            {
+                <input type="hidden" name="SelectedTagIds" value="@tagId" />
+            }
+        }
+        @if (Model.SelectedRoomTypeIds != null)
+        {
+            @foreach (var roomTypeId in Model.SelectedRoomTypeIds)
+            {
+                <input type="hidden" name="SelectedRoomTypeIds" value="@roomTypeId" />
+            }
+        }
     </form>
 </div>
 
@@ -83,7 +89,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
-                <button type="button" class="btn btn-primary" id="applyFilters">Zastosuj filtry</button>
+                <button type="button" class="btn darkcyan-button" id="applyFilters">Zastosuj filtry</button>
             </div>
         </div>
     </div>
@@ -94,7 +100,8 @@
     {
         <div class="shelter-container">
             <div class="shelter-info">
-                <h3 style="color:black"><strong>@shelter.Name</strong></h3>
+                <h3 style="color:black">
+                    <strong>@shelter.Name</strong> @if (shelter.Confirmed == true){<i style="color: green; font-size: 20px" class="bi bi-check-circle-fill"></i>}</h3>
                 <div class="shelter-rating">
                     @if (shelter.Rating != null)
                     {
@@ -138,7 +145,6 @@
     }
 </div>
     
-
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
@@ -166,7 +172,6 @@
         });
     </script>
 }
-
 
 <script>
     $(document).ready(function () {

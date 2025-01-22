@@ -46,6 +46,7 @@ namespace SchroniskaTurystyczne.Controllers
                 Id = user.Id,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
+                Email = user.Email,
                 Reviews = user.Reviews.Select(r => new ReviewInfoViewModel
                 {
                     Id = r.Id,
@@ -72,6 +73,18 @@ namespace SchroniskaTurystyczne.Controllers
                     .ToList()
             };
 
+            if(user.IdShelter.HasValue)
+            {
+                var shelter = await _context.Shelters
+                    .FirstOrDefaultAsync(s => s.Id == user.IdShelter.Value);
+
+                if (shelter != null)
+                {
+                    viewModel.ShelterName = shelter.Name;
+                    viewModel.IdShelter = shelter.Id;
+                }
+            }
+
             if (isExhibitor && currentUser.IdShelter.HasValue)
             {
                 viewModel.CurrentBookings = user.Bookings
@@ -83,6 +96,7 @@ namespace SchroniskaTurystyczne.Controllers
                         CheckOutDate = b.CheckOutDate,
                         NumberOfPeople = b.NumberOfPeople,
                         Paid = b.Paid,
+                        Bill = b.Bill,
                         Verified = b.Verified
                     })
                     .ToList();

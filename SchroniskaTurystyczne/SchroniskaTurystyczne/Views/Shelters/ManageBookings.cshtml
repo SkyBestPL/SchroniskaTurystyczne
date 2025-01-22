@@ -20,12 +20,12 @@
                     <div class="border p-3 mb-3 rounded">
                         <div class="row">
                             <div class="col-md-8">
-                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                                <h5> Id rezerwacji: #@booking.BookingId <a style="color: darkcyan; font-weight: bold" asp-controller="User" asp-action="Index" asp-route-id="@booking.IdUser">@booking.GuestName</a></h5>
                                 <p>
-                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
-                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                    <strong>Zameldowanie:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToShortDateString()
                                 </p>
-                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C") <span class="@(booking.Paid ? "confirmed" : "unconfirmed")">@((booking.Paid ? "Opłacona" : "Nieopłacona"))</span></p>
                                 <div class="mt-2">
                                     <strong>Zarezerwowane pokoje:</strong>
                                     <ul>
@@ -36,7 +36,7 @@
                                     </ul>
                                 </div>
                             </div>
-                            <div class="col-md-4 text-end">
+                            <div class="text-end">
                                 <form asp-action="ConfirmBooking" method="post" class="d-inline">
                                     <input type="hidden" name="bookingId" value="@booking.BookingId" />
                                     <button type="submit" class="btn btn-success">Potwierdź</button>
@@ -69,13 +69,13 @@
                 {
                     <div class="border p-3 mb-3 rounded">
                         <div class="row">
-                            <div class="col">
-                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                            <div class="col-md-8">
+                                <h5>Id rezerwacji: #@booking.BookingId <a style="color: darkcyan; font-weight: bold" asp-controller="User" asp-action="Index" asp-route-id="@booking.IdUser">@booking.GuestName</a></h5>
                                 <p>
-                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
-                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                    <strong>Zameldowanie:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToShortDateString()
                                 </p>
-                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C") <span class="@(booking.Paid ? "confirmed" : "unconfirmed")">@((booking.Paid ? "Opłacona" : "Nieopłacona"))</span></p>
                                 <div class="mt-2">
                                     <strong>Zarezerwowane pokoje:</strong>
                                     <ul>
@@ -85,12 +85,12 @@
                                         }
                                     </ul>
                                 </div>
-                                <div class="col-md-4 text-end">
-                                    <form asp-action="CompleteBooking" method="post" class="d-inline">
-                                        <input type="hidden" name="bookingId" value="@booking.BookingId" />
-                                        <button type="submit" class="btn btn-primary" onclick="return confirm('Czy na pewno chcesz zakończyć tę rezerwację?')">Zakończ</button>
-                                    </form>
-                                </div>
+                            </div>
+                            <div class="text-end">
+                                <form asp-action="CompleteBooking" method="post" class="d-inline">
+                                    <input type="hidden" name="bookingId" value="@booking.BookingId" />
+                                    <button type="submit" class="btn dimgray-button" onclick="return confirm('Czy na pewno chcesz zakończyć tę rezerwację?')">Zakończ</button>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -116,12 +116,12 @@
                     <div class="border p-3 mb-3 rounded">
                         <div class="row">
                             <div class="col-md-8">
-                                <h5>Rezerwacja #@booking.BookingId - @booking.GuestName</h5>
+                                <h5> Id rezerwacji: #@booking.BookingId <a style="color: darkcyan; font-weight: bold" asp-controller="User" asp-action="Index" asp-route-id="@booking.IdUser">@booking.GuestName</a></h5>
                                 <p>
-                                    <strong>Check-in:</strong> @booking.CheckInDate.ToShortDateString()
-                                    <strong>Check-out:</strong> @booking.CheckOutDate.ToShortDateString()
+                                    <strong>Zameldowanie:</strong> @booking.CheckInDate.ToShortDateString()
+                                    <strong>Wymeldowanie:</strong> @booking.CheckOutDate.ToShortDateString()
                                 </p>
-                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C")</p>
+                                <p><strong>Łączna cena:</strong> @booking.TotalPrice.ToString("C") <span class="@(booking.Paid ? "confirmed" : "unconfirmed")">@((booking.Paid ? "Opłacona" : "Nieopłacona"))</span></p>
                                 <div class="mt-2">
                                     <strong>Zarezerwowane pokoje:</strong>
                                     <ul>

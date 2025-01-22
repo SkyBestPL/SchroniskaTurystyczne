@@ -12,10 +12,12 @@
     public class BookingDetailsViewModel
     {
         public int BookingId { get; set; }
+        public string IdUser { get; set; }
         public string GuestName { get; set; }
         public DateTime CheckInDate { get; set; }
         public DateTime CheckOutDate { get; set; }
         public double TotalPrice { get; set; }
+        public bool Paid { get; set; }
         public List<RoomBookingDetail> Rooms { get; set; }
     }
 

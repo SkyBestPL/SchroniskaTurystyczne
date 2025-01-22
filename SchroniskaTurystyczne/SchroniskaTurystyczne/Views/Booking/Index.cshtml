@@ -5,7 +5,7 @@
 }
 
 <div class="booking-shelter-info">
-    <h1 style="color: darkcyan">@Model.Name</h1>
+    <h1 style="color: darkcyan">@Model.Name @if (Model.ConfirmedShelter == true){<i style="color: green; font-size: 25px" class="bi bi-check-circle-fill"></i>}</h1>
     <a class="dark-darkcyan-button btn" style="padding: 3px 3px 3px 3px" asp-action="MapView" asp-controller="Shelters" asp-route-id="@Model.Id">Pokaż na mapie</a>
     <a class="aquamarine-button btn" style="padding: 3px 3px 3px 3px" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@Model.Id">Recenzje</a>
     <div class="gallery-container">
@@ -25,7 +25,7 @@
         @if (Model.Rating != null)
         {
             <span class="star full">&#9733;</span>
-            <p> <strong style="color:black">@Model.Rating</strong>/10</p> <p style="font-size: 15px; margin: 10px 0 0 5px">(@Model.AmountOfReviews)</p>
+            <p style="margin-top: 5px; margin-left: 3px; margin-bottom: -5px"> <strong style="color:black">@Model.Rating</strong>/10</p> <p style="font-size: 15px; margin: 10px 0 0 5px">(@Model.AmountOfReviews)</p>
         }
         else
         {
@@ -105,10 +105,7 @@
                             </label>
                         </div>
                         <div class="room-photo-preview" onclick="openRoomPhotoModal(@room.Id)">
-                            @if (room.RoomPhotos != null)
-                            {
-                                <img data-src="@Url.Action("GetRoomThumbnail", "Booking", new { roomId = room.Id })" alt="Brak zdjęcia" class="lazy-load" />
-                            }
+                            <img data-src="@Url.Action("GetRoomThumbnail", "Booking", new { roomId = room.Id })" alt="Zdjęcie pokoju" class="lazy-load" />
                         </div>
                     </div>
                     <div id="calendar-@room.Id" class="calendar" data-room-id="@room.Id"></div>
@@ -246,12 +243,19 @@
             });
     }
 
+    function isValidDateRange(checkInDate, checkOutDate) {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        return checkInDate >= today && checkOutDate > checkInDate;
+    }
+
     async function confirmBooking() {
         const checkInDate = new Date(document.getElementById("checkInDate").value);
         const checkOutDate = new Date(document.getElementById("checkOutDate").value);
 
-        if (!checkInDate || !checkOutDate || checkInDate >= checkOutDate) {
-            alert("Wybierz poprawne daty zameldowania i wymeldowania.");
+        if (!checkInDate || !checkOutDate || !isValidDateRange(checkInDate, checkOutDate)) {
+            alert("Wybierz poprawne daty zameldowania i wymeldowania. Data zameldowania nie może być wcześniejsza niż dzisiaj.");
             return;
         }
 
@@ -261,7 +265,6 @@
 
         let totalPrice = 0;
 
-        // Zbierz dane pokoi prywatnych
         privateRooms.forEach(roomCheckbox => {
             const roomId = roomCheckbox.getAttribute('data-room-id');
             const roomName = roomCheckbox.getAttribute('data-room-name');
@@ -273,7 +276,6 @@
             selectedRooms.push({ roomId, numberOfPeople: capacity, roomName });
         });
 
-        // Zbierz dane pokoi publicznych i działek
         publicRooms.forEach(input => {
             const roomId = input.getAttribute('data-room-id');
             const roomName = input.getAttribute('data-room-name');
@@ -292,16 +294,33 @@
             return;
         }
 
-        // Wyświetl podsumowanie rezerwacji
+        document.getElementById("summaryCheckInDate").textContent = checkInDate.toLocaleDateString();
+        document.getElementById("summaryCheckOutDate").textContent = checkOutDate.toLocaleDateString();
+
         document.getElementById("reservationSummary").innerHTML = selectedRooms
-            .map(room => `Pokój: ${room.roomName}, Liczba osób: ${room.numberOfPeople}`)
+            .map(room => `<strong style="color:aquamarine">${room.roomName}</strong> - Liczba osób: <span style="color: aquamarine; font-weight: bold">${room.numberOfPeople}</span>`)
             .join("<br>");
         document.getElementById("totalPrice").textContent = totalPrice.toFixed(2);
 
-        // Otwórz modal Bootstrap
         var summaryModal = new bootstrap.Modal(document.getElementById('summaryModal'));
         summaryModal.show();
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const today = new Date().toISOString().split('T')[0];
+        const checkInInput = document.getElementById('checkInDate');
+        const checkOutInput = document.getElementById('checkOutDate');
+
+        checkInInput.min = today;
+        checkOutInput.min = today;
+
+        checkInInput.addEventListener('change', function () {
+            checkOutInput.min = this.value;
+            if (checkOutInput.value && new Date(checkOutInput.value) <= new Date(this.value)) {
+                checkOutInput.value = '';
+            }
+        });
+    });
 
     function closeSummaryModal() {
         document.getElementById("summaryModal").style.display = 'none';
@@ -315,14 +334,12 @@
         const privateRooms = document.querySelectorAll('.privateRoomCheckbox:checked');
         const publicRooms = document.querySelectorAll('.numberOfPeople');
 
-        // Zbierz dane pokoi prywatnych
         privateRooms.forEach(roomCheckbox => {
             const roomId = roomCheckbox.getAttribute('data-room-id');
             const capacity = roomCheckbox.getAttribute('data-capacity');
             selectedRooms.push({ roomId, numberOfPeople: capacity });
         });
 
-        // Zbierz dane pokoi publicznych i działek
         publicRooms.forEach(input => {
             const roomId = input.getAttribute('data-room-id');
             const numberOfPeople = parseInt(input.value);
@@ -331,7 +348,6 @@
             }
         });
 
-        // Wyślij dane do kontrolera
         fetch('/Booking/ConfirmBooking', {
             method: 'POST',
             headers: {
@@ -347,7 +363,7 @@
             .then(data => {
                 if (data.success) {
                     alert("Rezerwacja zakończona sukcesem!");
-                    window.location.href = '/Shelters/Index';
+                    window.location.href = '/Identity/Account/Manage/UserReservations';
                 } else {
                     alert("Rezerwacja nie powiodła się: " + data.message);
                 }
@@ -578,24 +594,21 @@
 
 <!-- Modal Podsumowania Rezerwacji -->
 <div style="z-index: 2000" class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
-        <!-- Zwiększona szerokość modalu -->
-        <div class="modal-content" style="background-color: darkcyan; color: #fff; border-radius: 12px;">
-            <div class="modal-header" style="background-color: aquamarine; color: black; border-top-left-radius: 12px; border-top-right-radius: 12px;">
-                <h5 class="modal-title" id="summaryModalLabel" style="font-weight: bold;">Podsumowanie rezerwacji</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" style="background-color: darkcyan;"></button>
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background-color: #004d4d; color: #fff; border-radius: 12px;">
+            <div class="modal-header" style="background-color: darkcyan; color: black; border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                <h5 class="modal-title" id="summaryModalLabel" style="font-weight: bold; color: white">Podsumowanie rezerwacji</h5>
             </div>
             <div class="modal-body" style="text-align: center;">
-                <!-- Sekcja z typem pokoju -->
-                <div id="reservationSummary" style="margin-bottom: 15px; line-height: 1.5;">
-                    <p style="font-size: 1.1em; font-weight: bold;">Typ pokoju: <span id="roomType" style="color: aquamarine;">Deluxe</span></p>
-                    <p style="font-size: 1em;">Liczba osób: <span id="guestCount" style="color: aquamarine;">2</span></p>
+                <div>
+                    <p sstyle="font-size: 1.2em">od <span style="color: aquamarine; font-weight: bold" id="summaryCheckInDate"></span> do <span style="color: aquamarine; font-weight: bold" id="summaryCheckOutDate"></span></p>
                 </div>
-                <p style="font-weight: bold; font-size: 1.2em;">Łączna suma: <span id="totalPrice" style="color: aquamarine;"></span> zł</p>
+                <div id="reservationSummary" style="margin-bottom: 15px; line-height: 1.5;"></div>
+                <p style="font-size: 1.2em;">Łączna suma: <span id="totalPrice" style="color: aquamarine; font-weight: bold"></span> zł</p>
             </div>
             <div class="modal-footer" style="justify-content: center; border-top: none;">
-                <button type="button" class="btn btn-success" onclick="finalizeBooking()" style="background-color: aquamarine; color: black; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px;">Rezerwuj</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" style="background-color: #f44336; color: white; font-weight: bold; border: none; padding: 10px 20px; border-radius: 5px; margin-left: 10px;">Anuluj</button>
+                <button type="button" class="btn aquamarine-button" onclick="finalizeBooking()">Rezerwuj</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
             </div>
         </div>
     </div>
