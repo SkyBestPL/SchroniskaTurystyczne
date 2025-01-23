@@ -17,9 +17,9 @@ header {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 10;
     position: fixed;
-    top: 0; /* Ustawienie na górze */
-    left: 0; /* Rozci¹ga od lewej */
-    width: 100%; /* Rozci¹ga na ca³¹ szerokoœæ okna */
+    top: 0;
+    left: 0;
+    width: 100%;
 }
 
 main {
@@ -48,7 +48,6 @@ body {
         background-color: darkcyan;
     }
 
-    /* Kolory dla linków i tekstu w nawigacji */
     .navbar-dark .navbar-brand,
     .navbar-dark .nav-link,
     .navbar-dark .nav-link.dropdown-toggle {
@@ -62,7 +61,7 @@ body {
     }
 
     .navbar-dark .dropdown-menu {
-        background-color: #004d4d; /* Kolor t³a dla menu rozwijanego */
+        background-color: #004d4d;
         border: none;
     }
 
@@ -71,11 +70,10 @@ body {
     }
 
     .navbar-dark .dropdown-item:hover {
-        background-color: #007b7b; /* Kolor na hover */
+        background-color: #007b7b;
         color: #f0f8ff;
     }
 
-    /* Przycisk nawigacji mobilnej */
     .navbar-toggler {
         border-color: #ffffff;
     }
@@ -244,7 +242,7 @@ body {
 
 .shelter-container {
     display: grid;
-    grid-template-columns: 3fr 2fr; /* Info zajmuje 3/4 szerokoœci, zdjêcie 1/4 */
+    grid-template-columns: 3fr 2fr;
     background-color: white;
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -262,16 +260,16 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* Liczba widocznych linii */
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
-    max-height: 4.5em; /* Dostosuj wysokoœæ zgodnie z iloœci¹ linii */
+    max-height: 4.5em;
 }
 
 .shelter-photo img {
     border-radius: 5px;
-    width: 100%; /* Obrazek zajmuje ca³¹ szerokoœæ kolumny */
-    height: 250px; /* Okreœlona wysokoœæ */
-    object-fit: cover; /* Automatyczne przycinanie, aby obraz pasowa³ */
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
 }
 
 .shelter-actions {
@@ -319,15 +317,15 @@ body {
 }
 
 .star {
-    font-size: 25px; /* Rozmiar gwiazdek */
-    color: gold; /* Kolor pe³nych gwiazdek */
-    -webkit-text-stroke: 0.5px orange; /* Kontur dla przegl¹darek obs³uguj¹cych WebKit */
-    text-stroke: 1px black; /* Kontur dla innych przegl¹darek */
+    font-size: 25px;
+    color: gold;
+    -webkit-text-stroke: 0.5px orange;
+    text-stroke: 1px black;
 }
 
     .star.empty {
-        color: lightgray; /* Kolor pustych gwiazdek */
-        -webkit-text-stroke: 0.5px orange; /* Kontur dla pustych gwiazdek */
+        color: lightgray;
+        -webkit-text-stroke: 0.5px orange;
         text-stroke: 1px black;
     }
 
@@ -375,7 +373,6 @@ body {
     display: none;
 }
 
-    /* Style for buttons */
     #summaryModal button {
         margin-top: 10px;
         padding: 10px 15px;
@@ -1021,18 +1018,16 @@ textarea[name="Contents"] {
     margin-top: 10px;
 }
 
-/* Aktualne rezerwacje */
 .current {
-    background-color: #d4edda; /* Zielony */
+    background-color: #d4edda;
 }
 
-/* Zakoñczone rezerwacje */
 .past {
-    background-color: #cce5ff; /* Niebieski */
+    background-color: #cce5ff;
 }
 
 .rejected {
-    background-color: #f8d7da; /* Czerwony */
+    background-color: #f8d7da;
 }
 
 .section-header.current {

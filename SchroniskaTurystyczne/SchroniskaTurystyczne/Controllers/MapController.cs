@@ -26,7 +26,6 @@ namespace SchroniskaTurystyczne.Controllers
             return View();
         }
 
-        // GET: Routes/Create
         public IActionResult Create()
         {
             var shelters = _context.Shelters
@@ -47,7 +46,6 @@ namespace SchroniskaTurystyczne.Controllers
             return View();
         }
 
-        // POST: Routes/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(SavedRoute route, string routePointsJson)
@@ -91,10 +89,8 @@ namespace SchroniskaTurystyczne.Controllers
 
         public IActionResult MapView(int id)
         {
-            // Get the current user
             var currentUser = _userManager.GetUserAsync(User).Result;
 
-            // Fetch shelters
             var shelters = _context.Shelters
                 .Select(shelter => new
                 {
@@ -118,7 +114,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             if(currentUser != null)
             {
-                // Fetch user's routes with limited data to avoid circular references
                 var userRoutes = _context.SavedRoutes
                     .Where(r => r.IdGuest == currentUser.Id)
                     .Select(r => new
@@ -133,7 +128,7 @@ namespace SchroniskaTurystyczne.Controllers
                                 LocationLon = p.LocationLon,
                                 LocationLat = p.LocationLat,
                                 Number = p.Number,
-                                ShelterId = p.IdShelter // Include shelter ID if available
+                                ShelterId = p.IdShelter
                             })
                             .ToList()
                     })
@@ -144,7 +139,6 @@ namespace SchroniskaTurystyczne.Controllers
                 ViewBag.UserRoutes = System.Text.Json.JsonSerializer.Serialize(userRoutes);
             }
 
-            // Pass the selected shelter ID if needed
             ViewBag.SelectedShelterId = id;
 
             return View(shelters);
@@ -164,11 +158,9 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound();
             }
 
-            // Remove associated points first
             var points = _context.Points.Where(p => p.IdSavedRoute == id);
             _context.Points.RemoveRange(points);
 
-            // Remove the route
             _context.SavedRoutes.Remove(route);
 
             await _context.SaveChangesAsync();

@@ -80,7 +80,7 @@
 <div style="height: 120px"></div>
 
 <div class="room-sections">
-    <!-- Sekcja dla pokoi prywatnych -->
+    <!-- pokoje prywatne -->
     <div class="room-section">
         <h3>Pokoje Prywatne</h3>
         <div id="privateRooms" class="room-container">
@@ -114,7 +114,7 @@
         </div>
     </div>
 
-    <!-- Sekcja dla pokoi publicznych -->
+    <!-- pokoje publiczne -->
     <div class="room-section">
         <h3>Pokoje Publiczne</h3>
         <div id="publicRooms" class="room-container">
@@ -146,7 +146,7 @@
         </div>
     </div>
 
-    <!-- Sekcja dla pól namiotowych -->
+    <!-- pola namiotowe -->
     <div class="room-section">
         <h3>Pola Namiotowe</h3>
         <div id="plotRooms" class="room-container">
@@ -184,7 +184,6 @@
  <script>
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Pobierz wszystkie elementy kalendarza
         document.querySelectorAll('.calendar').forEach(calendarDiv => {
             const roomId = calendarDiv.getAttribute('data-room-id');
             if (!roomId) {
@@ -192,12 +191,10 @@
                 return;
             }
             console.log("Room ID:", roomId);
-            // Konfiguracja FullCalendar dla każdego pokoju
             const calendar = new FullCalendar.Calendar(calendarDiv, {
                 initialView: 'dayGridMonth',
                 locale: 'pl',
                 events: function (fetchInfo, successCallback, failureCallback) {
-                    // Pobierz dane rezerwacji dla pokoju z kontrolera
                     fetch(`/Booking/GetRoomBookings?roomId=${roomId}`)
                         .then(response => response.json())
                         .then(data => {
@@ -215,23 +212,19 @@
     });
 
     function isBookingAvailable(checkInDate, checkOutDate, roomId, numberOfPeople) {
-        // Pobierz dane kalendarza dla pokoju
         return fetch(`/Booking/GetRoomBookings?roomId=${roomId}`)
             .then(response => response.json())
             .then(events => {
-                // Sprawdź każde wydarzenie w kalendarzu
                 for (const event of events) {
                     const eventStart = new Date(event.start);
                     const eventEnd = new Date(event.end);
                     const isDateOverlapping = (checkInDate < eventEnd && checkOutDate > eventStart);
 
                     if (isDateOverlapping) {
-                        // Jeżeli dzień jest pełny (kolor czerwony) zwróć false
                         if (event.color === "red") {
                             return false;
                         }
 
-                        // Jeżeli jest częściowo pełny (kolor żółty), sprawdź, czy dodanie kolejnych osób nie przekroczy pojemności
                         const occupiedCapacity = parseInt(event.title.split('/')[0]);
                         const maxCapacity = parseInt(event.title.split('/')[1]);
                         if (occupiedCapacity + numberOfPeople > maxCapacity) {
@@ -382,12 +375,10 @@
     }
 
     function openRoomPhotoModal(roomId) {
-        // Sprawdź, czy modal już istnieje
         if (document.getElementById(`roomPhotoModal-${roomId}`)) {
             return;
         }
         console.log(roomId);
-        // Wyświetl loader
         const loaderHtml = `
             <div id="roomPhotoModal-${roomId}" class="room-photo-modal">
                 <div class="room-photo-modal-content">
@@ -398,7 +389,6 @@
         `;
         document.body.insertAdjacentHTML('beforeend', loaderHtml);
 
-        // Wykonaj zapytanie do serwera o zdjęcia
         fetch(`/Booking/GetRoomPhotos?roomId=${roomId}`)
             .then(response => {
                 if (!response.ok) {
@@ -413,7 +403,6 @@
                     return;
                 }
 
-                // Zbuduj HTML dla zdjęć
                 let photosHtml = roomPhotos.map((photo, index) => `
                     <div class="room-photo-slide ${index === 0 ? 'active' : ''}">
                         <img src="data:image/jpeg;base64,${photo.photoData}" alt="Zdjęcie pokoju ${index + 1}" />
@@ -425,7 +414,6 @@
                     <button class="photo-nav next" onclick="changeSlide(${roomId}, 1)">&#10095;</button>
                 ` : '';
 
-                // Wstrzyknij zdjęcia do modala
                 const modalContent = document.querySelector(`#roomPhotoModal-${roomId} .room-photo-modal-content`);
                 modalContent.innerHTML = `
                     <span class="close" onclick="closeRoomPhotoModal(${roomId})">&times;</span>
@@ -485,7 +473,6 @@
                         photosContainer.appendChild(img);
                     });
 
-                    // Poczekaj na załadowanie wszystkich obrazów
                     const images = photosContainer.querySelectorAll('img');
                     Promise.all(Array.from(images).map(img => {
                         if (img.complete) return Promise.resolve();
@@ -545,7 +532,6 @@
             }
         });
 
-        // Aktualizacja przy zmianie rozmiaru okna
         window.addEventListener('resize', updateNavigationVisibility);
     });
 
@@ -557,11 +543,9 @@
                 const facilities = e.target.dataset.facilities.split(',');
                 const tooltip = e.target.nextElementSibling;
 
-                // Wypełnij tooltip
                 tooltip.innerHTML = facilities.map(facility => `<p>${facility}</p>`).join('');
                 tooltip.style.display = 'block';
 
-                // Pozycjonowanie tooltipa
                 tooltip.style.left = `${e.pageX + 10}px`;
                 tooltip.style.top = `${e.pageY + 10}px`;
             });
@@ -592,7 +576,7 @@
 
 </script>
 
-<!-- Modal Podsumowania Rezerwacji -->
+<!-- podsumowanie rezerwacji -->
 <div style="z-index: 2000" class="modal fade" id="summaryModal" tabindex="-1" aria-labelledby="summaryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content" style="background-color: #004d4d; color: #fff; border-radius: 12px;">

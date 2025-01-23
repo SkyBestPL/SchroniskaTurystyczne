@@ -61,40 +61,6 @@
     <label>Lokalizacja schroniska:</label>
     <div id="map" style="height: 400px; margin-bottom: 20px;"></div>
 
-    <h4 style="margin-top: 20px">Zdjęcia schroniska</h4>
-
-    <div class="existing-photos mb-3">
-        @if (Model.Photos != null && Model.Photos.Any())
-        {
-            <h5>Istniejące zdjęcia:</h5>
-            <div class="row">
-                @foreach (var photo in Model.Photos)
-                {
-                    <div class="col-md-3 mb-3">
-                        <div class="card">
-                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.PhotoData)" 
-                                 class="card-img-top" alt="@photo.Name" />
-                            <div class="card-body">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" 
-                                           name="PhotosToDelete" value="@photo.Id" id="photo@(photo.Id)" />
-                                    <label class="form-check-label" for="photo@(photo.Id)">
-                                        Usuń
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-    </div>
-
-    <div class="form-group">
-        <label>Dodaj nowe zdjęcia:</label>
-        <input type="file" name="NewPhotos" class="form-control" multiple accept=".jpg, .jpeg, .png" />
-    </div>
-
     <h4 style="margin-top: 20px">Tagi</h4>
     <div class="form-group">
         <div id="tags-display" class="d-flex flex-wrap">
@@ -158,18 +124,12 @@
                             <td>
                                 <button type="button" class="btn btn-secondary mb-2" 
                                         onclick="openFacilitiesModal(@i)">Edytuj Udogodnienia</button>
-                                <!--<div id="facilities-display-@i" class="selected-facilities-container mt-2">
-                                    @foreach (var facility in room.Facilities)
-                                    {
-                                        <span class="badge badge-info m-1">@facility.Name</span>
-                                    }
-                                </div>-->
                                 <input type="hidden" name="Rooms[@i].SelectedFacilities" 
                                        id="selected-facilities-@i" value="@room.SelectedFacilities" />
                             </td>
                             <td>
                                 <input type="checkbox" class="form-check-input is-active-checkbox" data-index="@i" onchange="updateIsActive(@i)" @(room.IsActive ? "checked" : "") />
-                                <input type="hidden" name="Rooms[@i].IsActive" id="is-active-@i" value="@room.IsActive" />
+                                <input type="hidden" name="Rooms[@i].IsActive" id="is-active-@i" value="@room.IsActive.ToString().ToLower()" />
                             </td>
                             <td>
                                 <button type="button" class="btn btn-danger @(room.HasConfirmedBooking ? "btn-disabled" : "")" onclick="removeRoom(this)" @(room.HasConfirmedBooking ? "disabled" : "")>Usuń</button>
@@ -192,15 +152,13 @@
  <script>
     const API_KEY = 'EqrphcGjSSf6pg5L1FXub1nmdOe9HzC_FV00UDqrve4';
 
-    // Pobieranie istniejących współrzędnych schroniska z pola formularza lub ustawienie domyślnych
     let lat = parseFloat(document.getElementById('shelter-lat').value) || 52.06936257159014;
     let lon = parseFloat(document.getElementById('shelter-lon').value) || 19.48022053933678;
 
-    // Inicjalizacja mapy
     const map = new maplibregl.Map({
-        container: 'map', // ID kontenera HTML
-        center: [lon, lat], // Początkowe współrzędne środka mapy
-        zoom: 6, // Początkowy poziom przybliżenia
+        container: 'map',
+        center: [lon, lat],
+        zoom: 6,
         style: {
             version: 8,
             sources: {
@@ -220,7 +178,6 @@
         },
     });
 
-    // Dodanie kontrolki z logo Mapy.cz
     class LogoControl {
         onAdd(map) {
             this._map = map;
@@ -238,21 +195,18 @@
 
     map.addControl(new LogoControl(), 'bottom-left');
 
-    // Dodanie znacznika (markera) na mapę
     let marker = new maplibregl.Marker({ color: 'darkcyan' })
         .setLngLat([lon, lat])
         .addTo(map);
 
-    // Przypisanie współrzędnych do ukrytych pól formularza
     document.getElementById('Latitude').value = lat;
     document.getElementById('Longitude').value = lon;
 
-    // Obsługa kliknięcia na mapie - przenoszenie markera i aktualizacja współrzędnych
     map.on('click', function (e) {
-        const coords = e.lngLat; // Pobranie współrzędnych kliknięcia
-        marker.setLngLat([coords.lng, coords.lat]); // Przeniesienie markera
-        document.getElementById('Latitude').value = coords.lat; // Aktualizacja pola Latitude
-        document.getElementById('Longitude').value = coords.lng; // Aktualizacja pola Longitude
+        const coords = e.lngLat;
+        marker.setLngLat([coords.lng, coords.lat]);
+        document.getElementById('Latitude').value = coords.lat;
+        document.getElementById('Longitude').value = coords.lng;
     });
 
     function addRoom() {
@@ -287,7 +241,7 @@
                 <input type="hidden" name="Rooms[${index}].SelectedFacilities" id="selected-facilities-${index}" />
             </td>
             <td>
-                <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked/>
+                <input type="checkbox" class="form-check-input is-active-checkbox" data-index="${index}" onchange="updateIsActive(${index})" checked />
                 <input type="hidden" name="Rooms[${index}].IsActive" id="is-active-${index}" value="true" />
             </td>
             <td>
@@ -295,12 +249,23 @@
             </td>
         `;
         container.appendChild(row);
+        updateIsActive(index);
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.is-active-checkbox');
+        checkboxes.forEach(checkbox => {
+            const index = checkbox.getAttribute('data-index');
+            updateIsActive(index);
+        });
+    });
 
     function updateIsActive(index) {
         const checkbox = document.querySelector(`.is-active-checkbox[data-index="${index}"]`);
         const hiddenField = document.getElementById(`is-active-${index}`);
-        hiddenField.value = checkbox.checked ? "true" : "false";
+        if (checkbox && hiddenField) {
+            hiddenField.value = checkbox.checked.toString().toLowerCase();
+        }
     }
 
     function removeRoom(button) {
@@ -443,7 +408,7 @@
     }
 </script>
 
-<!-- Modal Udogodnień -->
+<!-- udogodnienia -->
 <div id="facilities-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
     <h4>Wybierz Udogodnienia</h4>
     <ul id="facilities-list">
@@ -462,7 +427,7 @@
 </div>
 <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
 
-<!-- Modal Tagów -->
+<!-- tagi -->
 <div id="tags-modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; padding: 20px; z-index: 1000; width: 300px;">
     <h4>Wybierz Tagi</h4>
     <ul id="tags-list">
@@ -482,7 +447,7 @@
 </div>
 <div id="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 999;"></div>
 
-<!-- Modal Ostrzeżeń -->
+<!-- ostrzeżenia -->
 <div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-labelledby="deleteRoomModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
         <div class="modal-content" style="background-color: white; color: black; border-radius: 12px;">

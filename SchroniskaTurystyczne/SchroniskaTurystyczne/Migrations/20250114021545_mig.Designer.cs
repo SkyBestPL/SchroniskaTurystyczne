@@ -12,7 +12,7 @@ using SchroniskaTurystyczne.Data;
 namespace SchroniskaTurystyczne.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241217183410_mig")]
+    [Migration("20250114021545_mig")]
     partial class mig
     {
         /// <inheritdoc />
@@ -133,6 +133,33 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasIndex("IdFacility");
 
                     b.ToTable("RoomFacility");
+
+                    b.HasData(
+                        new
+                        {
+                            IdRoom = 1,
+                            IdFacility = 1
+                        },
+                        new
+                        {
+                            IdRoom = 1,
+                            IdFacility = 2
+                        },
+                        new
+                        {
+                            IdRoom = 2,
+                            IdFacility = 2
+                        },
+                        new
+                        {
+                            IdRoom = 2,
+                            IdFacility = 3
+                        },
+                        new
+                        {
+                            IdRoom = 3,
+                            IdFacility = 1
+                        });
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.AppUser", b =>
@@ -213,9 +240,9 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b7384669-b8c4-477e-a97d-3e0f35d2f87f",
+                            Id = "f82a9bb2-0417-4456-9a57-b5e74c7fb45d",
                             AccessFailedCount = 0,
-                            ConcurrencyStamp = "b63c8f67-5138-4868-990d-f7651f7fbb45",
+                            ConcurrencyStamp = "27be8715-30d7-4a45-89bb-60c72e7e2d84",
                             Email = "admin@admin.com",
                             EmailConfirmed = true,
                             FirstName = "Admin",
@@ -225,9 +252,27 @@ namespace SchroniskaTurystyczne.Migrations
                             NormalizedUserName = "ADMIN@ADMIN.COM",
                             PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
                             PhoneNumberConfirmed = false,
-                            SecurityStamp = "b6d13393-f877-4f00-94b0-41f76d97158b",
+                            SecurityStamp = "462e714d-1df9-441c-b681-1490226088b7",
                             TwoFactorEnabled = false,
                             UserName = "admin@admin.com"
+                        },
+                        new
+                        {
+                            Id = "212f7435-21eb-4b56-b78e-335de5e4d634",
+                            AccessFailedCount = 0,
+                            ConcurrencyStamp = "e45c31b7-241e-4577-90a3-e9b6f28f713e",
+                            Email = "jan.kowalski@example.com",
+                            EmailConfirmed = true,
+                            FirstName = "Jan",
+                            LastName = "Kowalski",
+                            LockoutEnabled = false,
+                            NormalizedEmail = "JAN.KOWALSKI@EXAMPLE.COM",
+                            NormalizedUserName = "JAN.KOWALSKI@EXAMPLE.COM",
+                            PasswordHash = "1234",
+                            PhoneNumberConfirmed = false,
+                            SecurityStamp = "4985bd0c-ce82-4a80-9603-f2829b6f2ca8",
+                            TwoFactorEnabled = false,
+                            UserName = "jan.kowalski@example.com"
                         });
                 });
 
@@ -512,8 +557,8 @@ namespace SchroniskaTurystyczne.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Contents")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Date")
                         .IsRequired()
@@ -567,19 +612,19 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "3ec6cfbc-146d-4d7b-a5ad-be39b135c889",
+                            Id = "e0136a9e-ef6b-4fc9-bcf1-4a3c7ee0d19a",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "44d4b6e3-3c49-46b9-91ce-aef04a26683a",
+                            Id = "745cdc32-fa2a-47d4-b7ef-97c199d4a992",
                             Name = "Guest",
                             NormalizedName = "Guest"
                         },
                         new
                         {
-                            Id = "3dc12321-0691-4bf5-9e21-4ecca8ca65a9",
+                            Id = "318e09f4-db1d-46df-a93d-3654b853b608",
                             Name = "Exhibitor",
                             NormalizedName = "Exhibitor"
                         });
@@ -624,6 +669,41 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasIndex("IdType");
 
                     b.ToTable("Rooms");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Capacity = 6,
+                            HasConfirmedBooking = false,
+                            IdShelter = 1,
+                            IdType = 1,
+                            IsActive = true,
+                            Name = "Pokój wspólny",
+                            PricePerNight = 50.0
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Capacity = 2,
+                            HasConfirmedBooking = false,
+                            IdShelter = 1,
+                            IdType = 2,
+                            IsActive = true,
+                            Name = "Pokój prywatny",
+                            PricePerNight = 150.0
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Capacity = 10,
+                            HasConfirmedBooking = false,
+                            IdShelter = 1,
+                            IdType = 3,
+                            IsActive = true,
+                            Name = "Pole namiotowe",
+                            PricePerNight = 20.0
+                        });
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.RoomPhoto", b =>
@@ -679,19 +759,19 @@ namespace SchroniskaTurystyczne.Migrations
                         {
                             Id = 1,
                             Description = "Pokój rezerwowany wspólnie z innymi gośćmi",
-                            Name = "Pokój publiczny"
+                            Name = "Publiczny"
                         },
                         new
                         {
                             Id = 2,
                             Description = "Pokój rezerwowany na własność",
-                            Name = "Pokój prywatny"
+                            Name = "Prywatny"
                         },
                         new
                         {
                             Id = 3,
                             Description = "Wspólne miejsce dla gości na zewnątrz",
-                            Name = "Pole namiotowe"
+                            Name = "Pole"
                         });
                 });
 
@@ -780,6 +860,25 @@ namespace SchroniskaTurystyczne.Migrations
                         .IsUnique();
 
                     b.ToTable("Shelters");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            AmountOfReviews = 0,
+                            City = "Zakopane",
+                            ConfirmedShelter = true,
+                            Country = "Polska",
+                            Description = "Malownicze schronisko położone w sercu Tatr.",
+                            IdCategory = 1,
+                            IdExhibitor = "212f7435-21eb-4b56-b78e-335de5e4d634",
+                            LocationLat = "49.2965",
+                            LocationLon = "19.9383",
+                            Name = "Schronisko Pod Tatrami",
+                            Street = "Tatrzańska",
+                            StreetNumber = "12",
+                            ZipCode = "34-500"
+                        });
                 });
 
             modelBuilder.Entity("SchroniskaTurystyczne.Models.Tag", b =>
@@ -843,8 +942,13 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasData(
                         new
                         {
-                            UserId = "b7384669-b8c4-477e-a97d-3e0f35d2f87f",
-                            RoleId = "3ec6cfbc-146d-4d7b-a5ad-be39b135c889"
+                            UserId = "f82a9bb2-0417-4456-9a57-b5e74c7fb45d",
+                            RoleId = "e0136a9e-ef6b-4fc9-bcf1-4a3c7ee0d19a"
+                        },
+                        new
+                        {
+                            UserId = "212f7435-21eb-4b56-b78e-335de5e4d634",
+                            RoleId = "318e09f4-db1d-46df-a93d-3654b853b608"
                         });
                 });
 
@@ -861,6 +965,23 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasIndex("IdTag");
 
                     b.ToTable("ShelterTag");
+
+                    b.HasData(
+                        new
+                        {
+                            IdShelter = 1,
+                            IdTag = 1
+                        },
+                        new
+                        {
+                            IdShelter = 1,
+                            IdTag = 3
+                        },
+                        new
+                        {
+                            IdShelter = 1,
+                            IdTag = 5
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -963,7 +1084,7 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "Sender")
                         .WithMany("SentMessages")
                         .HasForeignKey("IdSender")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Receiver");
@@ -1008,12 +1129,12 @@ namespace SchroniskaTurystyczne.Migrations
                     b.HasOne("SchroniskaTurystyczne.Models.Shelter", "Shelter")
                         .WithMany("Reviews")
                         .HasForeignKey("IdShelter")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("SchroniskaTurystyczne.Models.AppUser", "User")
                         .WithMany("Reviews")
                         .HasForeignKey("IdUser")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Shelter");

@@ -55,20 +55,22 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account
         public class InputModel
         {
             [Required(ErrorMessage = "Imię jest wymagane.")]
+            [StringLength(50, ErrorMessage = "Imię musi mieć przynajmniej {2} i maksymalnie {1} znaków.", MinimumLength = 2)]
             [Display(Name = "Imię")]
             public string FirstName { get; set; }
 
             [Required(ErrorMessage = "Nazwisko jest wymagane.")]
+            [StringLength(50, ErrorMessage = "Nazwisko musi mieć przynajmniej {2} i maksymalnie {1} znaków.", MinimumLength = 2)]
             [Display(Name = "Nazwisko")]
-
             public string LastName { get; set; }
             [Required(ErrorMessage = "Email jest wymagany.")]
             [EmailAddress(ErrorMessage = "Niepoprawna struktura adresu email.")]
+            [StringLength(100, ErrorMessage = "Email może mieć maksymalnie {1} znaków.")]
             [Display(Name = "Email")]
             public string Email { get; set; }
 
             [Required(ErrorMessage = "Hasło jest wymagane.")]
-            [StringLength(100, ErrorMessage = "Hasło musi mieć przynajmniej {2} i maksymalnie {1} znaków.", MinimumLength = 6)]
+            [StringLength(20, ErrorMessage = "Hasło musi mieć przynajmniej {2} i maksymalnie {1} znaków.", MinimumLength = 6)]
             [DataType(DataType.Password)]
             [Display(Name = "Hasło")]
             public string Password { get; set; }
@@ -82,6 +84,7 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account
             [Required(ErrorMessage = "Numer telefonu jest wymagany.")]
             [Phone]
             [Display(Name = "Numer telefonu")]
+            [StringLength(9, ErrorMessage = "Telefon musi mieć 9 znaków.", MinimumLength = 9)]
             [DataType(DataType.PhoneNumber)]
             public string PhoneNumber { get; set; }
 

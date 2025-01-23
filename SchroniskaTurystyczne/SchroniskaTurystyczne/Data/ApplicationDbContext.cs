@@ -200,11 +200,11 @@ namespace SchroniskaTurystyczne.Data
             {
                 FirstName = "Schroniarz",
                 LastName =  "Admin",
-                Email = "admin@admin.com",
-                NormalizedEmail = "ADMIN@ADMIN.COM",
-                UserName = "admin@admin.com",
-                NormalizedUserName = "ADMIN@ADMIN.COM",
-                PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==",
+                Email = "schroniarz.admin@gmail.com",
+                NormalizedEmail = "SCHRONIARZ.ADMIN@GMAIL.COM",
+                UserName = "schroniarz.admin@gmail.com",
+                NormalizedUserName = "SCHRONIARZ.ADMIN@GMAIL.COM",
+                PasswordHash = "AQAAAAIAAYagAAAAEOQVh1kJofgMzQRuloKQXrqZHtVl0xI+t3ITZ/tda/c6d2o1b6xCQGWzLPNWkVqsIw==", //haslo: Admin!1234
                 EmailConfirmed = true
             };
 

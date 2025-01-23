@@ -153,16 +153,13 @@ namespace SchroniskaTurystyczne.Controllers
                 })
                 .ToList();
 
-            // Pobierz pojemność pokoju
             var roomCapacity = _context.Rooms
                 .Where(r => r.Id == roomId)
                 .Select(r => r.Capacity)
                 .FirstOrDefault();
 
-            // Lista dni zliczająca liczbę osób dla każdego dnia w danym zakresie rezerwacji
             var dailyOccupancy = new Dictionary<DateTime, int>();
 
-            // Przejdź przez każdą rezerwację i podziel ją na poszczególne dni
             foreach (var booking in bookings)
             {
                 for (var date = booking.CheckInDate.Date; date < booking.CheckOutDate.Date; date = date.AddDays(1))
@@ -178,7 +175,6 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
-            // Przetwórz dane do formatu wymagającego przez FullCalendar
             var events = dailyOccupancy.Select(d => new
             {
                 start = d.Key.ToString("yyyy-MM-dd"),
@@ -231,7 +227,6 @@ namespace SchroniskaTurystyczne.Controllers
                 .Select(r => r.Shelter)
                 .FirstOrDefaultAsync();
 
-            // Dodaj nową rezerwację do bazy
             var booking = new Booking
             {
                 IdGuest = User.FindFirstValue(ClaimTypes.NameIdentifier),
@@ -279,14 +274,12 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound();
             }
 
-            // Sprawdź czy użytkownik jest właścicielem rezerwacji
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (booking.IdGuest != userId)
             {
                 return Forbid();
             }
 
-            // Sprawdź czy rezerwacja może być edytowana (nie jest potwierdzona)
             if (booking.Verified || booking.Paid)
             {
                 return RedirectToAction("Index", "Home");
@@ -320,7 +313,6 @@ namespace SchroniskaTurystyczne.Controllers
                 return Json(new { success = false, message = "Rezerwacja nie istnieje." });
             }
 
-            // Sprawdź prawa dostępu
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (booking.IdGuest != userId)
             {
@@ -332,12 +324,11 @@ namespace SchroniskaTurystyczne.Controllers
                 return Json(new { success = false, message = "Nie można edytować potwierdzonej rezerwacji." });
             }
 
-            // Sprawdź dostępność pokoi
             foreach (var room in request.Rooms)
             {
                 var roomBookings = await _context.BookingRooms
                     .Where(br => br.IdRoom == room.RoomId &&
-                                br.Booking.Id != booking.Id && // Wykluczamy obecną rezerwację
+                                br.Booking.Id != booking.Id &&
                                 br.Booking.CheckOutDate > request.CheckInDate &&
                                 br.Booking.CheckInDate < request.CheckOutDate)
                     .Select(br => new
@@ -359,16 +350,13 @@ namespace SchroniskaTurystyczne.Controllers
                 }
             }
 
-            // Aktualizuj rezerwację
             booking.CheckInDate = request.CheckInDate;
             booking.CheckOutDate = request.CheckOutDate;
             booking.NumberOfPeople = request.Rooms.Sum(r => r.NumberOfPeople);
             booking.BookingDate = DateTime.UtcNow;
 
-            // Usuń stare BookingRooms
             _context.BookingRooms.RemoveRange(booking.BookingRooms);
 
-            // Dodaj nowe BookingRooms
             foreach (var room in request.Rooms)
             {
                 var bookingRoom = new BookingRoom
@@ -380,7 +368,6 @@ namespace SchroniskaTurystyczne.Controllers
                 _context.BookingRooms.Add(bookingRoom);
             }
 
-            // Przelicz cenę
             booking.Bill = await CalculateBookingPrice(request.Rooms, request.CheckInDate, request.CheckOutDate);
 
             await _context.SaveChangesAsync();

@@ -406,13 +406,11 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(s => s.Category)
                 .AsQueryable();
 
-            // Filtruj według kategorii
             if (searchModel.SelectedCategoryId.HasValue)
             {
                 query = query.Where(s => s.IdCategory == searchModel.SelectedCategoryId.Value);
             }
 
-            // Aplikowanie filtrów
             if (!string.IsNullOrEmpty(searchModel.SearchTerm))
             {
                 query = query.Where(s =>
@@ -448,7 +446,6 @@ namespace SchroniskaTurystyczne.Controllers
                 );
             }
 
-            // Mapowanie na ViewModele
             var shelterViewModels = query.Select(s => new ShelterViewModel
             {
                 Id = s.Id,
@@ -500,7 +497,7 @@ namespace SchroniskaTurystyczne.Controllers
                 }).ToList()
             };
             return View(viewModel);
-        } 
+        }
 
         public IActionResult CreateRoute()
         {
@@ -546,7 +543,8 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var bookings = await _context.BookingRooms
                 .Where(br => br.IdRoom == roomId)
-                .Select(br => new {
+                .Select(br => new
+                {
                     start = br.Booking.CheckInDate,
                     end = br.Booking.CheckOutDate,
                     title = "Zarezerwowane",
@@ -562,7 +560,6 @@ namespace SchroniskaTurystyczne.Controllers
             return RedirectToAction("MapView", "Map", new { id });
         }
 
-        // GET: Shelters/Edit/5
         [Authorize(Policy = "RequireExhibitorRole")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -577,7 +574,6 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(s => s.Rooms)
                     .ThenInclude(r => r.RoomType)
                 .Include(s => s.Tags)
-                .Include(s => s.Photos)
                 .Include(s => s.Exhibitor)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
@@ -586,22 +582,18 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound();
             }
 
-            // Sprawdź czy zalogowany użytkownik jest właścicielem schroniska
             var currentUser = await _userManager.GetUserAsync(User);
             if (shelter.IdExhibitor != currentUser.Id)
             {
                 return Forbid();
             }
 
-            // Przygotuj dane dla widoku
             ViewBag.RoomTypes = await _context.RoomTypes.ToListAsync();
             ViewBag.Tags = await _context.Tags.ToListAsync();
             ViewBag.Facilities = await _context.Facilities.ToListAsync();
 
-            // Przygotuj string z ID wybranych tagów
             ViewBag.SelectedTags = string.Join(",", shelter.Tags.Select(t => t.Id));
 
-            // Przygotuj string z ID wybranych udogodnień dla każdego pokoju
             foreach (var room in shelter.Rooms)
             {
                 room.SelectedFacilities = string.Join(",", room.Facilities.Select(f => f.Id));
@@ -610,12 +602,10 @@ namespace SchroniskaTurystyczne.Controllers
             return View(shelter);
         }
 
-        // POST: Shelters/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "RequireExhibitorRole")]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Country,City,Street,StreetNumber,ZipCode,LocationLon,LocationLat,Rooms")] Shelter shelter,
-            string SelectedTags, IFormFileCollection NewPhotos, List<int> PhotosToDelete)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,Country,City,Street,StreetNumber,ZipCode,LocationLon,LocationLat,Rooms")] Shelter shelter, string SelectedTags)
         {
             if (id != shelter.Id)
             {
@@ -626,7 +616,6 @@ namespace SchroniskaTurystyczne.Controllers
                 .Include(s => s.Rooms)
                     .ThenInclude(r => r.Facilities)
                 .Include(s => s.Tags)
-                .Include(s => s.Photos)
                 .FirstOrDefaultAsync(s => s.Id == id);
 
             if (existingShelter == null)
@@ -634,7 +623,6 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound();
             }
 
-            // Sprawdź czy zalogowany użytkownik jest właścicielem schroniska
             var currentUser = await _userManager.GetUserAsync(User);
             if (existingShelter.IdExhibitor != currentUser.Id)
             {
@@ -643,7 +631,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             try
             {
-                // Aktualizuj podstawowe informacje
                 existingShelter.Name = shelter.Name;
                 existingShelter.Description = shelter.Description;
                 existingShelter.Country = shelter.Country;
@@ -654,7 +641,6 @@ namespace SchroniskaTurystyczne.Controllers
                 existingShelter.LocationLon = shelter.LocationLon;
                 existingShelter.LocationLat = shelter.LocationLat;
 
-                // Aktualizuj tagi
                 existingShelter.Tags.Clear();
                 if (!string.IsNullOrEmpty(SelectedTags))
                 {
@@ -666,52 +652,12 @@ namespace SchroniskaTurystyczne.Controllers
                     }
                 }
 
-                // Usuń zaznaczone zdjęcia
-                if (PhotosToDelete != null && PhotosToDelete.Any())
-                {
-                    var photosToRemove = existingShelter.Photos.Where(p => PhotosToDelete.Contains(p.Id)).ToList();
-                    foreach (var photo in photosToRemove)
-                    {
-                        existingShelter.Photos.Remove(photo);
-                        _context.Photos.Remove(photo);
-                    }
-                }
-
-                // Dodaj nowe zdjęcia
-                foreach (var photoFile in NewPhotos)
-                {
-                    if (photoFile != null && photoFile.Length > 0)
-                    {
-                        using (var memoryStream = new MemoryStream())
-                        {
-                            await photoFile.CopyToAsync(memoryStream);
-                            if (memoryStream.Length < 10097152) // Limit 10 MB
-                            {
-                                var photo = new Photo
-                                {
-                                    Name = photoFile.FileName,
-                                    PhotoData = memoryStream.ToArray(),
-                                    Shelter = existingShelter
-                                };
-                                existingShelter.Photos.Add(photo);
-                            }
-                            else
-                            {
-                                ModelState.AddModelError("NewPhotos", "Jedno ze zdjęć jest za duże. Maksymalny rozmiar to 10 MB.");
-                                return View(existingShelter);
-                            }
-                        }
-                    }
-                }
-
-                // Usuń pokoje, których nie ma w nowej kolekcji
                 var existingRoomIds = existingShelter.Rooms.Select(r => r.Id).ToList();
                 var updatedRoomIds = shelter.Rooms?.Select(r => r.Id).ToList() ?? new List<int>();
                 var roomsToDelete = existingShelter.Rooms.Where(r => !updatedRoomIds.Contains(r.Id)).ToList();
 
                 foreach (var room in roomsToDelete)
                 {
-                    // Usuń rezerwacje związane z tym pokojem
                     var relatedBookings = _context.BookingRooms
                         .Where(br => br.IdRoom == room.Id)
                         .Select(br => br.Booking)
@@ -720,35 +666,24 @@ namespace SchroniskaTurystyczne.Controllers
 
                     foreach (var booking in relatedBookings)
                     {
-                        // Usuń powiązane wpisy z BookingRoom
                         var bookingRooms = _context.BookingRooms.Where(br => br.IdBooking == booking.Id).ToList();
                         _context.BookingRooms.RemoveRange(bookingRooms);
-
-                        // Jeśli po usunięciu nie ma innych powiązań, usuń samą rezerwację
-                        //if (!bookingRooms.Any(br => br.IdBooking == booking.Id))
-                        //{
-                            _context.Bookings.Remove(booking);
-                        //}
                     }
 
-                    // Usuń pokój
                     _context.Rooms.Remove(room);
                 }
 
-                // Aktualizuj lub dodaj nowe pokoje
                 if (shelter.Rooms != null)
                 {
                     foreach (var room in shelter.Rooms)
                     {
                         if (room.Id == 0)
                         {
-                            // Nowy pokój
                             room.Shelter = existingShelter;
                             existingShelter.Rooms.Add(room);
                         }
                         else
                         {
-                            // Istniejący pokój
                             var existingRoom = existingShelter.Rooms.FirstOrDefault(r => r.Id == room.Id);
                             if (existingRoom != null)
                             {
@@ -759,7 +694,6 @@ namespace SchroniskaTurystyczne.Controllers
                                 existingRoom.IdType = room.IdType;
                                 existingRoom.IsActive = room.IsActive;
 
-                                // Aktualizuj udogodnienia
                                 existingRoom.Facilities.Clear();
                                 if (!string.IsNullOrEmpty(room.SelectedFacilities))
                                 {
@@ -784,7 +718,7 @@ namespace SchroniskaTurystyczne.Controllers
                 }
 
                 await _context.SaveChangesAsync();
-                return RedirectToAction("Index", "Shelters");
+                return RedirectToAction("MyShelter", "Shelters", new { id = shelter.Id });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -813,7 +747,6 @@ namespace SchroniskaTurystyczne.Controllers
             if (shelter == null)
                 return NotFound();
 
-            // Sprawdzenie czy zalogowany użytkownik jest właścicielem schroniska
             var currentUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (shelter.IdExhibitor != currentUserId)
                 return Forbid();
@@ -868,7 +801,6 @@ namespace SchroniskaTurystyczne.Controllers
             if (booking == null)
                 return NotFound();
 
-            // Sprawdzenie uprawnień
             var shelter = await _context.Rooms
                 .Where(r => r.Id == booking.BookingRooms.First().IdRoom)
                 .Select(r => r.Shelter)
@@ -899,7 +831,6 @@ namespace SchroniskaTurystyczne.Controllers
             if (booking == null)
                 return NotFound();
 
-            // Sprawdzenie uprawnień
             var shelter = await _context.Rooms
                 .Where(r => r.Id == booking.BookingRooms.First().IdRoom)
                 .Select(r => r.Shelter)
@@ -1000,6 +931,175 @@ namespace SchroniskaTurystyczne.Controllers
                     { "Ended", endedBookings }
                 }
             });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditRoomPhotos(int id)
+        {
+            var room = await _context.Rooms
+                .Include(r => r.RoomPhotos)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (room == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new RoomPhotosViewModel
+            {
+                RoomId = room.Id,
+                RoomName = room.Name,
+                Photos = room.RoomPhotos.Select(p => new RoomPhotoViewModel
+                {
+                    Id = p.Id,
+                    ThumbnailData = p.ThumbnailData
+                }).ToList()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteRoomPhoto(int id)
+        {
+            var photo = await _context.RoomPhotos.FindAsync(id);
+
+            if (photo == null)
+            {
+                return NotFound();
+            }
+
+            _context.RoomPhotos.Remove(photo);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(EditRoomPhotos), new { id = photo.IdRoom });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddRoomPhoto(int roomId, IFormFile photo)
+        {
+            var currentPhotosCount = await _context.RoomPhotos.CountAsync(p => p.IdRoom == roomId);
+            if (currentPhotosCount >= 3)
+            {
+                TempData["Error"] = "Nie można dodać więcej niż 3 zdjęcia dla jednego pokoju.";
+                return RedirectToAction(nameof(EditRoomPhotos), new { id = roomId });
+            }
+
+            if (photo.Length > 5 * 1024 * 1024)
+            {
+                TempData["Error"] = "Maksymalny rozmiar zdjęcia to 5MB.";
+                return RedirectToAction(nameof(EditRoomPhotos), new { id = roomId });
+            }
+
+            if (photo != null && photo.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await photo.CopyToAsync(memoryStream);
+                var newPhoto = new RoomPhoto
+                {
+                    IdRoom = roomId,
+                    Name = photo.FileName,
+                    ThumbnailData = ResizeImage(memoryStream.ToArray(), 200),
+                    PhotoData = memoryStream.ToArray()
+                };
+                _context.RoomPhotos.Add(newPhoto);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction(nameof(EditRoomPhotos), new { id = roomId });
+        }
+
+        [HttpGet]
+        public IActionResult ViewFullRoomImage(int id)
+        {
+            var photo = _context.RoomPhotos.FirstOrDefault(p => p.Id == id);
+            if (photo == null)
+                return NotFound();
+
+            return File(photo.PhotoData, "image/jpeg");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditShelterPhotos(int id)
+        {
+            var shelter = await _context.Shelters
+                .Include(s => s.Photos)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
+            if (shelter == null)
+                return NotFound();
+
+            var viewModel = new ShelterPhotosViewModel
+            {
+                ShelterId = shelter.Id,
+                ShelterName = shelter.Name,
+                Photos = shelter.Photos?.Select(p => new PhotoViewModel
+                {
+                    Id = p.Id,
+                    ThumbnailData = p.ThumbnailData,
+                    PhotoData = p.PhotoData
+                }).ToList() ?? new List<PhotoViewModel>()
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddShelterPhoto(int shelterId, IFormFile photo)
+        {
+            var currentPhotosCount = await _context.Photos.CountAsync(p => p.IdShelter == shelterId);
+
+            if (currentPhotosCount >= 5)
+            {
+                TempData["Error"] = "Nie można dodać więcej niż 5 zdjęć dla jednego schroniska.";
+                return RedirectToAction(nameof(EditShelterPhotos), new { id = shelterId });
+            }
+
+            if (photo != null)
+            {
+                if (photo.Length > 10 * 1024 * 1024)
+                {
+                    TempData["Error"] = "Maksymalny rozmiar zdjęcia to 10MB.";
+                    return RedirectToAction(nameof(EditShelterPhotos), new { id = shelterId });
+                }
+
+                using var memoryStream = new MemoryStream();
+                await photo.CopyToAsync(memoryStream);
+                var newPhoto = new Photo
+                {
+                    IdShelter = shelterId,
+                    Name = photo.FileName,
+                    ThumbnailData = ResizeImage(memoryStream.ToArray(), 500),
+                    PhotoData = memoryStream.ToArray()
+                };
+
+                _context.Photos.Add(newPhoto);
+                await _context.SaveChangesAsync();
+            }
+
+            return RedirectToAction(nameof(EditShelterPhotos), new { id = shelterId });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteShelterPhoto(int id)
+        {
+            var photo = await _context.Photos.FindAsync(id);
+            if (photo == null)
+                return NotFound();
+
+            _context.Photos.Remove(photo);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(EditShelterPhotos), new { id = photo.IdShelter });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewFullImage(int id)
+        {
+            var photo = await _context.Photos.FindAsync(id);
+            if (photo == null)
+                return NotFound();
+
+            return File(photo.PhotoData, "image/jpeg");
         }
     }
 }

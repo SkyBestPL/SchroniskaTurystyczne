@@ -3,7 +3,7 @@
 <div class="container mt-4">
     <h2>Zarządzanie rezerwacjami - @Model.ShelterName</h2>
 
-    <!-- Niepotwierdzone rezerwacje -->
+    <!-- niepotwierdzone -->
     <div class="card mb-4">
         <div class="card-header bg-warning">
             <h4>Rezerwacje oczekujące na potwierdzenie (@Model.PendingBookings.Count)</h4>
@@ -53,7 +53,7 @@
         </div>
     </div>
 
-    <!-- Potwierdzone rezerwacje -->
+    <!-- potwierdzone -->
     <div class="card mb-4">
         <div class="card-header bg-success text-white">
             <h4>Potwierdzone rezerwacje (@Model.ConfirmedBookings.Count)</h4>
@@ -99,7 +99,7 @@
         </div>
     </div>
 
-    <!-- Zakończone rezerwacje -->
+    <!-- zakończone -->
     <div class="card mb-4">
         <div class="card-header bg-secondary text-white">
             <h4>Zakończone rezerwacje (@Model.CompletedBookings.Count)</h4>

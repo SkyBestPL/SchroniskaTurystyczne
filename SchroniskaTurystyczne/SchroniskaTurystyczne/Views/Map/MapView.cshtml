@@ -6,21 +6,17 @@
 }
 
 <div class="map-container">
-    <!-- Mapa -->
     <div id="map" class="map-area"></div>
 
-    <!-- Interfejs użytkownika -->
     <div class="sidebar">
         <h2>@ViewData["Title"]</h2>
 
-        <!-- Zakładki -->
         <div class="tabs">
             <button onclick="showSection('searchSection')" class="tab-button active">Wyszukiwanie</button>
             <button onclick="showSection('planSection')" class="tab-button">Planowanie</button>
             <button onclick="showSection('savedRoutesSection')" class="tab-button">Moje trasy</button>
         </div>
 
-        <!-- Sekcja Wyszukiwanie -->
         <div id="searchSection" class="tab-content active p-3 rounded bg-light shadow">
             <h4 class="mb-3 text-darkcyan">Szukaj noclegu</h4>
             <input type="text" id="searchInput" placeholder="Wpisz miejscowość" class="form-control mb-3" />
@@ -33,7 +29,6 @@
             <span>Kliknij na schronisko, zeby wyświetlić proponowane trasy.</span>
         </div>
 
-        <!-- Sekcja Planowanie -->
         <div style="margin-bottom: 50px" id="planSection" class="tab-content p-3 rounded bg-light shadow mt-4">
             <h4 class="mb-3 text-darkcyan">Planowanie Trasy</h4>
             <div class="d-flex gap-2 mb-3">
@@ -55,7 +50,6 @@
             </form>
         </div>
 
-        <!-- Sekcja Moje trasy -->
         <div style="margin-bottom: 50px" id="savedRoutesSection" class="tab-content p-3 rounded bg-light shadow mt-4">
             <h4 class="mb-3 text-darkcyan">Twoje Zapisane Trasy</h4>
             <div id="userRoutesList" class="mb-3"></div>

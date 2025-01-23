@@ -8,7 +8,6 @@
 
 <div class="container d-flex justify-content-center">
     <div class="col-md-6 col-lg-5">
-        <!-- Kontener dla mniejszych i średnich ekranów -->
         <form id="account" method="post" class="shadow p-4 rounded bg-light">
             <h2 class="text-center mb-4">Zaloguj się</h2>
 
@@ -36,15 +35,9 @@
             <button id="login-submit" type="submit" class="w-100 darkcyan-button btn-lg mt-4">Zaloguj się</button>
 
             <div class="text-center mt-3">
-                <!--<p>
-                    <a id="forgot-password" asp-page="./ForgotPassword">Zapomniałeś hasła?</a>
-                </p>-->
                 <p>
                     <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Zarejestruj się jako nowy użytkownik</a>
                 </p>
-                <!--<p>
-                    <a id="resend-confirmation" asp-page="./ResendEmailConfirmation">Wyślij ponownie potwierdzenie email</a>
-                </p>-->
             </div>
         </form>
     </div>

@@ -1,0 +1,81 @@
+﻿@model SchroniskaTurystyczne.ViewModels.RoomPhotosViewModel
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header" style="background-color:darkcyan">
+                    <h2 class="h4 mb-0 text-white">@Model.RoomName</h2>
+                </div>
+                <div class="card-body">
+
+                @if (Model.Photos.Count < 3)
+                {
+                    <form asp-action="AddRoomPhoto" method="post" enctype="multipart/form-data" class="mb-4">
+                        <input type="hidden" name="roomId" value="@Model.RoomId" />
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label for="photo" class="form-label">Dodaj nowe zdjęcie (@Model.Photos.Count/3) <small class="text-muted">(max 5MB)</small></label>
+                                <input type="file" class="form-control" name="photo" id="photo" accept="image/*" required />
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn darkcyan-button">Dodaj zdjęcie</button>
+                            </div>
+                        </div>
+                    </form>
+                }
+                else
+                {
+                    <div class="alert alert-info mb-4">
+                        Osiągnięto maksymalną liczbę zdjęć (3/3)
+                    </div>
+                }
+
+                <hr />
+
+                <h4 class="mb-4">Aktualne zdjęcia</h4>
+                <div class="row g-4">
+                    @foreach (var photo in Model.Photos)
+                    {
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <a href="#" data-bs-toggle="modal" data-bs-target="#photoModal-@photo.Id">
+                                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(photo.ThumbnailData)"
+                                         class="card-img-top"
+                                         alt="Zdjęcie pokoju"
+                                         style="height: 200px; object-fit: cover;" />
+                                </a>
+                                <div class="card-body text-center">
+                                    <form asp-action="DeleteRoomPhoto" method="post" class="d-inline">
+                                        <input type="hidden" name="id" value="@photo.Id" />
+                                        <button type="submit" class="btn btn-danger btn-sm"
+                                                onclick="return confirm('Czy na pewno chcesz usunąć to zdjęcie?')">
+                                            Usuń zdjęcie
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="modal fade" id="photoModal-@photo.Id" tabindex="-1" aria-hidden="true">
+                            <div class="modal-dialog modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Zdjęcie pokoju</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body text-center">
+                                        <img src="@Url.Action("ViewFullRoomImage", new { id = photo.Id })"
+                                             class="img-fluid"
+                                             alt="Pełne zdjęcie pokoju" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

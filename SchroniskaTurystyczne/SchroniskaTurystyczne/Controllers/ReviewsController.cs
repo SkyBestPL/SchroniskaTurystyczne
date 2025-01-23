@@ -20,7 +20,6 @@ namespace SchroniskaTurystyczne.Controllers
 
         public IActionResult ShelterReviews(int shelterId)
         {
-            // Pobierz schronisko z recenzjami
             var shelter = _context.Shelters
                 .Include(s => s.Reviews)
                 .ThenInclude(r => r.User)
@@ -31,20 +30,17 @@ namespace SchroniskaTurystyczne.Controllers
                 return NotFound("Schronisko nie zostało znalezione.");
             }
 
-            // Sprawdź, czy użytkownik jest zalogowany
             var user = _userManager.GetUserAsync(User).Result;
             bool hasBooking = false;
             Review? existingReview = null;
 
             if (user != null)
             {
-                // Sprawdź, czy użytkownik miał kiedyś booking w tym schronisku
                 hasBooking = _context.Bookings.Any(b =>
                     b.IdShelter == shelterId &&
                     b.IdGuest == user.Id &&
                     b.Ended == true);
 
-                // Sprawdź czy użytkownik już dodał recenzję
                 existingReview = shelter.Reviews?.FirstOrDefault(r => r.IdUser == user.Id);
             }
 
@@ -80,7 +76,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             var user = _userManager.GetUserAsync(User).Result;
 
-            // Ponownie sprawdź uprawnienia do dodania recenzji
             var hasBooking = _context.Bookings.Any(b =>
                 b.IdShelter == model.ShelterId &&
                 b.IdGuest == user.Id);
@@ -94,7 +89,6 @@ namespace SchroniskaTurystyczne.Controllers
                 return Forbid();
             }
 
-            // Dodaj nową recenzję
             var review = new Review
             {
                 IdShelter = model.ShelterId,
@@ -106,7 +100,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             _context.Reviews.Add(review);
 
-            // Zaktualizuj ocenę schroniska
             var shelter = _context.Shelters.Find(model.ShelterId);
             shelter.AmountOfReviews++;
             shelter.Rating = CalculateNewShelterRating(shelter, model.Rating);
@@ -118,7 +111,6 @@ namespace SchroniskaTurystyczne.Controllers
 
         private double CalculateNewShelterRating(Shelter shelter, int newRating)
         {
-            // Oblicz nową średnią ocen
             var currentTotalRating = (shelter.Rating ?? 0) * (shelter.AmountOfReviews - 1);
             return (currentTotalRating + newRating) / shelter.AmountOfReviews;
         }
@@ -143,7 +135,6 @@ namespace SchroniskaTurystyczne.Controllers
 
             var user = _userManager.GetUserAsync(User).Result;
 
-            // Pobierz recenzję
             var review = _context.Reviews.FirstOrDefault(r =>
                 r.Id == model.Id && r.IdUser == user.Id);
 
@@ -152,12 +143,10 @@ namespace SchroniskaTurystyczne.Controllers
                 return Forbid();
             }
 
-            // Zaktualizuj dane recenzji
             review.Rating = model.Rating;
             review.Contents = model.Contents;
             review.Date = DateTime.Now.ToString("dd.MM.yyyy");
 
-            // Przelicz ocenę schroniska
             var shelter = _context.Shelters.Find(review.IdShelter);
             shelter.Rating = RecalculateShelterRating(shelter);
 
@@ -180,7 +169,6 @@ namespace SchroniskaTurystyczne.Controllers
         {
             var user = _userManager.GetUserAsync(User).Result;
 
-            // Pobierz recenzję użytkownika
             var review = _context.Reviews.FirstOrDefault(r =>
                 r.Id == reviewId && r.IdUser == user.Id);
 
@@ -189,10 +177,8 @@ namespace SchroniskaTurystyczne.Controllers
                 return Forbid();
             }
 
-            // Usuń recenzję
             _context.Reviews.Remove(review);
 
-            // Zaktualizuj ocenę schroniska
             var shelter = _context.Shelters.Find(shelterId);
             if (shelter != null)
             {

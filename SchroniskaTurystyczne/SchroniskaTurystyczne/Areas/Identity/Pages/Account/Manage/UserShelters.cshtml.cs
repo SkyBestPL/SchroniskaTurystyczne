@@ -30,12 +30,10 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            // Pobranie schronisk wystawionych przez u¿ytkownika
             Shelters = await _context.Shelters
                 .Where(s => s.IdExhibitor == user.Id)
                 .ToListAsync();
 
-            // Liczba zatwierdzonych i niezatwierdzonych rezerwacji dla ka¿dego schroniska
             foreach (var shelter in Shelters)
             {
                 var approvedBookings = await _context.Bookings
@@ -58,7 +56,6 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             var user = await _userManager.GetUserAsync(User);
             if (user == null) return NotFound();
 
-            // ZnajdŸ schronisko nale¿¹ce do u¿ytkownika
             var shelter = await _context.Shelters
                 .Where(s => s.IdExhibitor == user.Id && s.Id == shelterId)
                 .FirstOrDefaultAsync();
@@ -69,7 +66,6 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
                 return RedirectToPage();
             }
 
-            // Usuñ wszystkie powi¹zane dane (np. pokoje, rezerwacje)
             var rooms = _context.Rooms.Where(r => r.IdShelter == shelter.Id);
             foreach (var room in rooms)
             {
@@ -81,7 +77,6 @@ namespace SchroniskaTurystyczne.Areas.Identity.Pages.Account.Manage
             var bookings = _context.Bookings.Where(b => b.BookingRooms.Any(br => br.Room.IdShelter == shelter.Id));
             _context.Bookings.RemoveRange(bookings);
 
-            // Usuñ samo schronisko
             _context.Shelters.Remove(shelter);
             await _context.SaveChangesAsync();
 

@@ -45,6 +45,11 @@
                                 <strong>Tagi:</strong>
                                 <span class="ms-2">@string.Join(", ", Model.Shelter.Tags?.Select(t => t.Name) ?? new List<string>())</span>
                             </div>
+                            <div class="d-flex align-items-center" style="margin-top: 10px">
+                                <a asp-action="EditShelterPhotos" asp-route-id="@Model.Shelter.Id" class="btn dark-darkcyan-button">
+                                    Edytuj zdjęcia schroniska
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -94,6 +99,7 @@
                                 <th>Cena za noc</th>
                                 <th>Pojemność</th>
                                 <th>Status</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -102,9 +108,7 @@
                                 <tr>
                                     <td><strong>@room.Name</strong></td>
                                     <td>@room.PricePerNight.ToString("C")</td>
-                                    <td>
-                                        <span>@room.Capacity</span>
-                                    </td>
+                                    <td><span>@room.Capacity</span></td>
                                     <td>
                                         @if (room.IsActive)
                                         {
@@ -112,8 +116,13 @@
                                         }
                                         else
                                         {
-                                            <span class="badge bg-danger">Niekatywny</span>
+                                            <span class="badge bg-danger">Nieaktywny</span>
                                         }
+                                    </td>
+                                    <td>
+                                        <a asp-action="EditRoomPhotos" asp-route-id="@room.Id" class="btn darkcyan-button">
+                                            Edytuj zdjęcia pokoju
+                                        </a>
                                     </td>
                                 </tr>
                             }
@@ -124,7 +133,7 @@
         </div>
 
         <div class="d-flex justify-content-center gap-3 mt-4">
-            <a asp-action="Edit" asp-route-id="@Model.Shelter.Id" class="btn dark-darkcyan-button">Edytuj Schronisko</a>
+            <a asp-action="Edit" asp-route-id="@Model.Shelter.Id" class="btn gold-button">Edytuj Schronisko</a>
             <a asp-action="ManageBookings" asp-route-id="@Model.Shelter.Id" class="dimgray-button btn">Zarządzaj rezerwacjami</a>
             <a class="darkcyan-button btn" asp-action="Booking" asp-controller="Shelters" asp-route-id="@Model.Shelter.Id">Szczegóły</a>
             <a class="aquamarine-button btn" asp-action="ShelterReviews" asp-controller="Reviews" asp-route-shelterId="@Model.Shelter.Id">Recenzje</a>

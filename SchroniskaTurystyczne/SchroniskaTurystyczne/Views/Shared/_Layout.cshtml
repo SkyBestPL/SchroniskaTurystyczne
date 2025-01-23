@@ -24,18 +24,15 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-dark bg-darkcyan box-shadow">
             <div class="container-fluid">
-                <!-- Logo i nazwa strony -->
                 <a class="navbar-brand title-name" asp-area="" asp-controller="Shelters" asp-action="Index">
                     Schroniarz.pl
                 </a>
 
-                <!-- Przycisk nawigacyjny dla widoku mobilnego -->
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
                         aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                <!-- Elementy nawigacji -->
                 <div class="collapse navbar-collapse" id="navbarNavDropdown">
                     <ul class="navbar-nav me-auto">
                         @if (User.Identity.IsAuthenticated)
@@ -84,7 +81,6 @@
 
                     </ul>
 
-                    <!-- Sekcja użytkownika i zaloguj -->
                     <div class="d-flex align-items-center">
                         <partial name="_LoginPartial" />
                     </div>
